@@ -15,5 +15,8 @@ export default defineConfig({
   layout: false,
   routes, // 开始配置式路由
   title: '松果umi',
+  history: { // 路由类型
+    type: 'browser',
+  },
   ...envConfig,
 });
