@@ -11,8 +11,7 @@ const routes: ConfigModel['routes'] = [
       { path: 'start', component: '@/pages/index' },
     ],
   },
-
-  { path: '*', component: '@/pages/404', layout: false },
+  { path: '*', redirect: '/404' },
 ];
 
 export default routes;
