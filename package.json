@@ -37,6 +37,7 @@
     "@types/react": "^17.0.0",
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@umijs/fabric": "^4.0.1",
     "@umijs/max": "4.x",
     "cross-env": "^7.0.3",
     "eslint": "7.16.0",
