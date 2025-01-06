@@ -1,6 +1,6 @@
 import React from 'react';
 import './index.less';
-import { Outlet } from '@/.umi/exports';
+import { Outlet } from '@umijs/max';
 
 const HeaderLayout: React.FC = () => {
   return (
