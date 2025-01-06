@@ -9,7 +9,8 @@
     "lint:prettier": "prettier --check \"**/*.{js,jsx,tsx,ts,less,md,json}\" --end-of-line auto",
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
     "prettier": "prettier --write \"**/*.{js,jsx,tsx,ts,less,md,json}\"",
-    "analyze": "cross-env mode=dev ANALYZE=1 umi build"
+    "analyze": "cross-env mode=dev ANALYZE=1 umi build",
+    "postinstall": "node bin/postinstall.js"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
