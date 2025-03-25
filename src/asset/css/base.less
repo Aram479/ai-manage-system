@@ -1,0 +1,117 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+}
+.aside-el-drawer {
+  --el-drawer-padding-primary: 0px !important;
+  background-color: var(--el-menu-bg-color) !important;
+}
+#nprogress {
+  & .bar {
+    background-color: var(--el-color-primary) !important;
+  }
+
+  & .peg {
+    box-shadow: 0 0 10px var(--el-color-primary),
+      0 0 5px var(--el-color-primary) !important;
+  }
+
+  & .spinner-icon {
+    border-top-color: var(--el-color-primary);
+    border-left-color: var(--el-color-primary);
+  }
+}
+
+*::selection {
+  background: var(--el-color-primary) !important; // 选中时的背景颜色
+  color: white; // 选中时的文字颜色
+}
+
+.el-menu--horizontal {
+  border-bottom: none !important;
+  .el-menu--popup {
+    background-color: var(--el-menu-bg-color) !important;
+    .el-menu-item {
+      background-color: var(--el-menu-bg-color) !important;
+    }
+  }
+}
+
+/* 无子菜单时激活 border-bottom */
+.el-menu--horizontal > .el-sub-menu.is-active .el-sub-menu__title,
+.el-menu--horizontal > .el-menu-item.is-active {
+  border-bottom: 3px solid var(--el-color-primary) !important;
+  color: var(--el-menu-item-active-bg-color) !important
+}
+.el-menu--horizontal>.el-sub-menu .el-sub-menu__title:hover {
+  background-color: var(--el-menu-bg-color) !important;
+}
+
+.el-switch.is-checked .el-switch__core {
+  border-color: var(--el-color-primary) !important;
+  background-color: var(--el-color-primary) !important;
+}
+
+// 3.9日
+.el-menu--popup-container {
+  display: var(--popup-container) !important;
+}
+.el-sub-menu__icon-arrow {
+  display: var(--popup-container) !important;
+}
+
+.el-table--large {
+  padding: 12px 0px !important;
+}
+.el-table--default {
+  padding: 8px 0px !important;
+}
+.el-table--small {
+  padding: 4px 0px !important;
+}
+
+/* 克隆并自定义 ElMessage 样式，不会影响 ElMessage 原本样式，在 src/utils/message.ts 中调用自定义样式 ElMessage 方法即可，暗黑模式在 src/style/dark.scss 文件进行了适配 */
+.simple-message {
+  border-width: 0 !important;
+  background: #fff !important;
+  padding: 10px 13px !important;
+  box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014,
+    0 9px 28px 8px #0000000d !important;
+
+  &.el-message.is-closable .el-message__content {
+    padding-right: 17px !important;
+  }
+
+  & .el-message__content {
+    color: #000000d9 !important;
+    pointer-events: all !important;
+    background-image: initial !important;
+  }
+
+  & .el-message__icon {
+    margin-right: 8px !important;
+  }
+
+  & .el-message__closeBtn {
+    outline: none;
+    border-radius: 4px;
+    right: 9px !important;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+  }
+}
+.vuepress-markdown-body {
+  padding: 0 !important;
+}
+
+
