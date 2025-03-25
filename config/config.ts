@@ -1,22 +1,20 @@
-import devConfig from './config.dev';
-import prodConfig from './config.prod';
-import { defineConfig } from '@umijs/max';
-import routes from './routes';
+import { defineConfig } from "@umijs/max";
+import routes from "./routes";
+import proxy from "./proxy";
+const { UMI_ENV } = process.env;
 
-const env = process.env;
-const envConfig = env.mode === 'prod' ? prodConfig : devConfig;
+const env = require(`./.env${UMI_ENV ? "." + UMI_ENV : ""}.ts`).default;
 
 export default defineConfig({
-  // model: {},  开启 useModel
-  alias: {
-    '@': '/src',
-    '@packages': '/packages',
-  },
+  // model: {}, // 开启 useModel
   layout: false,
   routes, // 开始配置式路由
-  title: '松果umi',
-  history: { // 路由类型
-    type: 'browser',
+  title: "AI-Project",
+  base: "/", //路由前缀
+  request: {
+    dataField: "data",
   },
-  ...envConfig,
+  define: env,
+  proxy: (proxy as any)[UMI_ENV || "dev"],
+  npmClient: "pnpm",
 });

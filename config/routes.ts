@@ -1,17 +1,20 @@
-import { ConfigModel } from './config.model';
+import { defineConfig } from "@umijs/max";
 
-const routes: ConfigModel['routes'] = [
-  { path: '/404', component: '@/pages/404', layout: false },
+type RoutesType = Parameters<typeof defineConfig>[0]["routes"];
+
+const routes: RoutesType = [
+  { path: "/404", component: "@/pages/404", layout: false },
   {
-    path: '/',
-    component: '@/layouts/index',
+    path: "/main",
+    component: "@/pages/Main",
     layout: false,
-    routes: [
-      { path: '', redirect: '/start' },
-      { path: 'start', component: '@/pages/index' },
-    ],
   },
-  { path: '*', redirect: '/404' },
+  {
+    path: "/demo",
+    component: "@/pages/Demo",
+    layout: false,
+  },
+  { path: "*", redirect: "/404" },
 ];
 
 export default routes;

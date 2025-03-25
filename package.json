@@ -1,7 +1,8 @@
 {
   "scripts": {
     "pc:build": "cross-env mode=prod max build",
-    "pc:dev": "cross-env mode=dev max dev",
+    "start": "cross-env max dev",
+    "start:uat": "cross-env UMI_ENV=uat max dev",
     "node-server:dev": "pnpm -C  ./node-server dev",
     "prettier": "prettier --write \"**/*.{js,jsx,tsx,ts,less,md,json}\"",
     "analyze": "cross-env mode=dev ANALYZE=1 umi build",
@@ -20,8 +21,12 @@
     "@ant-design/pro-components": "^2.7.10",
     "@ant-design/x": "^1.0.6",
     "ahooks": "^3.7.4",
+    "antd": "^5.24.5",
+    "antd-style": "^3.7.1",
     "axios": "^1.4.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "openai": "^4.89.0",
+    "umi-request": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.10",
