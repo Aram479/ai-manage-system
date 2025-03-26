@@ -8,8 +8,8 @@ export const request: RequestConfig = {
   timeout: 60 * 60 * 1000,
   baseURL: API_BASE_URL,
   requestInterceptors: [
-    (config) => {
-      config.headers.Authorization = `Bearer ${process.env.DEEPSEEK_API_KEY}`;
+    (config: RequestConfig) => {
+      config.headers!.Authorization = `Bearer ${process.env.DEEPSEEK_API_KEY}`;
       return { ...config };
     },
   ],

@@ -17,14 +17,14 @@ export default {
 
   dev: {
     "/api": {
-      target: "https://api.deepseek.com",
+      target: "https://api.deepseek.com/v1",
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
     },
   },
   uat: {
     "/api": {
-      target: "https://api.deepseek.com",
+      target: "https://api.deepseek.com/v1",
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
     },
