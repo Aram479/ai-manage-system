@@ -17,7 +17,7 @@ const WelcomeCmp = () => {
             />
           }
           title="Hello, I'm Ant Design X"
-          description="当且页面接入了DeepSeek"
+          description="当前页面接入了DeepSeek"
         />
       </Card>
     </div>

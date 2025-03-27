@@ -1,7 +1,8 @@
 import WelcomeCmp from "@/component/DeepSeek/WelcomeCmp";
+import MarkDownCmp from "@/component/MarkDownCmp";
+import { deepSeekPrompt } from "@/constant/deepSeek";
 import { deepSeekXRequest } from "@/services/deepseekApi";
 import {
-  formartRequestMessage,
   formartResultMessage,
   StreamDataProcessor,
 } from "@/utils/deepseekUtils";
@@ -13,39 +14,68 @@ import {
   useXAgent,
   useXChat,
 } from "@ant-design/x";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { Flex, GetProp } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 const MainPage = () => {
+  const [userRole, setUserRole] = useState("user");
+  const [aiRole, setAiRole] = useState("assistant");
   const [content, setContent] = useState("");
   const [isHeader, setIsHeader] = useState(true);
+  const [chatList, setChatList] = useState<any[]>([]);
   const [bubbleList, setBubbleList] = useState<any[]>([]);
   // 创建处理器实例
   const processor = new StreamDataProcessor();
 
   // 调度请求
   const [agent] = useXAgent({
-    request: (messagesData, { onUpdate, onSuccess, onError }) => {
+    request: async (messagesData, { onUpdate, onSuccess, onError }) => {
       // 重置上一次对话内容
       processor.reset();
-      const requestData = {
-        ...formartRequestMessage(messagesData),
-        stream: true,
+      // push 用户当前会话
+      const userMessage = {
+        role: userRole,
+        content: `${messagesData.message}${deepSeekPrompt.concise}`,
       };
-      deepSeekXRequest.create(
+      chatList.push(userMessage);
+      const requestData = {
+        messages: chatList,
+        stream: true,
+        max_tokens: 2048,
+        temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
+        top_p: 0.9, // 调整此值也可能影响简洁性
+      };
+      await deepSeekXRequest.create(
         requestData,
         {
+          // 请求结束后调用
           onSuccess: (res) => {
-            if (res && !requestData.stream) {
-              onSuccess(formartResultMessage(res[0]));
+            if (res) {
+              if (!requestData.stream) {
+                onSuccess(formartResultMessage(res[0]));
+              } else {
+                const aiMessage = {
+                  role: aiRole,
+                  content: processor.getFullContent(),
+                };
+                // push AI 当前说完的会话
+                chatList.push(aiMessage);
+                setChatList([...chatList]);
+                // 发送成功事件，以通知isRequesting结束了
+                onSuccess(aiMessage.content);
+              }
             }
           },
+          // 流式调用
           onUpdate: (data) => {
             const newChunkStr = processor.processStream(data);
             // onSuccess(newChunkStr);
             onUpdate(newChunkStr);
           },
-          onError,
+          onError: (error) => {
+            setChatList([...chatList]);
+          },
         },
         new TransformStream<string, string>({
           transform(chunk, controller) {
@@ -56,32 +86,6 @@ const MainPage = () => {
     },
   });
 
-  // function mockReadableStream() {
-  //   return new ReadableStream({
-  //     async start(controller) {
-  //       for (const chunk of []) {
-  //         // await new Promise((resolve) => setTimeout(resolve, 100));
-  //         controller.enqueue(new TextEncoder().encode(chunk));
-  //       }
-  //       controller.close();
-  //     },
-  //   });
-  // }
-
-  // const testFunc = async () => {
-  //   for await (const chunk of XStream({
-  //     readableStream: mockReadableStream(),
-  //     transformStream: new TransformStream<string, string>({
-  //       transform(chunk, controller) {
-  //         controller.enqueue(chunk);
-  //       },
-  //     }),
-  //   })) {
-  //     messages[messages.length - 1].message += chunk;
-  //     setMessages([...messages]);
-  //   }
-  // };
-
   const { onRequest, messages } = useXChat({
     agent,
     requestPlaceholder: "请稍等...",
@@ -89,12 +93,14 @@ const MainPage = () => {
   });
 
   const roles: GetProp<typeof Bubble.List, "roles"> = {
-    ai: {
+    assistant: {
       placement: "start",
       avatar: { icon: <UserOutlined />, style: { background: "#fde3cf" } },
       typing: { step: 5, interval: 20 },
-      style: {
-        maxWidth: 600,
+      styles: {
+        content: {
+          minWidth: "calc(100% - 100px)",
+        },
       },
     },
     local: {
@@ -103,35 +109,72 @@ const MainPage = () => {
     },
   };
 
-  const handleSendChat: SenderProps["onSubmit"] = (messages) => {
-    onRequest(messages);
+  const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    onRequest(message);
     setIsHeader(false);
     setContent("");
   };
 
-  const items = messages.map(({ message, id, status }) => ({
+  const items: BubbleDataType[] = messages.map(({ message, id, status }) => ({
     key: id,
-    role: status === "local" ? "local" : "ai",
+    role: status === "local" ? "local" : "assistant",
     content: message,
     // loading: status === "loading",
+    messageRender: (content: string) =>
+      status !== "local" ? (
+        <MarkDownCmp content={content} theme="onDark" />
+      ) : (
+        <div>{content}</div>
+      ),
   }));
 
-  useEffect(() => {
-    // console.log(messages);
-  }, [messages]);
-
   return (
-    <div>
-      {isHeader && <WelcomeCmp />}
-      <Flex vertical gap="middle">
-        <Bubble.List items={items} roles={roles} />
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        padding: "20px",
+      }}
+    >
+      {isHeader && (
+        <div
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: 20,
+            right: 20,
+          }}
+        >
+          <WelcomeCmp />
+        </div>
+      )}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <Bubble.List
+          items={items}
+          roles={roles}
+          style={{
+            flexBasis: "65vh",
+            flexGrow: "1",
+            overflowY: "auto",
+          }}
+        />
+
         <Sender
           value={content}
-          // loading={agent.isRequesting()}
+          loading={agent.isRequesting()}
           onChange={setContent}
           onSubmit={handleSendChat}
         />
-      </Flex>
+      </div>
     </div>
   );
 };

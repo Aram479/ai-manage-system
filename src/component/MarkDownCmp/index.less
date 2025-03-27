@@ -1,0 +1,122 @@
+.markDownCmp {
+  pre {
+    margin: 0 0 20px !important;
+    min-height: 0;
+  }
+
+  hr {
+    border: none;
+    height: 2px;
+    background-color: #eaecef;
+  }
+
+  blockquote {
+    margin: 0;
+    border-left: 4px solid rgb(223 226 229);
+    padding-left: 16px;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  table {
+    display: block;
+    overflow: auto;
+    margin-bottom: 16px;
+    width: 100%;
+    border-collapse: collapse;
+    empty-cells: show;
+    border-spacing: 0;
+    word-break: keep-all;
+  }
+
+  th {
+    border: 1px solid #dfe2e5;
+    padding: 6px 13px;
+    white-space: nowrap;
+    word-break: normal;
+  }
+
+  td {
+    border: 1px solid #dfe2e5;
+    padding: 6px 13px;
+    white-space: nowrap;
+    word-break: normal;
+  }
+
+  thead {
+    tr {
+      background: rgb(248 248 248);
+    }
+  }
+
+  tbody {
+    tr:nth-child(even) {
+      background: rgb(248 248 248);
+    }
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 38px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #90a4ae;
+    background: #e6ebf1;
+    line-height: 38px;
+
+    .preview-code-box {
+      margin-left: auto;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      .preview-code-copy {
+        .copy-success {
+          margin-right: 10px;
+          color: rgb(73 177 245);
+          line-height: 1rem;
+        }
+
+        &:hover {
+          color: rgb(73 177 245);
+        }
+      }
+    }
+  }
+
+  .code-rotate-right {
+    font-size: 12px;
+    animation: rotate-right 0.2s linear forwards;
+  }
+
+  .code-rotate-down {
+    font-size: 12px;
+    animation: rotate-down 0.2s linear forwards;
+  }
+
+  .lang-box {
+    font-size: 14px;
+  }
+  @keyframes rotate-right {
+    from {
+      transform: rotate(0);
+    }
+
+    to {
+      transform: rotate(-90deg);
+    }
+  }
+
+  @keyframes rotate-down {
+    from {
+      transform: rotate(-90deg);
+    }
+
+    to {
+      transform: rotate(0);
+    }
+  }
+}
