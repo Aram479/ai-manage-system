@@ -4,7 +4,9 @@ export const useStreamController = () => {
   const streamController =
     useRef<TransformStreamDefaultController<string> | null>(null);
 
-  const streamTest = useRef<TransformStream<string, string> | null>(null);
+  const streamClass = useRef<TransformStream<string, string> | null>(null);
+
+  // 注意：这里任何useState和其他异步数据都只能获取初始值，无法获取set之后的数据，请使用useRef
   const transformStream = () => {
     const newStream = new TransformStream<string, string>({
       transform(chunk, controller) {
@@ -12,13 +14,13 @@ export const useStreamController = () => {
         controller.enqueue(chunk);
       },
     });
-    streamTest.current = newStream;
+    streamClass.current = newStream;
     return newStream;
   };
 
   return {
     transformStream,
     controller: streamController.current,
-    streamTest: streamTest.current,
+    streamClass: streamClass.current,
   };
 };

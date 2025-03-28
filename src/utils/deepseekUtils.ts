@@ -62,6 +62,7 @@ interface ChatCompletionChunk {
     delta: {
       role?: string;
       content?: string;
+      reasoning_content?: string;
     };
     logprobs: null | any; // 根据实际需求调整类型
     finish_reason: null | string;
@@ -78,10 +79,17 @@ interface ChatCompletionChunk {
   };
 }
 
+export type TResultStream = {
+  ctmpContent: string; // 用于存储完整的 思考内容
+  chatContent: string; // 用于存储完整的 对话内容
+};
 export class StreamDataProcessor {
-  private fullContent: string = ""; // 用于存储完整的合并内容
   private isCompleted: boolean = false; // 标记是否已完成
-
+  // 存储二者解析后字符串
+  private resultString: TResultStream = {
+    ctmpContent: "",
+    chatContent: "",
+  };
   /**
    * 处理单个数据块
    * @param chunkStr 单个数据块的字符串形式
@@ -90,9 +98,21 @@ export class StreamDataProcessor {
     try {
       const chunk: ChatCompletionChunk = JSON.parse(chunkStr);
 
-      // 提取并处理内容
-      const content = chunk.choices[0]?.delta?.content || "";
-      this.fullContent += content;
+      /* 提取并处理内容 */
+      const contentDelta = chunk.choices[0]?.delta;
+
+      // 思考 流内容
+      const ctmpContent = contentDelta?.reasoning_content;
+      // 对话 流内容
+      const content = contentDelta?.content;
+
+      if (ctmpContent != null) {
+        this.resultString.ctmpContent += ctmpContent;
+      }
+
+      if (content !== null) {
+        this.resultString.chatContent += content;
+      }
 
       // 检查是否结束
       if (chunk.choices[0]?.finish_reason === "stop") {
@@ -107,7 +127,7 @@ export class StreamDataProcessor {
    */
   public processStream(stream: string): string {
     if (this.isCompleted) {
-      return this.fullContent;
+      return this.resultString.chatContent;
     }
 
     const lines = stream
@@ -125,16 +145,22 @@ export class StreamDataProcessor {
       this.processChunk(dataString); // 处理每个数据块
     }
 
-    return this.fullContent;
+    return this.resultString.chatContent;
   }
 
   /**
-   * 获取当前完整的合并内容
+   * 获取当前所有内容
    */
-  public getFullContent(): string {
-    return this.fullContent;
+  public getAllContent(): TResultStream {
+    return this.resultString;
   }
 
+  public getChatContent(): string {
+    return this.resultString.chatContent;
+  }
+  public getCtmpContent(): string {
+    return this.resultString.ctmpContent;
+  }
   /**
    * 检查流是否完成
    */
@@ -144,6 +170,9 @@ export class StreamDataProcessor {
 
   public reset(): void {
     this.isCompleted = false;
-    this.fullContent = "";
+    this.resultString = {
+      ctmpContent: "",
+      chatContent: "",
+    };
   }
 }

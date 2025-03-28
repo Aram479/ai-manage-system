@@ -1,12 +1,9 @@
-import WelcomeCmp from "@/component/WelcomeCmp";
-import MarkDown from "@/component/MarkDownCmp";
+import { memo, useMemo, useRef, useState } from "react";
+import { GetProp } from "antd";
+import { LoadingOutlined, UserOutlined } from "@ant-design/icons";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
+import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { deepSeekPrompt } from "@/constant/deepSeek";
-import { deepSeekXRequest } from "@/services/deepseekApi";
-import {
-  formartResultMessage,
-  StreamDataProcessor,
-} from "@/utils/deepseekUtils";
-import { UserOutlined } from "@ant-design/icons";
 import {
   Bubble,
   Sender,
@@ -14,37 +11,40 @@ import {
   useXAgent,
   useXChat,
 } from "@ant-design/x";
-import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
-import { GetProp } from "antd";
-import { memo, useRef, useState } from "react";
-import styles from "./index.less";
+import {
+  formartResultMessage,
+  StreamDataProcessor,
+} from "@/utils/deepseekUtils";
 import { useStreamController } from "@/hooks/deepSeekHooks";
-import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
+import { deepSeekXRequest } from "@/services/deepseekApi";
+import WelcomeCmp from "@/component/WelcomeCmp";
+import MarkDown from "@/component/MarkDownCmp";
+import styles from "./index.less";
 
 const MarkDownCmp = memo(MarkDown);
+
 const MainPage = () => {
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [content, setContent] = useState("");
   const [isHeader, setIsHeader] = useState(true);
   const [chatList, setChatList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // 创建处理器实例
+  // 流数据处理U工具
   const processorRef = useRef(new StreamDataProcessor());
-  const { transformStream, controller, streamTest } = useStreamController();
+  const { transformStream, controller, streamClass } = useStreamController();
 
+  // 发起对话请求
   const chatRequest: XAgentConfigCustom<string>["request"] = async (
     messagesData,
     { onUpdate, onSuccess, onError }
   ) => {
-    setLoading(true);
     // push 用户当前会话
     const userMessage = {
       role: userRole,
-      content: `${messagesData.message}${
-        chatList.length ? "" : deepSeekPrompt.concise
-      }`,
+      // content: `${messagesData.message}${
+      //   chatList.length ? "" : deepSeekPrompt.concise
+      // }`,
+      content: messagesData.message,
     };
     chatList.push(userMessage);
     const requestData = {
@@ -66,27 +66,32 @@ const MainPage = () => {
             } else {
               const aiMessage = {
                 role: aiRole,
-                content: processorRef.current.getFullContent(),
+                content: processorRef.current.getChatContent(),
               };
               // push AI 当前说完的会话
               chatList.push(aiMessage);
               setChatList([...chatList]);
               // 发送成功事件，以通知isRequesting结束了, 如果用agent.isRequesting的话
-              onSuccess(aiMessage.content);
-              setLoading(false);
+              const allContent = processorRef.current.getAllContent();
+              onSuccess({
+                ...allContent,
+                abortedReason: window.abortController.signal.reason,
+              });
             }
           }
         },
-        // 流式调用
+        // 流式调用，注意：这里任何useState和其他异步数据都只能获取初始值，无法获取set之后的数据，请使用useRef
         onUpdate: (data) => {
-          const newChunkStr = processorRef.current.processStream(data);
-          onUpdate(newChunkStr);
+          processorRef.current.processStream(data);
+          const allContent = processorRef.current.getAllContent();
+          onUpdate({
+            ...allContent,
+            abortedReason: window.abortController.signal.reason,
+          });
         },
         onError: (error) => {
-          console.log("error", error);
           setChatList([...chatList]);
           onError(error);
-          setLoading(false);
         },
       },
       transformStream()
@@ -98,13 +103,32 @@ const MainPage = () => {
     request: chatRequest,
   });
 
+  const loading = useMemo(() => agent.isRequesting(), [agent.isRequesting()]);
+
   const { onRequest, messages } = useXChat({
     agent,
-    requestPlaceholder: "请稍等...",
+    requestPlaceholder: () => {
+      return {
+        ctmpContent: "思考中...",
+        chatContent: "",
+        abortedReason: "",
+      };
+    },
+    parser: (message) => {
+      const newMessage = {
+        ...message,
+        status: 1,
+      };
+      return newMessage;
+    },
     requestFallback: () => {
       const errMsg =
-        window.custonController.reson ?? "服务器繁忙，请稍后再试！";
-      return errMsg;
+        window.abortController.signal.reason ?? "服务器繁忙，请稍后再试！";
+      return {
+        ctmpContent: errMsg,
+        chatContent: errMsg,
+        abortedReason: errMsg,
+      };
     },
   });
 
@@ -117,12 +141,18 @@ const MainPage = () => {
       styles: {
         content: {
           minWidth: "calc(100% - 50px)",
+          background: "#00000000",
         },
       },
     },
     local: {
       placement: "end",
       avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
+      styles: {
+        content: {
+          background: "#e0dfff",
+        },
+      },
     },
   };
 
@@ -130,10 +160,23 @@ const MainPage = () => {
     key: id,
     role: status === "local" ? "local" : "assistant",
     content: message,
-    // loading: status === "loading",
+    loading: status === "loading" && !streamClass?.readable.locked,
     messageRender: (content: string) =>
       status !== "local" ? (
-        <MarkDownCmp theme="onDark" content={content} loading={loading} />
+        !message.abortedReason ? (
+          <div>
+            <div style={{ background: "skyblue" }}>{message.ctmpContent}</div>
+            <div style={{ background: "#fff" }}>
+              <MarkDownCmp
+                theme="onDark"
+                content={message.chatContent}
+                loading={loading}
+              />
+            </div>
+          </div>
+        ) : (
+          <>{message.abortedReason}</>
+        )
       ) : (
         <div>{content}</div>
       ),
@@ -142,24 +185,23 @@ const MainPage = () => {
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
     // 重置上一次对话状态和信息
     processorRef.current.reset();
-
-    onRequest(message);
     setIsHeader(false);
     setContent("");
+    onRequest(message);
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
-    // 流输出前中断
-    if (!streamTest?.writable.locked) {
-      setLoading(false);
-      window.custonController.abort("用户中止了");
+    // 1.中断请求：流输出前中断
+    if (!streamClass?.writable.locked) {
+      window.abortController.abort("用户中止了回答。");
 
-      // streamTest?.writable?.close();
+      // 流关闭(仅流输出前可用，输出中调用会报错)
+      // streamClass?.writable?.close();
     }
-    // 流输出后中断
+    // 2.中断流：流输出后中断
     controller?.terminate();
   };
-
+  console.log(messages);
   return (
     <div className={styles.mainPage}>
       {isHeader && (

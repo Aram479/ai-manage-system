@@ -1,14 +1,15 @@
 import { XRequest } from "@ant-design/x";
 
+// deepseek-reasoner
 export const deepSeekXRequest = XRequest({
   baseURL: "/api/chat/completions",
-  model: "deepseek-chat",
+  model: "deepseek-reasoner",
   dangerouslyApiKey: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
   fetch: (url, config) => {
-    window.custonController = new AbortController() as AbortController
+    window.abortController = new AbortController();
     return fetch(url, {
       ...config,
-      signal:  window.custonController.signal,
+      signal: window.abortController.signal,
     });
   },
 });
