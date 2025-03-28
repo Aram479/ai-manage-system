@@ -106,7 +106,6 @@ export class StreamDataProcessor {
    * @param stream 流式数据字符串
    */
   public processStream(stream: string): string {
-    console.log('this.isCompleted', this.isCompleted)
     if (this.isCompleted) {
       return this.fullContent;
     }

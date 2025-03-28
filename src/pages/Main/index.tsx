@@ -15,18 +15,39 @@ import {
   useXChat,
 } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
-import { Flex, GetProp } from "antd";
-import { useState } from "react";
+import { GetProp } from "antd";
+import { useRef, useState } from "react";
 
 const MainPage = () => {
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [content, setContent] = useState("");
   const [isHeader, setIsHeader] = useState(true);
+  // 取消流式输出必须用useRef
+  const isCancel = useRef(false);
   const [chatList, setChatList] = useState<any[]>([]);
   const [bubbleList, setBubbleList] = useState<any[]>([]);
   // 创建处理器实例
   const processor = new StreamDataProcessor();
+
+  const stream = () => {
+    const controller = new TransformStream<string, string>({
+      transform(chunk, controller) {
+        controller.enqueue(chunk);
+        if (isCancel.current) {
+          controller.terminate();
+        }
+      },
+    });
+    const cancel = () => {
+      isCancel.current = true;
+    };
+
+    return {
+      controller,
+      cancel,
+    };
+  };
 
   // 调度请求
   const [agent] = useXAgent({
@@ -45,6 +66,7 @@ const MainPage = () => {
         max_tokens: 2048,
         temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
         top_p: 0.9, // 调整此值也可能影响简洁性
+        // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
       };
       await deepSeekXRequest.create(
         requestData,
@@ -75,13 +97,10 @@ const MainPage = () => {
           },
           onError: (error) => {
             setChatList([...chatList]);
+            onError(error);
           },
         },
-        new TransformStream<string, string>({
-          transform(chunk, controller) {
-            controller.enqueue(chunk);
-          },
-        })
+        stream().controller
       );
     },
   });
@@ -110,9 +129,14 @@ const MainPage = () => {
   };
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    isCancel.current = false;
     onRequest(message);
     setIsHeader(false);
     setContent("");
+  };
+
+  const handleStopChat: SenderProps["onCancel"] = () => {
+    stream().cancel();
   };
 
   const items: BubbleDataType[] = messages.map(({ message, id, status }) => ({
@@ -173,6 +197,7 @@ const MainPage = () => {
           loading={agent.isRequesting()}
           onChange={setContent}
           onSubmit={handleSendChat}
+          onCancel={handleStopChat}
         />
       </div>
     </div>
