@@ -1,4 +1,4 @@
-import WelcomeCmp from "@/component/DeepSeek/WelcomeCmp";
+import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDownCmp from "@/component/MarkDownCmp";
 import { deepSeekPrompt } from "@/constant/deepSeek";
 import { deepSeekXRequest } from "@/services/deepseekApi";
@@ -99,7 +99,7 @@ const MainPage = () => {
       typing: { step: 5, interval: 20 },
       styles: {
         content: {
-          minWidth: "calc(100% - 100px)",
+          minWidth: "calc(100% - 50px)",
         },
       },
     },

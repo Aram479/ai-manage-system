@@ -1,4 +1,4 @@
-import ConverMenu from "@/component/DeepSeek/ConverMenu";
+import ConverMenu from "@/component/ConverMenu";
 import { Outlet } from "@umijs/max";
 import { Layout } from "antd";
 import React from "react";
