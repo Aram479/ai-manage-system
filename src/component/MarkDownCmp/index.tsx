@@ -36,6 +36,7 @@ const ThemeMap = new Map<TThemeType, SyntaxHighlighterProps["style"]>([
 interface Props {
   content: string;
   theme?: TThemeType;
+  loading?: boolean;
 }
 
 const inlineCodeStyle = {
@@ -45,11 +46,12 @@ const inlineCodeStyle = {
   color: "rgba(51, 51, 51)",
 };
 
-const MarkDownCmp: React.FC<Props> = ({ content, theme }) => {
+const MarkDownCmp: React.FC<Props> = ({ content, theme, loading }) => {
   let index = 0;
   return (
     <div className="markDownCmp">
       <ReactMarkdown
+        children={content}
         remarkPlugins={[remarkGfm, remarkMath, remarkGemoji]}
         rehypePlugins={[rehypeKatex, rehypeRaw]}
         components={{
@@ -63,45 +65,50 @@ const MarkDownCmp: React.FC<Props> = ({ content, theme }) => {
                 {!inline ? (
                   <>
                     {/* 代码头部 */}
-                    <div className="code-header">
-                      <div
-                        style={{
-                          cursor: "pointer",
-                          marginRight: "10px",
-                          transformOrigin: "8px",
-                        }}
-                        className={
-                          isShowCode ? "code-rotate-down" : "code-rotate-right"
-                        }
-                        onClick={() => setIsShowCode(!isShowCode)}
-                      >
-                        <DownOutlined />
-                      </div>
-                      <div className="lang-box">{match && match[1]}</div>
-                      <div className="preview-code-box">
-                        {!isShowCopy ? (
-                          <CopyOutlined
-                            className="preview-code-copy"
-                            onClick={_.throttle(() => {
-                              setIsShowCopy(true);
-                              ClipboardUtil.writeText(String(children));
-                              message.success("复制成功");
-                              setTimeout(() => {
-                                setIsShowCopy(false);
-                              }, 3000);
-                            }, 3000)}
-                          />
-                        ) : (
-                          <div>
-                            <CheckOutlined
-                              style={{
-                                color: "#78c326",
-                              }}
+                    {!loading && (
+                      <div className="code-header">
+                        <div
+                          style={{
+                            cursor: "pointer",
+                            marginRight: "10px",
+                            transformOrigin: "8px",
+                          }}
+                          className={
+                            isShowCode
+                              ? "code-rotate-down"
+                              : "code-rotate-right"
+                          }
+                          onClick={() => setIsShowCode(!isShowCode)}
+                        >
+                          <DownOutlined />
+                        </div>
+                        <div className="lang-box">{match && match[1]}</div>
+                        <div className="preview-code-box">
+                          {!isShowCopy ? (
+                            <CopyOutlined
+                              className="preview-code-copy"
+                              onClick={_.throttle(() => {
+                                setIsShowCopy(true);
+                                ClipboardUtil.writeText(String(children));
+                                message.success("复制成功");
+                                setTimeout(() => {
+                                  setIsShowCopy(false);
+                                }, 3000);
+                              }, 3000)}
                             />
-                          </div>
-                        )}
+                          ) : (
+                            <div>
+                              <CheckOutlined
+                                style={{
+                                  color: "#78c326",
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
+
                     {isShowCode && (
                       <SyntaxHighlighter
                         showLineNumbers={true}
@@ -163,9 +170,7 @@ const MarkDownCmp: React.FC<Props> = ({ content, theme }) => {
             );
           },
         }}
-      >
-        {content}
-      </ReactMarkdown>
+      />
     </div>
   );
 };

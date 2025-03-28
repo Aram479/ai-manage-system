@@ -5,10 +5,10 @@ import { SlackSquareOutlined } from "@ant-design/icons";
 
 const WelcomeCmp = () => {
   return (
-    <div>
+    <div className={styles.welcomeCmp}>
       <Card style={{ borderRadius: 0 }}>
         <Welcome
-          className={styles.welcomeCmp}
+          className={styles.welcome}
           icon={
             <SlackSquareOutlined
               style={{
