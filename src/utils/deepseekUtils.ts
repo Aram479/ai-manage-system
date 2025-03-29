@@ -6,87 +6,27 @@ type TMessage = {
 export const formartRequestMessage = (messageInfo: TMessage) => {
   if (messageInfo) {
     return {
-      messages: [{ role: "system", content: messageInfo.message }],
+      messages: [{ role: "assistant", content: messageInfo.message }],
     };
   }
   return [];
 };
 
-const DeepSeekResult = {
-  id: "23e6c543-8187-4539-beca-4d3ee424bc01",
-  object: "chat.completion",
-  created: 1742955599,
-  model: "deepseek-chat",
-  choices: [
-    {
-      index: 0,
-      message: {
-        role: "assistant",
-        content: "你好！请问有什么可以帮你的吗？😊",
-      },
-      logprobs: null,
-      finish_reason: "stop",
-    },
-  ],
-  usage: {
-    prompt_tokens: 3,
-    completion_tokens: 11,
-    total_tokens: 14,
-    prompt_tokens_details: {
-      cached_tokens: 0,
-    },
-    prompt_cache_hit_tokens: 0,
-    prompt_cache_miss_tokens: 3,
-  },
-  system_fingerprint: "fp_3d5141a69a_prod0225",
-};
-type TDeepSeekResult = typeof DeepSeekResult;
-export const formartResultMessage = (result: TDeepSeekResult) => {
+export const formartResultMessage = (result: ChatCompletionChunk) => {
   if (result) {
     if (result.choices?.length) {
-      return result.choices[0].message.content;
+      return result.choices[0].delta.content ?? "";
     }
   }
   return "";
 };
 
 // 定义接口
-interface ChatCompletionChunk {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  system_fingerprint: string;
-  choices: Array<{
-    index: number;
-    delta: {
-      role?: string;
-      content?: string;
-      reasoning_content?: string;
-    };
-    logprobs: null | any; // 根据实际需求调整类型
-    finish_reason: null | string;
-  }>;
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    prompt_tokens_details: {
-      cached_tokens: number;
-    };
-    prompt_cache_hit_tokens: number;
-    prompt_cache_miss_tokens: number;
-  };
-}
 
-export type TResultStream = {
-  ctmpContent: string; // 用于存储完整的 思考内容
-  chatContent: string; // 用于存储完整的 对话内容
-};
 export class StreamDataProcessor {
   private isCompleted: boolean = false; // 标记是否已完成
   // 存储二者解析后字符串
-  private resultString: TResultStream = {
+  private resultString: Pick<TResultStream, "ctmpContent" | "chatContent"> = {
     ctmpContent: "",
     chatContent: "",
   };
@@ -94,31 +34,30 @@ export class StreamDataProcessor {
    * 处理单个数据块
    * @param chunkStr 单个数据块的字符串形式
    */
-  private processChunk(chunkStr: string): void {
-    try {
-      const chunk: ChatCompletionChunk = JSON.parse(chunkStr);
+  public processChunk(dataString: string): string {
+    const chunk: ChatCompletionChunk = JSON.parse(dataString);
 
-      /* 提取并处理内容 */
-      const contentDelta = chunk.choices[0]?.delta;
+    /* 提取并处理内容 stream为true时delta有数据  否则message有数据  */
+    const contentDelta = chunk.choices[0]?.delta ?? chunk.choices[0]?.message;
 
-      // 思考 流内容
-      const ctmpContent = contentDelta?.reasoning_content;
-      // 对话 流内容
-      const content = contentDelta?.content;
+    // 思考 流内容
+    const ctmpContent = contentDelta?.reasoning_content;
+    // 对话 流内容
+    const content = contentDelta?.content;
 
-      if (ctmpContent != null) {
-        this.resultString.ctmpContent += ctmpContent;
-      }
+    if (ctmpContent != null) {
+      this.resultString.ctmpContent += ctmpContent;
+    }
 
-      if (content !== null) {
-        this.resultString.chatContent += content;
-      }
+    if (content !== null) {
+      this.resultString.chatContent += content;
+    }
 
-      // 检查是否结束
-      if (chunk.choices[0]?.finish_reason === "stop") {
-        this.isCompleted = true;
-      }
-    } catch (error) {}
+    // 检查是否结束
+    if (chunk.choices[0]?.finish_reason === "stop") {
+      this.isCompleted = true;
+    }
+    return this.resultString.chatContent ?? "";
   }
 
   /**
@@ -151,7 +90,7 @@ export class StreamDataProcessor {
   /**
    * 获取当前所有内容
    */
-  public getAllContent(): TResultStream {
+  public getAllContent(): Pick<TResultStream, "ctmpContent" | "chatContent"> {
     return this.resultString;
   }
 

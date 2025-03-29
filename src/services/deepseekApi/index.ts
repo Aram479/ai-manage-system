@@ -1,6 +1,6 @@
 import { XRequest } from "@ant-design/x";
 
-// deepseek-reasoner
+// deepseek-reasoner  deepseek-chat
 export const deepSeekXRequest = XRequest({
   baseURL: "/api/chat/completions",
   model: "deepseek-reasoner",

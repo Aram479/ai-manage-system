@@ -1,9 +1,17 @@
 import { memo, useMemo, useRef, useState } from "react";
-import { GetProp } from "antd";
-import { LoadingOutlined, UserOutlined } from "@ant-design/icons";
+import { GetProp, GetRef } from "antd";
+import {
+  CopyOutlined,
+  CopyrightOutlined,
+  DislikeOutlined,
+  LikeOutlined,
+  LoadingOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { deepSeekPrompt } from "@/constant/deepSeek";
+import dayjs, { Dayjs } from "dayjs";
 import {
   Bubble,
   Sender,
@@ -20,7 +28,9 @@ import { deepSeekXRequest } from "@/services/deepseekApi";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
 import styles from "./index.less";
-
+import _ from "lodash";
+import { message as AMessage } from "antd";
+import ClipboardUtil from "@/utils/clipboardUtil";
 const MarkDownCmp = memo(MarkDown);
 
 const MainPage = () => {
@@ -29,12 +39,41 @@ const MainPage = () => {
   const [content, setContent] = useState("");
   const [isHeader, setIsHeader] = useState(true);
   const [chatList, setChatList] = useState<any[]>([]);
+  const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 流数据处理U工具
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
 
+  const startTime = useRef<Dayjs | number>(0);
+  // 思考用时
+  const cmptTime = useRef<number>(0);
+
+  // 流是否被暂停
+  const isStreamLocked = useRef(false);
+
+  const formartMessage = (): TResultStream => {
+    const allContent = processorRef.current.getAllContent();
+    if (!startTime.current) startTime.current = dayjs();
+    if (!cmptTime.current && allContent.chatContent) {
+      cmptTime.current = dayjs().diff(startTime.current, "second");
+    }
+
+    return {
+      ...allContent,
+      abortedReason: window.abortController.signal.reason,
+      ctmpLoadingMessage: allContent.ctmpContent
+        ? isStreamLocked.current && !allContent.chatContent
+          ? "思考已中止"
+          : allContent.chatContent
+          ? `已完成深度思考（用时${cmptTime.current}秒）`
+          : "思考中..."
+        : "",
+      chatLoadngMessage: "等待思考完毕...",
+    };
+  };
+
   // 发起对话请求
-  const chatRequest: XAgentConfigCustom<string>["request"] = async (
+  const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
     messagesData,
     { onUpdate, onSuccess, onError }
   ) => {
@@ -62,32 +101,30 @@ const MainPage = () => {
         onSuccess: (res) => {
           if (res) {
             if (!requestData.stream) {
-              onSuccess(formartResultMessage(res[0]));
-            } else {
-              const aiMessage = {
-                role: aiRole,
-                content: processorRef.current.getChatContent(),
-              };
-              // push AI 当前说完的会话
-              chatList.push(aiMessage);
-              setChatList([...chatList]);
-              // 发送成功事件，以通知isRequesting结束了, 如果用agent.isRequesting的话
-              const allContent = processorRef.current.getAllContent();
-              onSuccess({
-                ...allContent,
-                abortedReason: window.abortController.signal.reason,
-              });
+              processorRef.current.processChunk(res[0]);
             }
+            const aiMessage = {
+              role: aiRole,
+              content: processorRef.current.getChatContent(),
+            };
+            chatList.push(aiMessage);
+            setChatList([...chatList]);
+
+            // 如果不是流数据 则存储Object数据块 并保存
+
+            onSuccess(formartMessage());
+
+            isStreamLocked.current = false
+            // 对话完毕时 清除当前思考时间记录
+            startTime.current = 0;
+            cmptTime.current = 0;
           }
         },
         // 流式调用，注意：这里任何useState和其他异步数据都只能获取初始值，无法获取set之后的数据，请使用useRef
         onUpdate: (data) => {
-          processorRef.current.processStream(data);
-          const allContent = processorRef.current.getAllContent();
-          onUpdate({
-            ...allContent,
-            abortedReason: window.abortController.signal.reason,
-          });
+          // 如果是流数据 则处理String流数据块 并保存
+          processorRef.current.processStream(data as unknown as string);
+          onUpdate(formartMessage());
         },
         onError: (error) => {
           setChatList([...chatList]);
@@ -109,24 +146,21 @@ const MainPage = () => {
     agent,
     requestPlaceholder: () => {
       return {
-        ctmpContent: "思考中...",
+        ctmpContent: "",
+        ctmpLoadingMessage: "",
         chatContent: "",
+        chatLoadngMessage: "",
         abortedReason: "",
       };
-    },
-    parser: (message) => {
-      const newMessage = {
-        ...message,
-        status: 1,
-      };
-      return newMessage;
     },
     requestFallback: () => {
       const errMsg =
         window.abortController.signal.reason ?? "服务器繁忙，请稍后再试！";
       return {
         ctmpContent: errMsg,
+        ctmpLoadingMessage: errMsg,
         chatContent: errMsg,
+        chatLoadngMessage: errMsg,
         abortedReason: errMsg,
       };
     },
@@ -141,7 +175,7 @@ const MainPage = () => {
       styles: {
         content: {
           minWidth: "calc(100% - 50px)",
-          background: "#00000000",
+          background: "#fff",
         },
       },
     },
@@ -159,19 +193,53 @@ const MainPage = () => {
   const items: BubbleDataType[] = messages.map(({ message, id, status }) => ({
     key: id,
     role: status === "local" ? "local" : "assistant",
-    content: message,
+    content: message.chatContent ?? message,
     loading: status === "loading" && !streamClass?.readable.locked,
-    messageRender: (content: string) =>
+    // 最终展示的内容使用content才可以有打字效果，无论是不是stream
+    messageRender: (content) =>
       status !== "local" ? (
         !message.abortedReason ? (
           <div>
-            <div style={{ background: "skyblue" }}>{message.ctmpContent}</div>
+            {message.ctmpContent && (
+              <div className={styles.ctmpMessageBox}>
+                {/* 思考状态 */}
+                <div className={styles.ctmpTimeBox}>
+                  <div>
+                    <CopyrightOutlined />
+                  </div>
+                  <div>{message.ctmpLoadingMessage}</div>
+                </div>
+                {/* 思考内容 */}
+                <div className={styles.ctmpContentBox}>
+                  {message.ctmpContent}
+                </div>
+              </div>
+            )}
+
             <div style={{ background: "#fff" }}>
-              <MarkDownCmp
-                theme="onDark"
-                content={message.chatContent}
-                loading={loading}
-              />
+              <MarkDownCmp theme="onDark" content={content} loading={loading} />
+              {status === "success" && (
+                <div className={styles.messageFooterBox}>
+                  <LikeOutlined
+                    onClick={_.throttle(() => {
+                      AMessage.success({
+                        key: "thanks",
+                        content: "感谢您的支持",
+                      });
+                    }, 300)}
+                  />
+                  <DislikeOutlined />
+                  <CopyOutlined
+                    onClick={_.throttle(() => {
+                      ClipboardUtil.writeText(String(content));
+                      AMessage.success({
+                        key: "copy",
+                        content: "复制成功",
+                      });
+                    }, 300)}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -191,17 +259,18 @@ const MainPage = () => {
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
+    isStreamLocked.current = !!streamClass?.writable.locked;
     // 1.中断请求：流输出前中断
     if (!streamClass?.writable.locked) {
       window.abortController.abort("用户中止了回答。");
 
       // 流关闭(仅流输出前可用，输出中调用会报错)
-      // streamClass?.writable?.close();
+      streamClass?.writable?.close();
     }
     // 2.中断流：流输出后中断
     controller?.terminate();
   };
-  console.log(messages);
+
   return (
     <div className={styles.mainPage}>
       {isHeader && (
@@ -211,6 +280,7 @@ const MainPage = () => {
       )}
       <div className={styles.chatListBox}>
         <Bubble.List
+          ref={listRef}
           className={styles.bubbleListBox}
           items={items}
           roles={roles}
