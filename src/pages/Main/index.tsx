@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
-import { deepSeekPrompt } from "@/constant/deepSeek";
+import { deepSeekPrompt, deepSeektools } from "@/constant/deepSeek.constant";
 import dayjs, { Dayjs } from "dayjs";
 import {
   Bubble,
@@ -22,15 +22,16 @@ import {
 import {
   formartResultMessage,
   StreamDataProcessor,
-} from "@/utils/deepseekUtils";
+} from "@/utils/deepseek.utils";
 import { useStreamController } from "@/hooks/deepSeekHooks";
-import { deepSeekXRequest } from "@/services/deepseekApi";
+import { deepSeekOpenAI, deepSeekXRequest } from "@/services/deepseek.api";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import { message as AMessage } from "antd";
 import ClipboardUtil from "@/utils/clipboardUtil";
+import { history } from "@umijs/max";
 const MarkDownCmp = memo(MarkDown);
 
 const MainPage = () => {
@@ -43,13 +44,14 @@ const MainPage = () => {
   // 流数据处理U工具
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
-
+  // 思考开始时间
   const startTime = useRef<Dayjs | number>(0);
   // 思考用时
   const cmptTime = useRef<number>(0);
-
   // 流是否被暂停
   const isStreamLocked = useRef(false);
+  // 流是否执行中
+  const isStreaming = useRef(false);
 
   const formartMessage = (): TResultStream => {
     const allContent = processorRef.current.getAllContent();
@@ -70,6 +72,17 @@ const MainPage = () => {
         : "",
       chatLoadngMessage: "等待思考完毕...",
     };
+  };
+
+  // 指令分发器
+  const commandExecutor = (commandMessage: string) => {
+    if (commandMessage) {
+      const command = JSON.parse(commandMessage)
+      console.log("command", command)
+      if(command.name === "navigate_to_page") {
+        history.push(command.path)
+      }
+    }
   };
 
   // 发起对话请求
@@ -93,6 +106,9 @@ const MainPage = () => {
       temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
       top_p: 0.9, // 调整此值也可能影响简洁性
       // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
+      // tools 不支持模型 deepseek-reasoner
+      tools: deepSeektools,
+      tool_choice: "auto",
     };
     await deepSeekXRequest.create(
       requestData,
@@ -110,18 +126,23 @@ const MainPage = () => {
             chatList.push(aiMessage);
             setChatList([...chatList]);
 
+            isStreaming.current = true;
+            const result = formartMessage();
             // 如果不是流数据 则存储Object数据块 并保存
-
-            onSuccess(formartMessage());
-
-            isStreamLocked.current = false
+            onSuccess(result);
             // 对话完毕时 清除当前思考时间记录
             startTime.current = 0;
             cmptTime.current = 0;
+
+            // 流执行完，没被锁(暂停)执行指令触发
+            if (!isStreamLocked.current) {
+              commandExecutor(result.toolContent);
+            }
           }
         },
         // 流式调用，注意：这里任何useState和其他异步数据都只能获取初始值，无法获取set之后的数据，请使用useRef
         onUpdate: (data) => {
+          isStreaming.current = true;
           // 如果是流数据 则处理String流数据块 并保存
           processorRef.current.processStream(data as unknown as string);
           onUpdate(formartMessage());
@@ -137,6 +158,7 @@ const MainPage = () => {
 
   // 调度请求
   const [agent] = useXAgent({
+    // chatRequest
     request: chatRequest,
   });
 
@@ -150,6 +172,7 @@ const MainPage = () => {
         ctmpLoadingMessage: "",
         chatContent: "",
         chatLoadngMessage: "",
+        toolContent: "",
         abortedReason: "",
       };
     },
@@ -161,6 +184,7 @@ const MainPage = () => {
         ctmpLoadingMessage: errMsg,
         chatContent: errMsg,
         chatLoadngMessage: errMsg,
+        toolContent: errMsg,
         abortedReason: errMsg,
       };
     },
@@ -193,7 +217,8 @@ const MainPage = () => {
   const items: BubbleDataType[] = messages.map(({ message, id, status }) => ({
     key: id,
     role: status === "local" ? "local" : "assistant",
-    content: message.chatContent ?? message,
+    // 这里的 ?? message 是非stream的用到的值(string)，除此之外message都是流数据的返回值(Object)
+    content: (message.chatContent || message.toolContent) ?? message,
     loading: status === "loading" && !streamClass?.readable.locked,
     // 最终展示的内容使用content才可以有打字效果，无论是不是stream
     messageRender: (content) =>
@@ -217,7 +242,11 @@ const MainPage = () => {
             )}
 
             <div style={{ background: "#fff" }}>
-              <MarkDownCmp theme="onDark" content={content} loading={loading} />
+              <MarkDownCmp
+                theme="onDark"
+                content={String(content)}
+                loading={loading}
+              />
               {status === "success" && (
                 <div className={styles.messageFooterBox}>
                   <LikeOutlined
@@ -231,7 +260,7 @@ const MainPage = () => {
                   <DislikeOutlined />
                   <CopyOutlined
                     onClick={_.throttle(() => {
-                      ClipboardUtil.writeText(String(content));
+                      ClipboardUtil.writeText(content);
                       AMessage.success({
                         key: "copy",
                         content: "复制成功",
@@ -251,11 +280,12 @@ const MainPage = () => {
   }));
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    isStreamLocked.current = false;
     // 重置上一次对话状态和信息
     processorRef.current.reset();
     setIsHeader(false);
     setContent("");
-    onRequest(message);
+    onRequest(message as any);
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {

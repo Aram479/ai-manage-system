@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 type TMessage = {
   message?: string;
   messages?: string[];
@@ -26,17 +28,21 @@ export const formartResultMessage = (result: ChatCompletionChunk) => {
 export class StreamDataProcessor {
   private isCompleted: boolean = false; // 标记是否已完成
   // 存储二者解析后字符串
-  private resultString: Pick<TResultStream, "ctmpContent" | "chatContent"> = {
+  private resultString: Pick<
+    TResultStream,
+    "ctmpContent" | "chatContent" | "toolContent"
+  > = {
     ctmpContent: "",
     chatContent: "",
+    toolContent: "",
   };
+
   /**
    * 处理单个数据块
    * @param chunkStr 单个数据块的字符串形式
    */
   public processChunk(dataString: string): string {
     const chunk: ChatCompletionChunk = JSON.parse(dataString);
-
     /* 提取并处理内容 stream为true时delta有数据  否则message有数据  */
     const contentDelta = chunk.choices[0]?.delta ?? chunk.choices[0]?.message;
 
@@ -44,13 +50,19 @@ export class StreamDataProcessor {
     const ctmpContent = contentDelta?.reasoning_content;
     // 对话 流内容
     const content = contentDelta?.content;
-
-    if (ctmpContent != null) {
+    // 工具 流内容
+    const toolContent = contentDelta?.tool_calls?.[0].function.arguments;
+    if (ctmpContent ?? false) {
       this.resultString.ctmpContent += ctmpContent;
     }
 
-    if (content !== null) {
+    if (content ?? false) {
       this.resultString.chatContent += content;
+    }
+
+    if ((toolContent ?? false) && _.isString(toolContent)) {
+    console.log("ChatCompletionChunk", toolContent)
+      this.resultString.toolContent += toolContent;
     }
 
     // 检查是否结束
@@ -90,7 +102,10 @@ export class StreamDataProcessor {
   /**
    * 获取当前所有内容
    */
-  public getAllContent(): Pick<TResultStream, "ctmpContent" | "chatContent"> {
+  public getAllContent(): Pick<
+    TResultStream,
+    "ctmpContent" | "chatContent" | "toolContent"
+  > {
     return this.resultString;
   }
 
@@ -99,6 +114,9 @@ export class StreamDataProcessor {
   }
   public getCtmpContent(): string {
     return this.resultString.ctmpContent;
+  }
+  public getToolContent(): string {
+    return this.resultString.toolContent;
   }
   /**
    * 检查流是否完成
@@ -112,6 +130,7 @@ export class StreamDataProcessor {
     this.resultString = {
       ctmpContent: "",
       chatContent: "",
+      toolContent: "",
     };
   }
 }
