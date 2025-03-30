@@ -23,7 +23,7 @@ import {
   formartResultMessage,
   StreamDataProcessor,
 } from "@/utils/deepseek.utils";
-import { useStreamController } from "@/hooks/deepSeekHooks";
+import { useStreamController } from "@/hooks/deepSeek.hooks";
 import { deepSeekOpenAI, deepSeekXRequest } from "@/services/deepseek.api";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
@@ -40,6 +40,8 @@ const MainPage = () => {
   const [content, setContent] = useState("");
   const [isHeader, setIsHeader] = useState(true);
   const [chatList, setChatList] = useState<any[]>([]);
+  const [chatListAuto, setChatListAuto] = useState<any[]>([]);
+
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 流数据处理U工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -52,6 +54,9 @@ const MainPage = () => {
   const isStreamLocked = useRef(false);
   // 流是否执行中
   const isStreaming = useRef(false);
+
+  // 是否开启自动对话
+  const isAutoChat = useRef(false);
 
   const formartMessage = (): TResultStream => {
     const allContent = processorRef.current.getAllContent();
@@ -72,17 +77,6 @@ const MainPage = () => {
         : "",
       chatLoadngMessage: "等待思考完毕...",
     };
-  };
-
-  // 指令分发器
-  const commandExecutor = (commandMessage: string) => {
-    if (commandMessage) {
-      const command = JSON.parse(commandMessage)
-      console.log("command", command)
-      if(command.name === "navigate_to_page") {
-        history.push(command.path)
-      }
-    }
   };
 
   // 发起对话请求
@@ -136,7 +130,7 @@ const MainPage = () => {
 
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              commandExecutor(result.toolContent);
+              handleCommandExecutor(result.toolContent);
             }
           }
         },
@@ -299,6 +293,28 @@ const MainPage = () => {
     }
     // 2.中断流：流输出后中断
     controller?.terminate();
+  };
+
+  // 指令分发器
+  const handleCommandExecutor = (commandMessage: string) => {
+    try {
+      if (isAutoChat.current) {
+      }
+      if (commandMessage) {
+        const command = JSON.parse(commandMessage);
+        console.log("command", command);
+        if (command.event === "navigate_to_page") {
+          history.push(command.path);
+        } else if (command.event === "help_have_conversation") {
+          isAutoChat.current = true;
+          const { message } = command;
+          // setContent(message)
+          handleSendChat(message);
+        }
+      }
+    } catch (error) {
+      AMessage.error("命令错误，请重试！");
+    }
   };
 
   return (

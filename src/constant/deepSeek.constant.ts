@@ -8,7 +8,7 @@ export const deepSeektools = [
     type: "function",
     function: {
       name: "help_have_conversation",
-      description: "帮助我对话",
+      description: "根据对话上下文，帮助我对话",
       parameters: {
         type: "object",
         properties: {
@@ -19,7 +19,7 @@ export const deepSeektools = [
           },
           message: {
             type: "string",
-            description: "根据对方的消息，生成响应内容",
+            description: "帮我，随机生成一个问题，或者问候语句",
           },
         },
       },
