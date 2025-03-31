@@ -90,14 +90,15 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     // push 用户当前会话
     const userMessage = {
       role: userRole,
-      content: `${messagesData.message}${
+      // content: `${messagesData.message}${
+      //   chatList.length ? "" : deepSeekPrompt.concise
+      // }`,
+      content: `${chatList.length ? "" : props.defaultMessage}${messagesData.message}${
         chatList.length ? "" : deepSeekPrompt.concise
       }`,
       // content: messagesData.message,
     };
     chatList.push(userMessage);
-    if (props.defaultMessage) {
-    }
     const requestData = {
       ...requestInfo,
       model: model.current ?? "88",
@@ -220,14 +221,14 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   };
 
   useEffect(() => {
-    // 默认消息
-    if (props.defaultMessage) {
-      const defaultUserMessage = {
-        role: userRole,
-        content: props.defaultMessage,
-      };
-      chatList.push(defaultUserMessage);
-    }
+    // TODO 默认消息 后续需要优化：不需要push了
+    // if (props.defaultMessage) {
+    //   const defaultUserMessage = {
+    //     role: userRole,
+    //     content: props.defaultMessage,
+    //   };
+    //   chatList.push(defaultUserMessage);
+    // }
   }, [props.defaultMessage]);
 
   useEffect(() => {

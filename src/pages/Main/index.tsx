@@ -62,6 +62,7 @@ const MainPage = () => {
       children: "自动对话",
     },
   ]);
+
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 是否开启深度思考
   const isConsideration = useRef(false);
@@ -112,7 +113,7 @@ const MainPage = () => {
   } = useDeepSeekXChat({
     /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
         deepSeekPrompt.concise, */
-    defaultMessage: "",
+    defaultMessage: "我需要你以对方的口气，帮我回复下量子力学话题吧，你不需要想太多，帮我当成对方，你不需要列列表，只需要以我的语气根据上下文，进行如何回答对方或提出问题或反驳对方即可，可以说粗话和脏话:",
     requestInfo: {
       model: model,
       stream: true,
