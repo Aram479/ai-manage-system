@@ -1,11 +1,13 @@
-import { deepSeektools } from "@/constant/deepSeek.constant";
 import { deepSeekXRequest } from "@/services/deepseek.api";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
-import { Bubble, useXAgent, useXChat } from "@ant-design/x";
+import { Bubble, SenderProps, useXAgent, useXChat } from "@ant-design/x";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
+import { history } from "@umijs/max";
 import { GetRef } from "antd";
-import { Dayjs } from "dayjs";
-import { useRef, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { message as AMessage } from "antd";
+import { deepSeekPrompt } from "@/constant/deepSeek.constant";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -34,17 +36,21 @@ export const useStreamController = () => {
 };
 
 interface IUseDeepSeekXChat {
-  requestData?: any;
-  deepSeektools?: any[];
+  userName?: string;
+  aiName?: string;
+  defaultMessage?: string;
+  requestInfo?: any;
+  onSuccess?: (messageData: TResultStream) => void;
 }
 export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
+  const { requestInfo } = props;
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<any[]>([]);
-  const listRef = useRef<GetRef<typeof Bubble.List>>(null);
-  // 流数据处理U工具
+  // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
+  const model = useRef<TDeepSeekModel>(props.requestInfo.model);
   // 思考开始时间
   const startTime = useRef<Dayjs | number>(0);
   // 思考用时
@@ -53,6 +59,29 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   const isStreamLocked = useRef(false);
   // 流是否执行中
   const isStreaming = useRef(false);
+  // 是否开启自动对话
+  const isAutoChat = useRef(false);
+  const formartMessage = (): TResultStream => {
+    const allContent = processorRef.current.getAllContent();
+    if (!startTime.current) startTime.current = dayjs();
+    if (!cmptTime.current && allContent.chatContent) {
+      cmptTime.current = dayjs().diff(startTime.current, "second");
+    }
+
+    return {
+      ...allContent,
+      abortedReason: window.abortController.signal.reason,
+      ctmpLoadingMessage: allContent.ctmpContent
+        ? isStreamLocked.current && !allContent.chatContent
+          ? "思考已中止"
+          : allContent.chatContent
+          ? `已完成深度思考（用时${cmptTime.current}秒）`
+          : "思考中..."
+        : "",
+      chatLoadngMessage: "等待思考完毕...",
+    };
+  };
+
   // 发起对话请求
   const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
     messagesData,
@@ -61,22 +90,18 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     // push 用户当前会话
     const userMessage = {
       role: userRole,
-      // content: `${messagesData.message}${
-      //   chatList.length ? "" : deepSeekPrompt.concise
-      // }`,
-      content: messagesData.message,
+      content: `${messagesData.message}${
+        chatList.length ? "" : deepSeekPrompt.concise
+      }`,
+      // content: messagesData.message,
     };
     chatList.push(userMessage);
+    if (props.defaultMessage) {
+    }
     const requestData = {
+      ...requestInfo,
+      model: model.current ?? "88",
       messages: chatList,
-      stream: true,
-      max_tokens: 2048,
-      temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
-      top_p: 0.9, // 调整此值也可能影响简洁性
-      // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
-      // tools 不支持模型 deepseek-reasoner
-      tools: deepSeektools,
-      tool_choice: "auto",
     };
     await deepSeekXRequest.create(
       requestData,
@@ -94,7 +119,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
             chatList.push(aiMessage);
             setChatList([...chatList]);
 
-            isStreaming.current = true;
+            isStreaming.current = false;
             const result = formartMessage();
             // 如果不是流数据 则存储Object数据块 并保存
             onSuccess(result);
@@ -104,6 +129,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
 
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
+              props.onSuccess?.(result);
               handleCommandExecutor(result.toolContent);
             }
           }
@@ -153,8 +179,72 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
       };
     },
   });
+
+  const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    isStreamLocked.current = false;
+    // 重置上一次对话状态和信息
+    processorRef.current.reset();
+    onRequest(message as any);
+  };
+
+  const handleStopChat: SenderProps["onCancel"] = () => {
+    isStreamLocked.current = !!streamClass?.writable.locked;
+    // 1.中断请求：流输出前中断
+    if (!streamClass?.writable.locked) {
+      window.abortController.abort("用户中止了回答。");
+
+      // 流关闭(仅流输出前可用，输出中调用会报错)
+      streamClass?.writable?.close();
+    }
+    // 2.中断流：流输出后中断
+    controller?.terminate();
+  };
+
+  // 指令分发器
+  const handleCommandExecutor = (commandMessage: string) => {
+    try {
+      if (commandMessage) {
+        const command = JSON.parse(commandMessage);
+        if (command.event === "navigate_to_page") {
+          history.push(command.path);
+        } else if (command.event === "help_have_conversation") {
+          isAutoChat.current = true;
+          const { message } = command;
+          // setContent(message)
+          handleSendChat(message);
+        }
+      }
+    } catch (error) {
+      AMessage.error("命令错误，请重试！");
+    }
+  };
+
+  useEffect(() => {
+    // 默认消息
+    if (props.defaultMessage) {
+      const defaultUserMessage = {
+        role: userRole,
+        content: props.defaultMessage,
+      };
+      chatList.push(defaultUserMessage);
+    }
+  }, [props.defaultMessage]);
+
+  useEffect(() => {
+    if (props.requestInfo) {
+      model.current = props.requestInfo.model;
+    }
+  }, [props.requestInfo]);
+
   return {
-    messages: [],
+    messages,
     processorRef,
+    chatList,
+    streamClass,
+    isStreamLocked,
+    isStreaming,
+    loading: agent.isRequesting(),
+    onRequest: handleSendChat,
+    onCancel: handleStopChat,
   };
 };

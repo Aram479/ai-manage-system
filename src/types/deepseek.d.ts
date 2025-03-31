@@ -1,3 +1,5 @@
+type TDeepSeekModel = "deepseek-chat" | "deepseek-reasoner"
+
 interface ChatCompletionChunk {
   id: string;
   object: string;

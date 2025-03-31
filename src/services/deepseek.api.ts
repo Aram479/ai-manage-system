@@ -4,7 +4,7 @@ import OpenAI from "openai";
 // deepseek-reasoner  deepseek-chat
 export const deepSeekXRequest = XRequest({
   baseURL: "/api/chat/completions",
-  model: "deepseek-chat",
+  // model: "deepseek-chat",
   dangerouslyApiKey: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
   fetch: (url, config) => {
     window.abortController = new AbortController();

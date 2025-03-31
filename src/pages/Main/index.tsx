@@ -1,19 +1,31 @@
-import { memo, useMemo, useRef, useState } from "react";
-import { GetProp, GetRef } from "antd";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Button,
+  ButtonProps,
+  Flex,
+  GetProp,
+  GetRef,
+  Tag,
+  TagProps,
+} from "antd";
 import {
   CopyOutlined,
   CopyrightOutlined,
   DislikeOutlined,
+  FireOutlined,
   LikeOutlined,
   LoadingOutlined,
+  ReadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { deepSeekPrompt, deepSeektools } from "@/constant/deepSeek.constant";
 import dayjs, { Dayjs } from "dayjs";
+
 import {
   Bubble,
+  Prompts,
   Sender,
   SenderProps,
   useXAgent,
@@ -23,7 +35,8 @@ import {
   formartResultMessage,
   StreamDataProcessor,
 } from "@/utils/deepseek.utils";
-import { useStreamController } from "@/hooks/deepSeek.hooks";
+import { v4 as uuidv4 } from "uuid";
+import { useDeepSeekXChat, useStreamController } from "@/hooks/deepSeek.hooks";
 import { deepSeekOpenAI, deepSeekXRequest } from "@/services/deepseek.api";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
@@ -35,153 +48,83 @@ import { history } from "@umijs/max";
 const MarkDownCmp = memo(MarkDown);
 
 const MainPage = () => {
-  const [userRole, setUserRole] = useState("user");
-  const [aiRole, setAiRole] = useState("assistant");
+  const [model, setModel] = useState<TDeepSeekModel>("deepseek-chat");
   const [content, setContent] = useState("");
+  const [placeholder, setPlaceholder] = useState("");
   const [isHeader, setIsHeader] = useState(true);
-  const [chatList, setChatList] = useState<any[]>([]);
-  const [chatListAuto, setChatListAuto] = useState<any[]>([]);
-
+  const [messageTags, setMessageTags] = useState<ButtonProps[]>([
+    {
+      id: "consideration",
+      children: "深度思考",
+    },
+    {
+      id: "autoChat",
+      children: "自动对话",
+    },
+  ]);
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
-  // 流数据处理U工具
-  const processorRef = useRef(new StreamDataProcessor());
-  const { transformStream, controller, streamClass } = useStreamController();
-  // 思考开始时间
-  const startTime = useRef<Dayjs | number>(0);
-  // 思考用时
-  const cmptTime = useRef<number>(0);
-  // 流是否被暂停
-  const isStreamLocked = useRef(false);
-  // 流是否执行中
-  const isStreaming = useRef(false);
-
+  // 是否开启深度思考
+  const isConsideration = useRef(false);
   // 是否开启自动对话
   const isAutoChat = useRef(false);
-
-  const formartMessage = (): TResultStream => {
-    const allContent = processorRef.current.getAllContent();
-    if (!startTime.current) startTime.current = dayjs();
-    if (!cmptTime.current && allContent.chatContent) {
-      cmptTime.current = dayjs().diff(startTime.current, "second");
+  // AI1 对话完成事件
+  const successAction = (messageData: TResultStream) => {
+    if (!streamClass?.writable.locked && isAutoChat.current) {
+      onAutoRequest(messageData.chatContent);
     }
-
-    return {
-      ...allContent,
-      abortedReason: window.abortController.signal.reason,
-      ctmpLoadingMessage: allContent.ctmpContent
-        ? isStreamLocked.current && !allContent.chatContent
-          ? "思考已中止"
-          : allContent.chatContent
-          ? `已完成深度思考（用时${cmptTime.current}秒）`
-          : "思考中..."
-        : "",
-      chatLoadngMessage: "等待思考完毕...",
-    };
   };
 
-  // 发起对话请求
-  const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
-    messagesData,
-    { onUpdate, onSuccess, onError }
-  ) => {
-    // push 用户当前会话
-    const userMessage = {
-      role: userRole,
-      // content: `${messagesData.message}${
-      //   chatList.length ? "" : deepSeekPrompt.concise
-      // }`,
-      content: messagesData.message,
-    };
-    chatList.push(userMessage);
-    const requestData = {
-      messages: chatList,
+  // AI2 对话完成事件
+  const successAutoAction = (messageData: TResultStream) => {
+    // isAutoChat.current = true;
+    /** TODO 优化点：
+     * 问题：每当自动对话结束时，用户自动对话的思考message会消失
+     * 原因：出现在这，因为这里只发送了chatContent没有发送ctmpContent
+     * 阻碍：优化此项需要更改 deepSeek.hooks.ts的chatRequest中messagesData参数类型
+     */
+    onRequest(messageData.chatContent);
+  };
+
+  const { messages, streamClass, loading, onRequest, onCancel } =
+    useDeepSeekXChat({
+      requestInfo: {
+        model: model,
+        stream: true,
+        max_tokens: 2048,
+        temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
+        top_p: 0.9, // 调整此值也可能影响简洁性
+        // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
+        // tools 不支持模型 deepseek-reasoner
+        tool_choice: "auto",
+      },
+      onSuccess: successAction,
+    });
+
+  const {
+    messages: autoMessage,
+    streamClass: autoStreamClass,
+    loading: autoLoading,
+    chatList: autoChatList,
+    isStreaming: autoIsStreaming,
+    isStreamLocked: autoIsStreamLocked,
+    onRequest: onAutoRequest,
+    onCancel: onAutoCancel,
+  } = useDeepSeekXChat({
+    /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
+        deepSeekPrompt.concise, */
+    defaultMessage: "",
+    requestInfo: {
+      model: model,
       stream: true,
       max_tokens: 2048,
       temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
       top_p: 0.9, // 调整此值也可能影响简洁性
       // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
       // tools 不支持模型 deepseek-reasoner
-      tools: deepSeektools,
+      // tools: deepSeektools,
       tool_choice: "auto",
-    };
-    await deepSeekXRequest.create(
-      requestData,
-      {
-        // 请求结束后调用
-        onSuccess: (res) => {
-          if (res) {
-            if (!requestData.stream) {
-              processorRef.current.processChunk(res[0]);
-            }
-            const aiMessage = {
-              role: aiRole,
-              content: processorRef.current.getChatContent(),
-            };
-            chatList.push(aiMessage);
-            setChatList([...chatList]);
-
-            isStreaming.current = true;
-            const result = formartMessage();
-            // 如果不是流数据 则存储Object数据块 并保存
-            onSuccess(result);
-            // 对话完毕时 清除当前思考时间记录
-            startTime.current = 0;
-            cmptTime.current = 0;
-
-            // 流执行完，没被锁(暂停)执行指令触发
-            if (!isStreamLocked.current) {
-              handleCommandExecutor(result.toolContent);
-            }
-          }
-        },
-        // 流式调用，注意：这里任何useState和其他异步数据都只能获取初始值，无法获取set之后的数据，请使用useRef
-        onUpdate: (data) => {
-          isStreaming.current = true;
-          // 如果是流数据 则处理String流数据块 并保存
-          processorRef.current.processStream(data as unknown as string);
-          onUpdate(formartMessage());
-        },
-        onError: (error) => {
-          setChatList([...chatList]);
-          onError(error);
-        },
-      },
-      transformStream()
-    );
-  };
-
-  // 调度请求
-  const [agent] = useXAgent({
-    // chatRequest
-    request: chatRequest,
-  });
-
-  const loading = useMemo(() => agent.isRequesting(), [agent.isRequesting()]);
-
-  const { onRequest, messages } = useXChat({
-    agent,
-    requestPlaceholder: () => {
-      return {
-        ctmpContent: "",
-        ctmpLoadingMessage: "",
-        chatContent: "",
-        chatLoadngMessage: "",
-        toolContent: "",
-        abortedReason: "",
-      };
     },
-    requestFallback: () => {
-      const errMsg =
-        window.abortController.signal.reason ?? "服务器繁忙，请稍后再试！";
-      return {
-        ctmpContent: errMsg,
-        ctmpLoadingMessage: errMsg,
-        chatContent: errMsg,
-        chatLoadngMessage: errMsg,
-        toolContent: errMsg,
-        abortedReason: errMsg,
-      };
-    },
+    onSuccess: successAutoAction,
   });
 
   // 对话时，用户和AI样式
@@ -200,6 +143,7 @@ const MainPage = () => {
     local: {
       placement: "end",
       avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
+      // typing: { step: 5, interval: 20 },
       styles: {
         content: {
           background: "#e0dfff",
@@ -208,115 +152,141 @@ const MainPage = () => {
     },
   };
 
-  const items: BubbleDataType[] = messages.map(({ message, id, status }) => ({
-    key: id,
-    role: status === "local" ? "local" : "assistant",
-    // 这里的 ?? message 是非stream的用到的值(string)，除此之外message都是流数据的返回值(Object)
-    content: (message.chatContent || message.toolContent) ?? message,
-    loading: status === "loading" && !streamClass?.readable.locked,
-    // 最终展示的内容使用content才可以有打字效果，无论是不是stream
-    messageRender: (content) =>
-      status !== "local" ? (
-        !message.abortedReason ? (
-          <div>
-            {message.ctmpContent && (
-              <div className={styles.ctmpMessageBox}>
-                {/* 思考状态 */}
-                <div className={styles.ctmpTimeBox}>
-                  <div>
-                    <CopyrightOutlined />
-                  </div>
-                  <div>{message.ctmpLoadingMessage}</div>
-                </div>
-                {/* 思考内容 */}
-                <div className={styles.ctmpContentBox}>
-                  {message.ctmpContent}
-                </div>
-              </div>
-            )}
+  const items: BubbleDataType[] = useMemo(() => {
+    let newItems = [];
+    const newMessages = messages.map((item) => ({
+      ...item,
+      key: item.id,
+      role: item.status === "local" ? item.status : "assistant",
+      content:
+        (item.message.chatContent || item.message.toolContent) ?? item.message,
+      loading: item.status === "loading" && !streamClass?.readable.locked,
+    }));
 
-            <div style={{ background: "#fff" }}>
+    newItems = [...newMessages];
+
+    const lastAutoMessage = autoMessage?.[autoMessage.length - 1];
+
+    // 当user自动对话加载时，实时更新message
+    if (autoLoading && lastAutoMessage) {
+      let newLastAutoMessage = {
+        ...lastAutoMessage,
+        key: `auto_${lastAutoMessage.id}`,
+        role: "local",
+        content:
+          (lastAutoMessage.message.chatContent ||
+            lastAutoMessage.message.toolContent) ??
+          lastAutoMessage.message,
+        loading: autoLoading,
+      };
+      if (autoIsStreaming.current) {
+        newLastAutoMessage = {
+          ...newLastAutoMessage,
+          loading:
+            lastAutoMessage.status === "loading" && !autoIsStreaming.current,
+        };
+      }
+
+      newItems = [...newItems, newLastAutoMessage];
+    }
+
+    return newItems.map(({ message, status, ...item }) => ({
+      ...item,
+      messageRender: (content) =>
+        status !== "local" ? (
+          !message.abortedReason ? (
+            <div>
+              {message.ctmpContent && (
+                <div className={styles.ctmpMessageBox}>
+                  {/* 思考状态 */}
+                  <div className={styles.ctmpTimeBox}>
+                    <div>
+                      <CopyrightOutlined />
+                    </div>
+                    <div>{message.ctmpLoadingMessage}</div>
+                  </div>
+                  {/* 思考内容 */}
+                  <div className={styles.ctmpContentBox}>
+                    {message.ctmpContent}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ background: "auto" }}>
+                <MarkDownCmp
+                  theme="onDark"
+                  content={String(content)}
+                  loading={loading}
+                />
+                {status === "success" && (
+                  <div className={styles.messageFooterBox}>
+                    <LikeOutlined
+                      onClick={_.throttle(() => {
+                        AMessage.success({
+                          key: "thanks",
+                          content: "感谢您的支持",
+                        });
+                      }, 300)}
+                    />
+                    <DislikeOutlined />
+                    <CopyOutlined
+                      onClick={_.throttle(() => {
+                        ClipboardUtil.writeText(content);
+                        AMessage.success({
+                          key: "copy",
+                          content: "复制成功",
+                        });
+                      }, 300)}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>{message.abortedReason}</>
+          )
+        ) : (
+          <div>
+            {isAutoChat.current ? (
               <MarkDownCmp
                 theme="onDark"
                 content={String(content)}
                 loading={loading}
               />
-              {status === "success" && (
-                <div className={styles.messageFooterBox}>
-                  <LikeOutlined
-                    onClick={_.throttle(() => {
-                      AMessage.success({
-                        key: "thanks",
-                        content: "感谢您的支持",
-                      });
-                    }, 300)}
-                  />
-                  <DislikeOutlined />
-                  <CopyOutlined
-                    onClick={_.throttle(() => {
-                      ClipboardUtil.writeText(content);
-                      AMessage.success({
-                        key: "copy",
-                        content: "复制成功",
-                      });
-                    }, 300)}
-                  />
-                </div>
-              )}
-            </div>
+            ) : (
+              content
+            )}
           </div>
-        ) : (
-          <>{message.abortedReason}</>
-        )
-      ) : (
-        <div>{content}</div>
-      ),
-  }));
+        ),
+    }));
+  }, [messages, autoMessage]);
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
-    isStreamLocked.current = false;
-    // 重置上一次对话状态和信息
-    processorRef.current.reset();
     setIsHeader(false);
     setContent("");
     onRequest(message as any);
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
-    isStreamLocked.current = !!streamClass?.writable.locked;
-    // 1.中断请求：流输出前中断
-    if (!streamClass?.writable.locked) {
-      window.abortController.abort("用户中止了回答。");
-
-      // 流关闭(仅流输出前可用，输出中调用会报错)
-      streamClass?.writable?.close();
-    }
-    // 2.中断流：流输出后中断
-    controller?.terminate();
+    // onAutoCancel();
+    onCancel();
   };
 
-  // 指令分发器
-  const handleCommandExecutor = (commandMessage: string) => {
-    try {
-      if (isAutoChat.current) {
-      }
-      if (commandMessage) {
-        const command = JSON.parse(commandMessage);
-        console.log("command", command);
-        if (command.event === "navigate_to_page") {
-          history.push(command.path);
-        } else if (command.event === "help_have_conversation") {
-          isAutoChat.current = true;
-          const { message } = command;
-          // setContent(message)
-          handleSendChat(message);
-        }
-      }
-    } catch (error) {
-      AMessage.error("命令错误，请重试！");
+  const handleTagItem = (item: ButtonProps) => {
+    // consideration autoChat
+
+    if (item.id === "consideration") {
+      isConsideration.current = true;
+      isAutoChat.current = false;
+      setModel("deepseek-reasoner");
+      setPlaceholder("已开启深度思考");
+    } else if (item.id === "autoChat") {
+      isConsideration.current = false;
+      isAutoChat.current = true;
+      setModel("deepseek-chat");
+      setPlaceholder("请输入一个话题，即可开始对话");
     }
   };
-
   return (
     <div className={styles.mainPage}>
       {isHeader && (
@@ -332,8 +302,22 @@ const MainPage = () => {
           roles={roles}
         />
 
+        {/* 🌟 提示词 */}
+        {/* <Prompts items={senderPromptsItems} /> */}
+
+        <Flex gap="8px">
+          {messageTags.map((item) => (
+            <Button
+              variant="solid"
+              {...item}
+              onClick={() => handleTagItem(item)}
+            />
+          ))}
+        </Flex>
+
         <Sender
           value={content}
+          placeholder={placeholder}
           loading={loading}
           onChange={setContent}
           onSubmit={handleSendChat}
