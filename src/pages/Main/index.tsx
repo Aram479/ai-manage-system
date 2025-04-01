@@ -1,67 +1,48 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Button,
-  ButtonProps,
-  Flex,
-  GetProp,
-  GetRef,
-  Tag,
-  TagProps,
-} from "antd";
+import { memo, useMemo, useRef, useState } from "react";
+import { Button, ButtonProps, Flex, GetProp, GetRef, Tooltip } from "antd";
 import {
   CopyOutlined,
   CopyrightOutlined,
   DislikeOutlined,
-  FireOutlined,
   LikeOutlined,
-  LoadingOutlined,
-  ReadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
-import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
-import { deepSeekPrompt, deepSeektools } from "@/constant/deepSeek.constant";
-import dayjs, { Dayjs } from "dayjs";
 
-import {
-  Bubble,
-  Prompts,
-  Sender,
-  SenderProps,
-  useXAgent,
-  useXChat,
-} from "@ant-design/x";
-import {
-  formartResultMessage,
-  StreamDataProcessor,
-} from "@/utils/deepseek.utils";
-import { v4 as uuidv4 } from "uuid";
-import { useDeepSeekXChat, useStreamController } from "@/hooks/deepSeek.hooks";
-import { deepSeekOpenAI, deepSeekXRequest } from "@/services/deepseek.api";
+import { Bubble, Sender, SenderProps } from "@ant-design/x";
+
+import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import { message as AMessage } from "antd";
 import ClipboardUtil from "@/utils/clipboardUtil";
-import { history } from "@umijs/max";
 const MarkDownCmp = memo(MarkDown);
 
+const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const MainPage = () => {
   const [model, setModel] = useState<TDeepSeekModel>("deepseek-chat");
   const [content, setContent] = useState("");
-  const [placeholder, setPlaceholder] = useState("");
+  const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
+  const [defaultAutoMessage, setDefaulAutoMessage] = useState("");
   const [isHeader, setIsHeader] = useState(true);
-  const [messageTags, setMessageTags] = useState<ButtonProps[]>([
+  const [messageTags, setMessageTags] = useState<
+    (ButtonProps & { desc: string })[]
+  >([
     {
       id: "consideration",
       children: "深度思考",
+      desc: "先思考后回答，解决推理问题",
     },
     {
       id: "autoChat",
       children: "自动对话",
+      desc: "请输入一个话题，即可开始对话",
     },
   ]);
+
+  const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
 
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 是否开启深度思考
@@ -113,7 +94,7 @@ const MainPage = () => {
   } = useDeepSeekXChat({
     /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
         deepSeekPrompt.concise, */
-    defaultMessage: "我需要你以对方的口气，帮我回复下量子力学话题吧，你不需要想太多，帮我当成对方，你不需要列列表，只需要以我的语气根据上下文，进行如何回答对方或提出问题或反驳对方即可，可以说粗话和脏话:",
+    defaultMessage: `${defaultAutoMessage}:`,
     requestInfo: {
       model: model,
       stream: true,
@@ -263,6 +244,7 @@ const MainPage = () => {
   }, [messages, autoMessage]);
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    if (!defaultAutoMessage) setDefaulAutoMessage(message);
     setIsHeader(false);
     setContent("");
     onRequest(message as any);
@@ -273,19 +255,28 @@ const MainPage = () => {
     onCancel();
   };
 
-  const handleTagItem = (item: ButtonProps) => {
+  const handleTagItem = (item: (typeof messageTags)[number]) => {
+    // 再次点击自己则取消
+    if (item.id == currentTag?.id) {
+      setCurrentTag(undefined);
+      setPlaceholder(defaultPlaceholder);
+      return;
+    }
     // consideration autoChat
+    setCurrentTag(item);
 
     if (item.id === "consideration") {
       isConsideration.current = true;
       isAutoChat.current = false;
       setModel("deepseek-reasoner");
-      setPlaceholder("已开启深度思考");
+      setPlaceholder(
+        "深度思考已启动...大概吧，谁在乎呢？反正我也挺擅长假装在思考的。"
+      );
     } else if (item.id === "autoChat") {
       isConsideration.current = false;
       isAutoChat.current = true;
       setModel("deepseek-chat");
-      setPlaceholder("请输入一个话题，即可开始对话");
+      setPlaceholder("随便说点什么，我都行...毕竟今天也是不想动脑子的一天。");
     }
   };
   return (
@@ -308,11 +299,14 @@ const MainPage = () => {
 
         <Flex gap="8px">
           {messageTags.map((item) => (
-            <Button
-              variant="solid"
-              {...item}
-              onClick={() => handleTagItem(item)}
-            />
+            <Tooltip title={item.desc} placement="top">
+              <Button
+                {...item}
+                color={currentTag?.id === item.id ? "primary" : undefined}
+                variant="outlined"
+                onClick={() => handleTagItem(item)}
+              />
+            </Tooltip>
           ))}
         </Flex>
 

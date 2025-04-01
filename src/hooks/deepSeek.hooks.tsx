@@ -51,6 +51,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
   const model = useRef<TDeepSeekModel>(props.requestInfo.model);
+  const defaultMessage = useRef<string>("");
   // 思考开始时间
   const startTime = useRef<Dayjs | number>(0);
   // 思考用时
@@ -93,9 +94,13 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
       // content: `${messagesData.message}${
       //   chatList.length ? "" : deepSeekPrompt.concise
       // }`,
-      content: `${chatList.length ? "" : props.defaultMessage}${messagesData.message}${
-        chatList.length ? "" : deepSeekPrompt.concise
-      }`,
+      content: `${
+        chatList.length
+          ? ""
+          : props.defaultMessage
+          ? deepSeekPrompt.towntalk(props.defaultMessage)
+          : ""
+      }${messagesData.message}`,
       // content: messagesData.message,
     };
     chatList.push(userMessage);
@@ -229,6 +234,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     //   };
     //   chatList.push(defaultUserMessage);
     // }
+    defaultMessage.current = props.defaultMessage ?? "";
   }, [props.defaultMessage]);
 
   useEffect(() => {
