@@ -5,9 +5,19 @@ import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { history } from "@umijs/max";
 import { GetRef } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { message as AMessage } from "antd";
 import { deepSeekPrompt } from "@/constant/deepSeek.constant";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
+import MarkDownCmp from "@/component/MarkDownCmp";
+import {
+  CopyOutlined,
+  CopyrightOutlined,
+  DislikeOutlined,
+  LikeOutlined,
+} from "@ant-design/icons";
+import ClipboardUtil from "@/utils/clipboardUtil";
+import _ from "lodash";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -39,19 +49,19 @@ interface IUseDeepSeekXChat {
   userName?: string;
   aiName?: string;
   defaultMessage?: string;
-  requestInfo?: any;
+  requestBody?: any;
   onSuccess?: (messageData: TResultStream) => void;
 }
 export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
-  const { requestInfo } = props;
+  const { requestBody } = props;
+  const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<any[]>([]);
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
-  const model = useRef<TDeepSeekModel>(props.requestInfo.model);
-  const defaultMessage = useRef<string>("");
+
   // 思考开始时间
   const startTime = useRef<Dayjs | number>(0);
   // 思考用时
@@ -83,7 +93,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     };
   };
 
-  // 发起对话请求
+  // 发起对话请求: chatrequest内部要用useRef变量，否则依赖值不会更新
   const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
     messagesData,
     { onUpdate, onSuccess, onError }
@@ -105,8 +115,8 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     };
     chatList.push(userMessage);
     const requestData = {
-      ...requestInfo,
-      model: model.current ?? "88",
+      ...requestProps.current,
+      model: requestProps.current.model,
       messages: chatList,
     };
     await deepSeekXRequest.create(
@@ -225,25 +235,92 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     }
   };
 
-  useEffect(() => {
-    // TODO 默认消息 后续需要优化：不需要push了
-    // if (props.defaultMessage) {
-    //   const defaultUserMessage = {
-    //     role: userRole,
-    //     content: props.defaultMessage,
-    //   };
-    //   chatList.push(defaultUserMessage);
-    // }
-    defaultMessage.current = props.defaultMessage ?? "";
-  }, [props.defaultMessage]);
+  const items: BubbleDataType[] = useMemo(() => {
+    let newItems = [];
+    const newMessages = messages.map(({id, ...item}) => ({
+      ...item,
+      role: item.status === "local" ? item.status : "assistant",
+      content:
+        (item.message.chatContent || item.message.toolContent) ?? item.message,
+      loading: item.status === "loading" && !streamClass?.readable.locked,
+    }));
+
+    newItems = [...newMessages];
+
+    return newItems.map(({ message, status, ...item }) => ({
+      ...item,
+      messageRender: (content) =>
+        status !== "local" ? (
+          !message.abortedReason ? (
+            <div>
+              {message.ctmpContent && (
+                <div className="ctmpMessageBox">
+                  {/* 思考状态 */}
+                  <div className="ctmpTimeBox">
+                    <div>
+                      <CopyrightOutlined />
+                    </div>
+                    <div>{message.ctmpLoadingMessage}</div>
+                  </div>
+                  {/* 思考内容 */}
+                  <div className="ctmpContentBox">{message.ctmpContent}</div>
+                </div>
+              )}
+
+              <div style={{ background: "auto" }}>
+                <MarkDownCmp
+                  theme="onDark"
+                  content={String(content)}
+                  loading={agent.isRequesting()}
+                />
+                {status === "success" && (
+                  <div className="messageFooterBox">
+                    <LikeOutlined
+                      onClick={_.throttle(() => {
+                        AMessage.success({
+                          key: "thanks",
+                          content: "感谢您的支持",
+                        });
+                      }, 300)}
+                    />
+                    <DislikeOutlined />
+                    <CopyOutlined
+                      onClick={_.throttle(() => {
+                        ClipboardUtil.writeText(content);
+                        AMessage.success({
+                          key: "copy",
+                          content: "复制成功",
+                        });
+                      }, 300)}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>{message.abortedReason}</>
+          )
+        ) : (
+          <div>
+            {isAutoChat.current ? (
+              <MarkDownCmp
+                theme="onDark"
+                content={String(content)}
+                loading={agent.isRequesting()}
+              />
+            ) : (
+              content
+            )}
+          </div>
+        ),
+    }));
+  }, [messages]);
 
   useEffect(() => {
-    if (props.requestInfo) {
-      model.current = props.requestInfo.model;
-    }
-  }, [props.requestInfo]);
-
+    requestProps.current = requestBody;
+  }, [requestBody]);
   return {
+    items,
     messages,
     processorRef,
     chatList,

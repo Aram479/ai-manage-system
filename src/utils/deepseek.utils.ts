@@ -1,3 +1,4 @@
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import _ from "lodash";
 
 type TMessage = {
@@ -61,7 +62,6 @@ export class StreamDataProcessor {
     }
 
     if ((toolContent ?? false) && _.isString(toolContent)) {
-    console.log("ChatCompletionChunk", toolContent)
       this.resultString.toolContent += toolContent;
     }
 
@@ -134,3 +134,13 @@ export class StreamDataProcessor {
     };
   }
 }
+
+// 聊天对话数据交叉
+export const chatsCrossMerge = (...arrs: BubbleDataType[][]): BubbleDataType[] => {
+  // 翻转后.zip才是正确顺序
+  arrs = arrs.reverse();
+  // 使用 _.zip 将两个数组按索引配对
+  const zipped = _.zip(...arrs);
+  // 使用 _.flatten 将二维数组展平为一维数组
+  return _.flatten(zipped).filter((item) => item) as BubbleDataType[];
+};
