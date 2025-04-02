@@ -16,10 +16,7 @@ import WelcomeCmp from "@/component/WelcomeCmp";
 import MarkDown from "@/component/MarkDownCmp";
 import styles from "./index.less";
 import _ from "lodash";
-import { message as AMessage } from "antd";
-import ClipboardUtil from "@/utils/clipboardUtil";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
-const MarkDownCmp = memo(MarkDown);
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const MainPage = () => {
@@ -27,6 +24,7 @@ const MainPage = () => {
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [defaultTwoMessage, setDefaulTwoMessage] = useState("");
+  const [endIndex, setEndIndex] = useState(1);
   const [isHeader, setIsHeader] = useState(true);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
@@ -52,6 +50,11 @@ const MainPage = () => {
   const isAutoChat = useRef(false);
   // AI1 对话完成事件
   const successAction = (messageData: TResultStream) => {
+    if (!isAutoChat.current) {
+      setEndIndex(endIndex + 1);
+    }
+
+    // TODO 切换聊天类型时，消息不会随时改变
     if (!Ai_Two.streamClass?.writable.locked && isAutoChat.current) {
       Ai_Two.onRequest(messageData.chatContent);
     }
@@ -143,21 +146,17 @@ const MainPage = () => {
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {
-    // 自动对话模式
+    // 自动对话模式 且 ai1输出完毕后 执行
     if (isAutoChat.current) {
       // 只获取AI1的回答，不包括我的
       const oneItemsByAssistant = Ai_One.items.filter(
         (item) => item.role === "assistant"
       );
 
-      const userAutoFirstMessage = {
-        ...Ai_One.items[0],
-        content: defaultTwoMessage,
-      };
-      // 将AI2的对话转换为我说的，默认第一条为我最开始说的
       const twoItemsByAssistant = [
-        // TODO 目前这里深度思考和自动对话切换前出了问题
-        Ai_One.items[0] ?? {},
+        ...Ai_One.items
+          .slice(0, endIndex)
+          .filter((item) => item.role === "local"),
         ...Ai_Two.items
           .filter((item) => item.role === "assistant")
           .map((item) => ({ ...item, role: "local" })),
@@ -169,120 +168,10 @@ const MainPage = () => {
     }
   }, [Ai_One.messages, Ai_Two.messages]);
 
-  const items: BubbleDataType[] = useMemo(() => {
-    let newItems = [];
-    const newMessages = Ai_One.messages.map((item) => ({
-      ...item,
-      key: item.id,
-      role: item.status === "local" ? item.status : "assistant",
-      content:
-        (item.message.chatContent || item.message.toolContent) ?? item.message,
-      loading:
-        item.status === "loading" && !Ai_One.streamClass?.readable.locked,
-    }));
-
-    newItems = [...newMessages];
-
-    const lastTwoMessage = Ai_Two.messages?.[Ai_Two.messages.length - 1];
-
-    // 当user自动对话加载时，实时更新message
-    if (Ai_Two.loading && lastTwoMessage) {
-      let newLastTwoMessage = {
-        ...lastTwoMessage,
-        key: `auto_${lastTwoMessage.id}`,
-        role: "local",
-        content:
-          (lastTwoMessage.message.chatContent ||
-            lastTwoMessage.message.toolContent) ??
-          lastTwoMessage.message,
-        loading: Ai_Two.loading as boolean,
-      };
-      if (Ai_Two.isStreaming.current) {
-        newLastTwoMessage = {
-          ...newLastTwoMessage,
-          loading:
-            lastTwoMessage.status === "loading" && !Ai_Two.isStreaming.current,
-        };
-      }
-
-      newItems = [...newItems, newLastTwoMessage];
-    }
-
-    return newItems.map(({ message, status, ...item }) => ({
-      ...item,
-      id: String(item.key),
-      messageRender: (content) =>
-        status !== "local" ? (
-          !message.abortedReason ? (
-            <div>
-              {message.ctmpContent && (
-                <div className={styles.ctmpMessageBox}>
-                  {/* 思考状态 */}
-                  <div className={styles.ctmpTimeBox}>
-                    <div>
-                      <CopyrightOutlined />
-                    </div>
-                    <div>{message.ctmpLoadingMessage}</div>
-                  </div>
-                  {/* 思考内容 */}
-                  <div className={styles.ctmpContentBox}>
-                    {message.ctmpContent}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ background: "auto" }}>
-                <MarkDownCmp
-                  theme="onDark"
-                  content={String(content)}
-                  loading={Ai_One.loading}
-                />
-                {status === "success" && (
-                  <div className={styles.messageFooterBox}>
-                    <LikeOutlined
-                      onClick={_.throttle(() => {
-                        AMessage.success({
-                          key: "thanks",
-                          content: "感谢您的支持",
-                        });
-                      }, 300)}
-                    />
-                    <DislikeOutlined />
-                    <CopyOutlined
-                      onClick={_.throttle(() => {
-                        ClipboardUtil.writeText(content);
-                        AMessage.success({
-                          key: "copy",
-                          content: "复制成功",
-                        });
-                      }, 300)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>{message.abortedReason}</>
-          )
-        ) : (
-          <div>
-            {isAutoChat.current ? (
-              <MarkDownCmp
-                theme="onDark"
-                content={String(content)}
-                loading={Ai_One.loading}
-              />
-            ) : (
-              content
-            )}
-          </div>
-        ),
-    }));
-  }, [Ai_One.messages, Ai_Two.messages]);
-
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
     // 开启自动对话
     if (isAutoChat.current && !defaultTwoMessage) {
+      setEndIndex(endIndex + 1);
       setDefaulTwoMessage(message);
     }
     setIsHeader(false);
