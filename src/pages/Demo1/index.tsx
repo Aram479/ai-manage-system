@@ -150,8 +150,13 @@ const MainPage = () => {
         (item) => item.role === "assistant"
       );
 
+      const userAutoFirstMessage = {
+        ...Ai_One.items[0],
+        content: defaultTwoMessage,
+      };
       // 将AI2的对话转换为我说的，默认第一条为我最开始说的
       const twoItemsByAssistant = [
+        // TODO 目前这里深度思考和自动对话切换前出了问题
         Ai_One.items[0] ?? {},
         ...Ai_Two.items
           .filter((item) => item.role === "assistant")
@@ -276,7 +281,10 @@ const MainPage = () => {
   }, [Ai_One.messages, Ai_Two.messages]);
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
-    if (!defaultTwoMessage) setDefaulTwoMessage(message);
+    // 开启自动对话
+    if (isAutoChat.current && !defaultTwoMessage) {
+      setDefaulTwoMessage(message);
+    }
     setIsHeader(false);
     setContent("");
     Ai_One.onRequest(message as any);
@@ -290,6 +298,7 @@ const MainPage = () => {
   const handleTagItem = (item: (typeof messageTags)[number]) => {
     // 再次点击自己则取消
     if (item.id == currentTag?.id) {
+      isAutoChat.current = false;
       setCurrentTag(undefined);
       setPlaceholder(defaultPlaceholder);
       return;
