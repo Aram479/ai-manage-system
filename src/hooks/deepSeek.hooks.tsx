@@ -204,16 +204,18 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
-    isStreamLocked.current = !!streamClass?.writable.locked;
-    // 1.中断请求：流输出前中断
-    if (!streamClass?.writable.locked) {
-      window.abortController.abort("用户中止了回答。");
-
-      // 流关闭(仅流输出前可用，输出中调用会报错)
-      streamClass?.writable?.close();
+    if (isStreaming.current || agent.isRequesting()) {
+      isStreamLocked.current = !!streamClass?.writable.locked;
+      // 1.中断请求：流输出前中断
+      if (!isStreaming.current) {
+        window.abortController.abort("用户中止了回答。");
+        // 流关闭(仅流输出前可用，输出中调用会报错)
+        streamClass?.writable.close();
+      } else {
+        // 2.中断流：流输出后中断
+        controller?.terminate();
+      }
     }
-    // 2.中断流：流输出后中断
-    controller?.terminate();
   };
 
   // 指令分发器
@@ -237,7 +239,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
 
   const items: BubbleDataType[] = useMemo(() => {
     let newItems = [];
-    const newMessages = messages.map(({id, ...item}) => ({
+    const newMessages = messages.map(({ id, ...item }) => ({
       ...item,
       role: item.status === "local" ? item.status : "assistant",
       content:
