@@ -1,7 +1,19 @@
-1
+1;
 import { useMemo, useRef, useState } from "react";
-import { Button, ButtonProps, Flex, GetProp, GetRef, Tooltip } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  Badge,
+  Button,
+  ButtonProps,
+  Flex,
+  GetProp,
+  GetRef,
+  Tooltip,
+  UploadFile,
+} from "antd";
+import {
+  PaperClipOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
@@ -11,6 +23,7 @@ import WelcomeCmp from "@/component/WelcomeCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
+import SenderHeader from "./cpns/SenderHeader";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const MainPage = () => {
@@ -19,6 +32,8 @@ const MainPage = () => {
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [defaultTwoMessage, setDefaulTwoMessage] = useState("");
   const [endIndex, setEndIndex] = useState(1);
+  const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   // 记录用户正常对话(非自动对话)时，截止的位置
   const [isHeader, setIsHeader] = useState(true);
   const [messageTags, setMessageTags] = useState<
@@ -197,6 +212,18 @@ const MainPage = () => {
       setPlaceholder("随便说点什么，我都行...毕竟今天也是不想动脑子的一天。");
     }
   };
+
+  // 输入框左侧图标
+  const attachmentsNode = (
+    <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
+      <Button
+        type="text"
+        icon={<PaperClipOutlined />}
+        onClick={() => setSenderHeaderOpen(!senderHeaderOpen)}
+      />
+    </Badge>
+  );
+
   return (
     <div className={styles.mainPage}>
       {isHeader && (
@@ -231,6 +258,14 @@ const MainPage = () => {
 
         <Sender
           value={content}
+          header={
+            <SenderHeader
+              open={senderHeaderOpen}
+              onUpload={setUploadFiles}
+              onOpenChange={setSenderHeaderOpen}
+            />
+          }
+          prefix={attachmentsNode}
           placeholder={placeholder}
           loading={Ai_One.loading || Ai_Two.loading}
           onChange={setContent}
