@@ -1,4 +1,3 @@
-1;
 import { useMemo, useRef, useState } from "react";
 import {
   Badge,

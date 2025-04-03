@@ -1,11 +1,10 @@
 import { deepSeekXRequest } from "@/services/deepseek.api";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
-import { Bubble, SenderProps, useXAgent, useXChat } from "@ant-design/x";
+import { SenderProps, useXAgent, useXChat } from "@ant-design/x";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { history } from "@umijs/max";
-import { GetRef } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { message as AMessage } from "antd";
 import { deepSeekPrompt } from "@/constant/deepSeek.constant";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
