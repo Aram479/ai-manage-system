@@ -10,10 +10,7 @@ import {
   Tooltip,
   UploadFile,
 } from "antd";
-import {
-  PaperClipOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
@@ -26,7 +23,7 @@ import { chatsCrossMerge } from "@/utils/deepseek.utils";
 import SenderHeader from "./cpns/SenderHeader";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
-const MainPage = () => {
+const Demo1Page = () => {
   const [model, setModel] = useState<TDeepSeekModel>("deepseek-chat");
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
@@ -277,4 +274,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default Demo1Page;

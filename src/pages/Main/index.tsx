@@ -1,25 +1,26 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, ButtonProps, Flex, GetProp, GetRef, Tooltip } from "antd";
+1;
+import { useMemo, useRef, useState } from "react";
 import {
-  CopyOutlined,
-  CopyrightOutlined,
-  DislikeOutlined,
-  LikeOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+  Badge,
+  Button,
+  ButtonProps,
+  Flex,
+  GetProp,
+  GetRef,
+  Tooltip,
+  UploadFile,
+} from "antd";
+import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 
 import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
 import WelcomeCmp from "@/component/WelcomeCmp";
-import MarkDown from "@/component/MarkDownCmp";
 import styles from "./index.less";
 import _ from "lodash";
-import { message as AMessage } from "antd";
-import ClipboardUtil from "@/utils/clipboardUtil";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
-const MarkDownCmp = memo(MarkDown);
+import SenderHeader from "./cpns/SenderHeader";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const MainPage = () => {
@@ -27,6 +28,10 @@ const MainPage = () => {
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [defaultTwoMessage, setDefaulTwoMessage] = useState("");
+  const [endIndex, setEndIndex] = useState(1);
+  const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
+  // 记录用户正常对话(非自动对话)时，截止的位置
   const [isHeader, setIsHeader] = useState(true);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
@@ -51,20 +56,19 @@ const MainPage = () => {
   // 是否开启自动对话
   const isAutoChat = useRef(false);
   // AI1 对话完成事件
-  const successAction = (messageData: TResultStream) => {
+  const Ai_One_SuccessAction = (messageData: TResultStream) => {
+    if (!isAutoChat.current) {
+      setEndIndex(endIndex + 1);
+    }
+    // TODO 切换聊天类型时，消息不应该随时改变
     if (!Ai_Two.streamClass?.writable.locked && isAutoChat.current) {
       Ai_Two.onRequest(messageData.chatContent);
     }
   };
 
   // AI2 对话完成事件
-  const successAutoAction = (messageData: TResultStream) => {
+  const Ai_Two_SuccessAction = (messageData: TResultStream) => {
     // isAutoChat.current = true;
-    /** TODO 优化点：
-     * 问题：每当自动对话结束时，用户自动对话的思考message会消失
-     * 原因：出现在这，因为这里只发送了chatContent没有发送ctmpContent
-     * 阻碍：优化此项需要更改 deepSeek.hooks.ts的chatRequest中messagesData参数类型
-     */
     Ai_One.onRequest(messageData.chatContent);
   };
 
@@ -82,7 +86,7 @@ const MainPage = () => {
       ...requestConfig,
       model,
     },
-    onSuccess: successAction,
+    onSuccess: Ai_One_SuccessAction,
   });
 
   const Ai_Two = useDeepSeekXChat({
@@ -93,22 +97,12 @@ const MainPage = () => {
       ...requestConfig,
       model,
     },
-    onSuccess: successAutoAction,
-  });
-  const Ai_Three = useDeepSeekXChat({
-    /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
-        deepSeekPrompt.concise, */
-    defaultMessage: `${defaultTwoMessage}:`,
-    requestBody: {
-      ...requestConfig,
-      model,
-    },
-    onSuccess: successAutoAction,
+    onSuccess: Ai_Two_SuccessAction,
   });
 
   // 对话时，用户和AI样式
   const roles: GetProp<typeof Bubble.List, "roles"> = {
-    system: {
+    assistant: {
       placement: "start",
       avatar: { icon: <UserOutlined />, style: { background: "#fde3cf" } },
       typing: { step: 5, interval: 20 },
@@ -119,14 +113,14 @@ const MainPage = () => {
         },
       },
     },
-    assistant: {
+    system: {
       placement: "start",
       avatar: { icon: <UserOutlined />, style: { background: "#fde3cf" } },
       typing: { step: 5, interval: 20 },
       styles: {
         content: {
           minWidth: "calc(100% - 50px)",
-          background: "#fff",
+          background: "skyblue",
         },
       },
     },
@@ -142,154 +136,58 @@ const MainPage = () => {
     },
   };
 
+  const aaa = (
+    items: BubbleDataType[],
+    aiName: string,
+    toName: string
+  ): BubbleDataType | unknown => {
+    const lastItem = _.last(items);
+    if (lastItem?.role === aiName) {
+      lastItem.role = toName;
+      return lastItem;
+    }
+    return false;
+  };
+
   const newItems = useMemo<BubbleDataType[]>(() => {
-    // 自动对话模式
-    if (isAutoChat.current) {
-      // 只获取AI1的回答，不包括我的
-      const oneItemsByAssistant = Ai_One.items.filter(
-        (item) => item.role === "assistant"
-      );
+    if (!isAutoChat.current) return Ai_One.items; // 正常模式直接返回
 
-      // 将AI2的对话转换为我说的，默认第一条为我最开始说的
-      const twoItemsByAssistant = [
-        Ai_One.items[0] ?? {},
-        ...Ai_Two.items
-          .filter((item) => item.role === "assistant")
-          .map((item) => ({ ...item, role: "local" })),
-      ];
-      return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
-    } else {
-      // 正常模式
-      return Ai_One.items;
-    }
-  }, [Ai_One.messages, Ai_Two.messages]);
+    const oneItemsByLocal = _.filter(Ai_One.items, ["role", "local"]);
+    const oneItemsByAssistant = _.filter(Ai_One.items, ["role", "assistant"]);
 
-  const items: BubbleDataType[] = useMemo(() => {
-    let newItems = [];
-    const newMessages = Ai_One.messages.map((item) => ({
+    // AI2获取role为assistant并改为local
+    const oneAssistantTolocal = _.filter(Ai_Two.items, [
+      "role",
+      "assistant",
+    ]).map((item) => ({
       ...item,
-      key: item.id,
-      role: item.status === "local" ? item.status : "assistant",
-      content:
-        (item.message.chatContent || item.message.toolContent) ?? item.message,
-      loading:
-        item.status === "loading" && !Ai_One.streamClass?.readable.locked,
+      role: "local",
     }));
+    const twoItemsByAssistant = oneItemsByLocal.concat(oneAssistantTolocal);
 
-    newItems = [...newMessages];
-
-    const lastTwoMessage = Ai_Two.messages?.[Ai_Two.messages.length - 1];
-
-    // 当user自动对话加载时，实时更新message
-    if (Ai_Two.loading && lastTwoMessage) {
-      let newLastTwoMessage = {
-        ...lastTwoMessage,
-        key: `auto_${lastTwoMessage.id}`,
-        role: "local",
-        content:
-          (lastTwoMessage.message.chatContent ||
-            lastTwoMessage.message.toolContent) ??
-          lastTwoMessage.message,
-        loading: Ai_Two.loading as boolean,
-      };
-      if (Ai_Two.isStreaming.current) {
-        newLastTwoMessage = {
-          ...newLastTwoMessage,
-          loading:
-            lastTwoMessage.status === "loading" && !Ai_Two.isStreaming.current,
-        };
-      }
-
-      newItems = [...newItems, newLastTwoMessage];
-    }
-
-    return newItems.map(({ message, status, ...item }) => ({
-      ...item,
-      id: String(item.key),
-      messageRender: (content) =>
-        status !== "local" ? (
-          !message.abortedReason ? (
-            <div>
-              {message.ctmpContent && (
-                <div className={styles.ctmpMessageBox}>
-                  {/* 思考状态 */}
-                  <div className={styles.ctmpTimeBox}>
-                    <div>
-                      <CopyrightOutlined />
-                    </div>
-                    <div>{message.ctmpLoadingMessage}</div>
-                  </div>
-                  {/* 思考内容 */}
-                  <div className={styles.ctmpContentBox}>
-                    {message.ctmpContent}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ background: "auto" }}>
-                <MarkDownCmp
-                  theme="onDark"
-                  content={String(content)}
-                  loading={Ai_One.loading}
-                />
-                {status === "success" && (
-                  <div className={styles.messageFooterBox}>
-                    <LikeOutlined
-                      onClick={_.throttle(() => {
-                        AMessage.success({
-                          key: "thanks",
-                          content: "感谢您的支持",
-                        });
-                      }, 300)}
-                    />
-                    <DislikeOutlined />
-                    <CopyOutlined
-                      onClick={_.throttle(() => {
-                        ClipboardUtil.writeText(content);
-                        AMessage.success({
-                          key: "copy",
-                          content: "复制成功",
-                        });
-                      }, 300)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>{message.abortedReason}</>
-          )
-        ) : (
-          <div>
-            {isAutoChat.current ? (
-              <MarkDownCmp
-                theme="onDark"
-                content={String(content)}
-                loading={Ai_One.loading}
-              />
-            ) : (
-              content
-            )}
-          </div>
-        ),
-    }));
-  }, [Ai_One.messages, Ai_Two.messages]);
+    return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
+  }, [Ai_One.items, Ai_Two.items, endIndex]);
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
-    if (!defaultTwoMessage) setDefaulTwoMessage(message);
+    // 开启自动对话
+    if (isAutoChat.current && !defaultTwoMessage) {
+      setEndIndex(endIndex + 1);
+      setDefaulTwoMessage(message);
+    }
     setIsHeader(false);
     setContent("");
     Ai_One.onRequest(message as any);
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
-    // onAutoCancel();
     Ai_One.onCancel();
+    Ai_Two.onCancel();
   };
 
   const handleTagItem = (item: (typeof messageTags)[number]) => {
     // 再次点击自己则取消
     if (item.id == currentTag?.id) {
+      isAutoChat.current = false;
       setCurrentTag(undefined);
       setPlaceholder(defaultPlaceholder);
       return;
@@ -311,6 +209,18 @@ const MainPage = () => {
       setPlaceholder("随便说点什么，我都行...毕竟今天也是不想动脑子的一天。");
     }
   };
+
+  // 输入框左侧图标
+  const attachmentsNode = (
+    <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
+      <Button
+        type="text"
+        icon={<PaperClipOutlined />}
+        onClick={() => setSenderHeaderOpen(!senderHeaderOpen)}
+      />
+    </Badge>
+  );
+
   return (
     <div className={styles.mainPage}>
       {isHeader && (
@@ -334,6 +244,7 @@ const MainPage = () => {
             <Tooltip title={item.desc} placement="top">
               <Button
                 {...item}
+                disabled={currentTag && currentTag?.id !== item.id}
                 color={currentTag?.id === item.id ? "primary" : undefined}
                 variant="outlined"
                 onClick={() => handleTagItem(item)}
@@ -344,8 +255,16 @@ const MainPage = () => {
 
         <Sender
           value={content}
+          header={
+            <SenderHeader
+              open={senderHeaderOpen}
+              onUpload={setUploadFiles}
+              onOpenChange={setSenderHeaderOpen}
+            />
+          }
+          prefix={attachmentsNode}
           placeholder={placeholder}
-          loading={Ai_One.loading}
+          loading={Ai_One.loading || Ai_Two.loading}
           onChange={setContent}
           onSubmit={handleSendChat}
           onCancel={handleStopChat}
