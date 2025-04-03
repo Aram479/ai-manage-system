@@ -12,12 +12,7 @@ const routes: RoutesType = [
         path: "/:id",
         component: "@/pages/Main",
         layout: false,
-      },
-      {
-        path: "/demo1",
-        component: "@/pages/Demo1",
-        layout: false,
-      },
+      }
     ],
   },
   {
