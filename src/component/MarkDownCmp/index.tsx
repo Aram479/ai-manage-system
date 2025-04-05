@@ -1,5 +1,5 @@
-import ReactMarkdown from "react-markdown"; // 解析 markdown
-import remarkGfm from "remark-gfm"; // markdown 对表格/删除线/脚注等的支持
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGemoji from "remark-gemoji";

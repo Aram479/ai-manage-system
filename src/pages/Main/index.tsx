@@ -167,7 +167,7 @@ const MainPage = () => {
     return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
   }, [Ai_One.items, Ai_Two.items, endIndex]);
 
-  const handleSendChat: SenderProps["onSubmit"] = (message) => {
+  const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     // 开启自动对话
     if (isAutoChat.current && !defaultTwoMessage) {
       setEndIndex(endIndex + 1);

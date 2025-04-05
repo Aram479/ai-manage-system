@@ -21,7 +21,6 @@ export const deepSeekOpenAI = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
-
 /* 结合 useXAgent使用 */
 // const openAiChatRequest: XAgentConfigCustom<TResultStream>["request"] =
 // async (messagesData, { onUpdate, onSuccess, onError }) => {
