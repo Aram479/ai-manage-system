@@ -1,4 +1,7 @@
+type TAiType = 'qwen' | 'deepseek'
 type TDeepSeekModel = "deepseek-chat" | "deepseek-reasoner"
+type TQwenModel = "qwen-plus" | "qwen-max"
+type TAllModel = TQwenModel | TDeepSeekModel | string
 
 interface ChatCompletionChunk {
   id: string;

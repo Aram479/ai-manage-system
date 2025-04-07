@@ -19,14 +19,19 @@ export default {
     "/api": {
       target: "https://api.deepseek.com/v1",
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      pathRewrite: { "^/api": "" },
     },
   },
   uat: {
     "/api": {
       target: "https://api.deepseek.com/v1",
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      pathRewrite: { "^/api": "" },
+    },
+    "/ali": {
+      target: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      changeOrigin: true,
+      pathRewrite: { "^/ali": "" },
     },
   },
 };

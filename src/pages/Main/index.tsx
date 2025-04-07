@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   ButtonProps,
+  Dropdown,
   Flex,
   GetProp,
   GetRef,
@@ -14,29 +15,36 @@ import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 
-import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
 import WelcomeCmp from "@/component/WelcomeCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
 import SenderHeader from "./cpns/SenderHeader";
+import { Ai_Options, AiXChatHookMap } from "@/constant/base.constant";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const MainPage = () => {
-  const [model, setModel] = useState<TDeepSeekModel>("deepseek-chat");
+  const defaultModelInfo = Ai_Options[0];
+  const [model, setModel] = useState<TAllModel>(
+    defaultModelInfo.model?.default!
+  );
+  const [currentAi, setCurrentAi] = useState(defaultModelInfo);
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [defaultTwoMessage, setDefaulTwoMessage] = useState("");
   const [endIndex, setEndIndex] = useState(1);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
+  const Ai_XChatHook = AiXChatHookMap.get(defaultModelInfo.key as string)!;
+
   // 记录用户正常对话(非自动对话)时，截止的位置
   const [isHeader, setIsHeader] = useState(true);
+
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
   >([
     {
-      id: "consideration",
+      id: "deep",
       children: "深度思考",
       desc: "先思考后回答，解决推理问题",
     },
@@ -51,9 +59,10 @@ const MainPage = () => {
 
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 是否开启深度思考
-  const isConsideration = useRef(false);
+  const isDeep = useRef(false);
   // 是否开启自动对话
   const isAutoChat = useRef(false);
+
   // AI1 对话完成事件
   const Ai_One_SuccessAction = (messageData: TResultStream) => {
     if (!isAutoChat.current) {
@@ -78,9 +87,10 @@ const MainPage = () => {
     top_p: 0.9, // 调整此值也可能影响简洁性
     // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
     // tools 不支持模型 deepseek-reasoner
-    tool_choice: "auto",
+    // tool_choice: "auto",
   };
-  const Ai_One = useDeepSeekXChat({
+
+  const Ai_One = Ai_XChatHook({
     requestBody: {
       ...requestConfig,
       model,
@@ -88,7 +98,7 @@ const MainPage = () => {
     onSuccess: Ai_One_SuccessAction,
   });
 
-  const Ai_Two = useDeepSeekXChat({
+  const Ai_Two = Ai_XChatHook({
     /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
         deepSeekPrompt.concise, */
     defaultMessage: `${defaultTwoMessage}:`,
@@ -149,23 +159,27 @@ const MainPage = () => {
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {
-    if (!isAutoChat.current) return Ai_One.items; // 正常模式直接返回
+    // 自动对话模式 且 ai1输出完毕后 执行
+    if (isAutoChat.current) {
+      // 只获取AI1的回答，不包括我的
+      const oneItemsByAssistant = Ai_One.items.filter(
+        (item) => item.role === "assistant"
+      );
 
-    const oneItemsByLocal = _.filter(Ai_One.items, ["role", "local"]);
-    const oneItemsByAssistant = _.filter(Ai_One.items, ["role", "assistant"]);
-
-    // AI2获取role为assistant并改为local
-    const oneAssistantTolocal = _.filter(Ai_Two.items, [
-      "role",
-      "assistant",
-    ]).map((item) => ({
-      ...item,
-      role: "local",
-    }));
-    const twoItemsByAssistant = oneItemsByLocal.concat(oneAssistantTolocal);
-
-    return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
-  }, [Ai_One.items, Ai_Two.items, endIndex]);
+      const twoItemsByAssistant = [
+        ...Ai_One.items
+          .slice(0, endIndex)
+          .filter((item) => item.role === "local"),
+        ...Ai_Two.items
+          .filter((item) => item.role === "assistant")
+          .map((item) => ({ ...item, role: "local" })),
+      ];
+      return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
+    } else {
+      // 正常模式
+      return Ai_One.items;
+    }
+  }, [Ai_One.messages, Ai_Two.messages, endIndex]);
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     // 开启自动对话
@@ -191,20 +205,20 @@ const MainPage = () => {
       setPlaceholder(defaultPlaceholder);
       return;
     }
-    // consideration autoChat
+    // deep autoChat
     setCurrentTag(item);
 
-    if (item.id === "consideration") {
-      isConsideration.current = true;
+    if (item.id === "deep") {
+      isDeep.current = true;
       isAutoChat.current = false;
-      setModel("deepseek-reasoner");
+      setModel(currentAi.model?.deep!);
       setPlaceholder(
         "深度思考已启动...大概吧，谁在乎呢？反正我也挺擅长假装在思考的。"
       );
     } else if (item.id === "autoChat") {
-      isConsideration.current = false;
+      isDeep.current = false;
       isAutoChat.current = true;
-      setModel("deepseek-chat");
+      setModel(currentAi.model?.autoChat!);
       setPlaceholder("随便说点什么，我都行...毕竟今天也是不想动脑子的一天。");
     }
   };
@@ -250,8 +264,22 @@ const MainPage = () => {
               />
             </Tooltip>
           ))}
+          <Dropdown
+            placement="top"
+            menu={{
+              items: Ai_Options,
+              onClick: (item: (typeof Ai_Options)[number]) => {
+                const newCurrentAiInfo = _.find(Ai_Options, ["key", item.key]);
+                setModel(newCurrentAiInfo?.model?.default!);
+                setCurrentAi(newCurrentAiInfo!);
+              },
+            }}
+          >
+            <Button>
+              当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
+            </Button>
+          </Dropdown>
         </Flex>
-
         <Sender
           value={content}
           header={

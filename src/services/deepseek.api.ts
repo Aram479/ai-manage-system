@@ -15,11 +15,11 @@ export const deepSeekXRequest = XRequest({
   },
 });
 
-export const deepSeekOpenAI = new OpenAI({
-  baseURL: "https://api.deepseek.com/v1",
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
+// export const deepSeekOpenAI = new OpenAI({
+//   baseURL: "https://api.deepseek.com/v1",
+//   apiKey: process.env.DEEPSEEK_API_KEY,
+//   dangerouslyAllowBrowser: true,
+// });
 
 /* 结合 useXAgent使用 */
 // const openAiChatRequest: XAgentConfigCustom<TResultStream>["request"] =
