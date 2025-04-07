@@ -223,7 +223,8 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
       if (commandMessage) {
         const command = JSON.parse(commandMessage);
         if (command.event === "navigate_to_page") {
-          history.push(command.path);
+          // history.push(command.path);
+          history.push(command.path, command.state)
         } else if (command.event === "help_have_conversation") {
           isAutoChat.current = true;
           const { message } = command;

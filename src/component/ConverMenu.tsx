@@ -1,27 +1,28 @@
+import { useEffect } from "react";
 import { Conversations, ConversationsProps } from "@ant-design/x";
-import { history } from "@umijs/max";
+import { history, useSelectedRoutes } from "@umijs/max";
 import { GetProp } from "antd";
-import React from "react";
+import _ from "lodash";
 
 const ConverMenu = () => {
-  const items: GetProp<ConversationsProps, "items"> = Array.from({
-    length: 10,
-  }).map((_, index) => ({
+  const routes = useSelectedRoutes();
+
+  const items: GetProp<ConversationsProps, 'items'> = Array.from({ length: 3 }).map((_, index) => ({
     key: `item${index + 1}`,
     label: `Conversation Item ${index + 1}`,
-    disabled: index === 3,
-    group: index > 5 ? "本周" : "今天",
   }));
 
   const handleMenuItem: ConversationsProps["onActiveChange"] = (value) => {
     history.push(value);
   };
+  useEffect(() => {
+    console.log("routes", _.find(routes, ["pathname", "/"])?.route);
+  }, []);
   return (
     <div>
       <Conversations
         items={items}
         defaultActiveKey="item1"
-        groupable
         onActiveChange={handleMenuItem}
       />
     </div>

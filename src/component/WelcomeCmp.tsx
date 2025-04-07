@@ -1,9 +1,12 @@
-import { Welcome } from "@ant-design/x";
+import { Welcome, WelcomeProps } from "@ant-design/x";
 import { Card } from "antd";
 import styles from "./index.less";
 import { SlackSquareOutlined } from "@ant-design/icons";
 
-const WelcomeCmp = () => {
+interface IWelcomeCmp extends WelcomeProps {}
+
+const WelcomeCmp = (props: IWelcomeCmp) => {
+  const { title = "Hello, I'm Ant Design X" } = props;
   return (
     <div className={styles.welcomeCmp}>
       <Card style={{ borderRadius: 0 }}>
@@ -16,7 +19,7 @@ const WelcomeCmp = () => {
               }}
             />
           }
-          title="Hello, I'm Ant Design X"
+          title={title}
           description="当前页面接入了DeepSeek"
         />
       </Card>

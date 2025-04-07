@@ -12,7 +12,12 @@ const routes: RoutesType = [
         path: "/:id",
         component: "@/pages/Main",
         layout: false,
-      }
+      },
+      {
+        path: "/AutoChat",
+        component: "@/pages/AutoChat",
+        layout: false,
+      },
     ],
   },
   {

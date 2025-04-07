@@ -24,6 +24,7 @@ import {
   SmileOutlined,
 } from "@ant-design/icons";
 import { Badge, Button, type GetProp, Space } from "antd";
+import { useLocation } from "@umijs/max";
 
 const { DEEPSEEK_API_KEY } = process.env;
 
@@ -199,6 +200,7 @@ const roles: GetProp<typeof Bubble.List, "roles"> = {
 };
 
 const Independent: React.FC = () => {
+  const location = useLocation();
   // ==================== Style ====================
   const { styles } = useStyle();
 
@@ -320,7 +322,7 @@ const Independent: React.FC = () => {
 
   const senderHeader = (
     <Sender.Header
-      title="Attachments"
+      title="附件"
       open={headerOpen}
       onOpenChange={setHeaderOpen}
       styles={{
@@ -356,7 +358,11 @@ const Independent: React.FC = () => {
       <span>Ant Design X</span>
     </div>
   );
-
+  useEffect(() => {
+    if (location.state?.content) {
+      onRequest(location.state?.content);
+    }
+  }, []);
   // ==================== Render =================
   return (
     <div className={styles.layout}>
