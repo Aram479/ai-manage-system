@@ -1,6 +1,7 @@
 import { message } from "antd";
 import "./global.less";
 import type { RequestConfig } from "@umijs/max";
+import Assistant from "./component/Assistant";
 
 const { API_BASE_URL } = process.env;
 
@@ -60,3 +61,15 @@ export const request: RequestConfig = {
     ],
   ],
 };
+
+// 全局组件
+export function rootContainer(container: React.ReactNode) {
+  return (
+    <div>
+      {/* 根页面 */}
+      {container}
+      {/* Chat助手 */}
+      <Assistant />
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
+import Assistant from "@/component/Assistant";
 import ConverMenu from "@/component/ConverMenu";
 import { Outlet } from "@umijs/max";
 import { Layout } from "antd";
-import React from "react";
 
 const { Sider, Content } = Layout;
 const DeepSeekLayout = () => {
@@ -9,10 +9,13 @@ const DeepSeekLayout = () => {
     <div>
       <Layout>
         <Layout>
-          <Sider width={240} style={{
-            height: '100vh',
-            background: '#fff'
-          }}>
+          <Sider
+            width={240}
+            style={{
+              height: "100vh",
+              background: "#fff",
+            }}
+          >
             <ConverMenu />
           </Sider>
           <Content>
@@ -20,6 +23,7 @@ const DeepSeekLayout = () => {
           </Content>
         </Layout>
       </Layout>
+      <Assistant />
     </div>
   );
 };

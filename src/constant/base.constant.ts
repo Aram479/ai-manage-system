@@ -4,28 +4,28 @@ import { MenuItemType } from "antd/es/menu/interface";
 
 // 执行工具
 export const Tools_Options = [
-  {
-    type: "function",
-    function: {
-      name: "help_have_conversation",
-      description: "根据对话上下文，帮助我对话",
-      parameters: {
-        type: "object",
-        properties: {
-          event: {
-            type: "string",
-            description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
-            emun: ["help_have_conversation"],
-          },
-          message: {
-            type: "string",
-            description: "帮我，随机生成一个问题，或者问候语句",
-          },
-        },
-      },
-      required: ["message"],
-    },
-  },
+  // {
+  //   type: "function",
+  //   function: {
+  //     name: "help_have_conversation",
+  //     description: "根据对话上下文，帮助我对话",
+  //     parameters: {
+  //       type: "object",
+  //       properties: {
+  //         event: {
+  //           type: "string",
+  //           description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
+  //           emun: ["help_have_conversation"],
+  //         },
+  //         message: {
+  //           type: "string",
+  //           description: "帮我，随机生成一个问题，或者问候语句",
+  //         },
+  //       },
+  //     },
+  //     required: ["message"],
+  //   },
+  // },
   {
     type: "function",
     function: {
