@@ -1,7 +1,10 @@
 import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
 import { useQwenXChat } from "@/hooks/qwen.hooks";
+import { useSelectedRoutes } from "@umijs/max";
 import { MenuItemType } from "antd/es/menu/interface";
-
+import _ from "lodash";
+import routes from "../../config/routes";
+import { getAllPaths } from "@/utils";
 // 执行工具
 export const Tools_Options = [
   // {
@@ -42,7 +45,7 @@ export const Tools_Options = [
           path: {
             type: "string",
             description: "目标页面路径",
-            enum: ["/main", "/demo", "/AutoChat"],
+            enum: getAllPaths(routes),
           },
           state: {
             type: "object",

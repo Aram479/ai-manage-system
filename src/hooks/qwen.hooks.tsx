@@ -169,8 +169,23 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
     // chatRequest
     request: chatRequest,
   });
+  
   const { onRequest, messages } = useXChat({
     agent,
+    defaultMessages: [
+      {
+        id: 'local',
+        message: {
+          ctmpContent: "",
+          ctmpLoadingMessage: "",
+          chatContent: "欢迎使用通义千问",
+          chatLoadngMessage: "",
+          toolContent: "",
+          abortedReason: "",
+        },
+        status: 'local',
+      },
+    ],
     requestPlaceholder: () => {
       return {
         ctmpContent: "",

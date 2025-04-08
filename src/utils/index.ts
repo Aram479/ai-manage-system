@@ -1,4 +1,5 @@
 import { UploadFile } from "antd";
+import _ from "lodash";
 
 // 图片转Base64  并压缩
 export const compressImageToBase64 = (
@@ -62,5 +63,19 @@ export const compressImageToBase64 = (
     };
 
     reader.readAsDataURL(file);
+  });
+};
+
+// 递归提取所有路径
+export const getAllPaths: any = (routes: any[]) => {
+  return _.flatMap(routes, (route: any) => {
+    // 当前路由的 path
+    const currentPath = route.path;
+
+    // 子路由的 paths
+    const childPaths = route.routes ? getAllPaths(route.routes) : [];
+
+    // 合并当前 path 和子路由 paths
+    return _.compact([currentPath, ...childPaths]);
   });
 };

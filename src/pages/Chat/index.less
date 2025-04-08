@@ -1,0 +1,54 @@
+.chatPage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+
+  .chatListBox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .bubbleListBox {
+    flex-basis: 58vh;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+}
+// 思考对话样式
+.ctmpMessageBox {
+  color: #8f91a8;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+
+  .ctmpTimeBox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .ctmpContentBox {
+    padding: 0px 10px;
+    border-left: 1px solid #ccc;
+    line-height: 25px;
+  }
+}
+
+.messageFooterBox {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 15px;
+  font-size: 16px;
+
+  & > * {
+    cursor: pointer;
+    &:hover {
+      color: #615ced;
+    }
+  }
+}

@@ -1,20 +1,44 @@
 import { defineConfig } from "@umijs/max";
 
 type RoutesType = Parameters<typeof defineConfig>[0]["routes"];
-
 const routes: RoutesType = [
+  // 管理系统相关页面
   {
+    name: "System",
     path: "/",
-    component: "@/pages/Layout",
-    layout: false,
     routes: [
       {
-        path: "/:id",
+        name: "Main",
+        path: "/Main",
         component: "@/pages/Main",
+        meta: {
+          title: "首页",
+        },
+      },
+      {
+        name: "UserManage",
+        path: "/UserManage",
+        component: "@/pages/UserManage",
+        meta: {
+          title: "用户管理",
+        },
+      },
+    ],
+  },
+  /* 聊天相关页面 */
+  {
+    path: "/Chats",
+    component: "@/pages/ChatLayout",
+    layout: false,
+    // redirect: "/Chats/Chat",
+    routes: [
+      {
+        path: "/Chats/Chat",
+        component: "@/pages/Chat",
         layout: false,
       },
       {
-        path: "/AutoChat",
+        path: "/Chats/AutoChat",
         component: "@/pages/AutoChat",
         layout: false,
       },
@@ -26,7 +50,7 @@ const routes: RoutesType = [
     layout: false,
   },
   { path: "/404", component: "@/pages/404", layout: false },
-  { path: "*", redirect: "/404" },
+  { path: "*", redirect: "/404", layout: false },
 ];
 
 export default routes;
