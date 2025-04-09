@@ -61,18 +61,6 @@ export const request: RequestConfig = {
   ],
 };
 
-// 全局组件
-export function rootContainer(container: React.ReactNode) {
-  return (
-    <div>
-      {/* 根页面 */}
-      {container}
-      {/* Chat助手 */}
-      <Assistant />
-    </div>
-  );
-}
-
 export async function getInitialState() {
   return {
     routes, // 将路由信息注入到 initialState

@@ -2,11 +2,11 @@ import { qwenXRequest } from "@/services/qwen.api";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
 import { SenderProps, useXAgent, useXChat } from "@ant-design/x";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
-import { history } from "@umijs/max";
+import { useModel } from "@umijs/max";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { message as AMessage } from "antd";
-import { deepSeekPrompt } from "@/constant/deepSeek.constant";
+import { chatPrompt } from "@/constant/base.constant";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import MarkDownCmp from "@/component/MarkDownCmp";
 import {
@@ -51,8 +51,9 @@ interface IUseQwenXChat {
   requestBody?: any;
   onSuccess?: (messageData: TResultStream) => void;
 }
-export const useQwenXChat = (props: IUseQwenXChat) => {
+const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
+  const { setCommandExecutor } = useModel("chat");
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
@@ -107,7 +108,7 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
         chatList.length
           ? ""
           : props.defaultMessage
-          ? deepSeekPrompt.towntalk(props.defaultMessage)
+          ? chatPrompt.towntalk(props.defaultMessage)
           : ""
       }${messagesData.message}`,
       // content: messagesData.message,
@@ -141,11 +142,11 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
             // 对话完毕时 清除当前思考时间记录
             startTime.current = 0;
             cmptTime.current = 0;
-
-            // 流执行完，没被锁(暂停)执行指令触发
+              // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
               props.onSuccess?.(result);
-              handleCommandExecutor(result.toolContent);
+              // 设置指令分发器
+              setCommandExecutor(result.toolContent);
             }
           }
         },
@@ -169,12 +170,12 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
     // chatRequest
     request: chatRequest,
   });
-  
+
   const { onRequest, messages } = useXChat({
     agent,
     defaultMessages: [
       {
-        id: 'local',
+        id: "local",
         message: {
           ctmpContent: "",
           ctmpLoadingMessage: "",
@@ -183,7 +184,7 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
           toolContent: "",
           abortedReason: "",
         },
-        status: 'local',
+        status: "local",
       },
     ],
     requestPlaceholder: () => {
@@ -229,26 +230,6 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
         // 2.中断流：流输出后中断
         controller?.terminate();
       }
-    }
-  };
-
-  // 指令分发器
-  const handleCommandExecutor = (commandMessage: string) => {
-    try {
-      if (commandMessage) {
-        const command = JSON.parse(commandMessage);
-        if (command.event === "navigate_to_page") {
-          // history.push(command.path);
-          history.push(command.path, command.state)
-        } else if (command.event === "help_have_conversation") {
-          isAutoChat.current = true;
-          const { message } = command;
-          // setContent(message)
-          handleSendChat(message);
-        }
-      }
-    } catch (error) {
-      AMessage.error("命令错误，请重试！");
     }
   };
 
@@ -349,3 +330,4 @@ export const useQwenXChat = (props: IUseQwenXChat) => {
     onCancel: handleStopChat,
   };
 };
+export default useQwenXChat

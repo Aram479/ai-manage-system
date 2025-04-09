@@ -19,9 +19,10 @@ import WelcomeCmp from "@/component/WelcomeCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import SenderHeader from "./cpns/SenderHeader";
-import { Ai_Options, AiXChatHookMap, Tools_Options } from "@/constant/base.constant";
-import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
-import { useQwenXChat } from "@/hooks/qwen.hooks";
+import { Ai_Options } from "@/constant/base.constant";
+import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
+import useQwenXChat from "@/hooks/useQwenXChat";
+import { allTools } from "@/tools";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -44,7 +45,7 @@ const ChatPage = () => {
       top_p: 0.9, // 调整此值也可能影响简洁性
       model,
       // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
-      tools: Tools_Options, //不支持模型 deepseek-reasoner
+      tools: allTools, //不支持模型 deepseek-reasoner
       // tool_choice: "auto",
     },
     onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),

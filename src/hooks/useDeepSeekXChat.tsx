@@ -6,7 +6,7 @@ import { history } from "@umijs/max";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { message as AMessage } from "antd";
-import { deepSeekPrompt } from "@/constant/deepSeek.constant";
+import { chatPrompt } from "@/constant/base.constant";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import MarkDownCmp from "@/component/MarkDownCmp";
 import {
@@ -51,7 +51,7 @@ interface IUseDeepSeekXChat {
   requestBody?: any;
   onSuccess?: (messageData: TResultStream) => void;
 }
-export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
+const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   const { requestBody } = props;
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
@@ -107,7 +107,7 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
         chatList.length
           ? ""
           : props.defaultMessage
-          ? deepSeekPrompt.towntalk(props.defaultMessage)
+          ? chatPrompt.towntalk(props.defaultMessage)
           : ""
       }${messagesData.message}`,
       // content: messagesData.message,
@@ -171,6 +171,20 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   });
   const { onRequest, messages } = useXChat({
     agent,
+    defaultMessages: [
+      {
+        id: "local",
+        message: {
+          ctmpContent: "",
+          ctmpLoadingMessage: "",
+          chatContent: "欢迎使用DeepSeek",
+          chatLoadngMessage: "",
+          toolContent: "",
+          abortedReason: "",
+        },
+        status: "local",
+      },
+    ],
     requestPlaceholder: () => {
       return {
         ctmpContent: "",
@@ -333,3 +347,5 @@ export const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     onCancel: handleStopChat,
   };
 };
+
+export default useDeepSeekXChat;

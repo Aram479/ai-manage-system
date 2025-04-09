@@ -1,0 +1,55 @@
+import { UserToolsNames } from "@/constant/tools.constant";
+
+const search_Tool = {
+  type: "function",
+  function: {
+    name: UserToolsNames.Search_User,
+    description: "搜索或输入查询数据",
+    parameters: {
+      type: "object",
+      properties: {
+        event: {
+          type: "string",
+          description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
+          emun: [UserToolsNames.Search_User],
+        },
+        user: {
+          type: "string",
+          description: "用户名称",
+        },
+        createTime: {
+          type: "date",
+          format: "date",
+          description: "创建时间",
+        },
+        // age: {
+        //   type: "integer",
+        //   description: "用户年龄",
+        // },
+        // is_vip: {
+        //   type: "boolean",
+        //   description: "是否为VIP用户",
+        // },
+        // tags: {
+        //   type: "array",
+        //   items: {
+        //     type: "string",
+        //   },
+        //   description: "用户标签",
+        // },
+        // address: {
+        //   type: "object",
+        //   description: "用户地址",
+        //   properties: {
+        //     street: { type: "string" },
+        //     city: { type: "string" },
+        //   },
+        //   required: ["street"],
+        // },
+      },
+      required: ["event", "user", "createTime"],
+    },
+  },
+};
+
+export { search_Tool };

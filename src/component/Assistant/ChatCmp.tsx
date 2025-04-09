@@ -12,10 +12,12 @@ import {
 import { UserOutlined } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
-import { Ai_Options, Tools_Options } from "@/constant/base.constant";
-import { useDeepSeekXChat } from "@/hooks/deepSeek.hooks";
-import { useQwenXChat } from "@/hooks/qwen.hooks";
+import { Ai_Options } from "@/constant/base.constant";
+import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
+import useQwenXChat from "@/hooks/useQwenXChat";
 import styles from "./index.less";
+import { allTools } from "@/tools";
+import { BaseToolsNames, UserToolsNames } from "@/constant/tools.constant";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -47,13 +49,13 @@ const ChatCmp = () => {
     return {
       requestBody: {
         stream: true,
-        max_tokens: 2048,
-        temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
-        top_p: 0.9, // 调整此值也可能影响简洁性
+        // max_tokens: 2048,
+        // temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
+        // top_p: 0.9, // 调整此值也可能影响简洁性
         model,
         // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
-        tools: currentTag?.id ? undefined : Tools_Options, // 深度思考不支持
-        // tool_choice: "auto",
+        tools: currentTag?.id === "deep" ? undefined : allTools, // 深度思考不支持
+        // tool_choice: 'auto',
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
     };

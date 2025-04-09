@@ -20,7 +20,8 @@ import styles from "./index.less";
 import _ from "lodash";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
 import SenderHeader from "./cpns/SenderHeader";
-import { Ai_Options, AiXChatHookMap } from "@/constant/base.constant";
+import { Ai_Options } from "@/constant/base.constant";
+import useQwenXChat from "@/hooks/useQwenXChat";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const AutoChatPage = () => {
@@ -35,7 +36,7 @@ const AutoChatPage = () => {
   const [endIndex, setEndIndex] = useState(1);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
-  const Ai_XChatHook = AiXChatHookMap.get(defaultModelInfo.key as string)!;
+  const Ai_XChatHook = useQwenXChat;
 
   // 记录用户正常对话(非自动对话)时，截止的位置
   const [isHeader, setIsHeader] = useState(true);

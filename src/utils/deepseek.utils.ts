@@ -52,7 +52,7 @@ export class StreamDataProcessor {
     // 对话 流内容
     const content = contentDelta?.content;
     // 工具 流内容
-    const toolContent = contentDelta?.tool_calls?.[0].function.arguments;
+    const toolContent = contentDelta?.tool_calls?.[0]?.function.arguments;
     if (ctmpContent ?? false) {
       this.resultString.ctmpContent += ctmpContent;
     }
