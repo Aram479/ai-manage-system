@@ -4,7 +4,7 @@ const search_Tool = {
   type: "function",
   function: {
     name: UserToolsNames.Search_User,
-    description: "搜索或输入查询数据",
+    description: "跳转到指定系统页面，并搜索或输入查询数据",
     parameters: {
       type: "object",
       properties: {
@@ -12,6 +12,11 @@ const search_Tool = {
           type: "string",
           description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
           emun: [UserToolsNames.Search_User],
+        },
+        path: {
+          type: "string",
+          description: "目标页面路径",
+          enum: ["/Main", "/UserManage"], // getAllPaths(routes)
         },
         user: {
           type: "string",

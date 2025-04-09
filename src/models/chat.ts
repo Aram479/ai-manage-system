@@ -19,7 +19,7 @@ const ChatModel = () => {
         // 在model中提前处理某些事件
         if (commands.length) {
           commands.forEach((item) => {
-            if (item.event === "navigate_to_page") {
+            if (item.path) {
               // history.push(item.path);
               history.push(item.path, item.state);
             }
