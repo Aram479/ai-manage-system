@@ -21,7 +21,7 @@ export const search_Role = {
   type: "function",
   function: {
     name: RoleToolsEvents.Search_Role,
-    description: "跳转到指定系统页面，并搜索或输入查询数据",
+    description: "跳转到角色管理页面，并搜索或输入查询数据",
     parameters: {
       type: "object",
       properties: {
@@ -68,7 +68,7 @@ export const export_Role = {
   type: "function",
   function: {
     name: RoleToolsEvents.Export_Role,
-    description: "跳转到指定系统页面，并搜索或输入查询数据",
+    description: "跳转到角色管理页面，导出数据",
     parameters: {
       type: "object",
       properties: {
@@ -84,12 +84,12 @@ export const export_Role = {
         },
         role: {
           type: "string",
-          description: "角色名称",
+          description: "要导出的角色名称",
         },
         createTime: {
           type: "date",
           format: "date",
-          description: "创建时间",
+          description: "角色创建时间",
         },
         // age: {
         //   type: "integer",
@@ -99,7 +99,7 @@ export const export_Role = {
         //   type: "boolean",
         //   description: "是否为VIP用户",
       },
-      required: ["event", "roles", "createTime"],
+      required: ["event", "path", "role", "createTime"],
     },
   },
 } as const;

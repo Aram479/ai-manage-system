@@ -1,4 +1,3 @@
-
 export enum OrderToolsEvents {
   Search_Order = "Search_Order",
 }
@@ -15,7 +14,7 @@ export const search_Order = {
   type: "function",
   function: {
     name: OrderToolsEvents.Search_Order,
-    description: "跳转到指定系统页面，并搜索或输入查询数据",
+    description: "跳转到订单管理页面，并搜索或输入查询数据",
     parameters: {
       type: "object",
       properties: {
@@ -27,43 +26,39 @@ export const search_Order = {
         path: {
           type: "string",
           description: "目标页面路径",
-          enum: ["/Main", "/UserManage"], // getAllPaths(routes)
+          enum: ["/OrderManage"], // getAllPaths(routes)
         },
-        user: {
+        orderNo: {
+          type: "integer",
+          description: "订单号",
+        },
+        orderName: {
           type: "string",
-          description: "用户名称",
+          description: "订单名称",
         },
-        createTime: {
-          type: "date",
+        startTime: {
+          type: "string",
           format: "date",
-          description: "创建时间",
+          description: "订单开始时间",
         },
-        // age: {
-        //   type: "integer",
-        //   description: "用户年龄",
-        // },
+        endTime: {
+          type: "string",
+          format: "date",
+          description: "订单结束时间",
+        },
         // is_vip: {
         //   type: "boolean",
         //   description: "是否为VIP用户",
         // },
-        // tags: {
-        //   type: "array",
-        //   items: {
-        //     type: "string",
-        //   },
-        //   description: "用户标签",
-        // },
-        // address: {
-        //   type: "object",
-        //   description: "用户地址",
-        //   properties: {
-        //     street: { type: "string" },
-        //     city: { type: "string" },
-        //   },
-        //   required: ["street"],
-        // },
       },
-      required: ["event", "user", "createTime"],
+      required: [
+        "event",
+        "path",
+        "orderNo",
+        "orderName",
+        "startTime",
+        "endTime",
+      ],
     },
   },
 } as const;

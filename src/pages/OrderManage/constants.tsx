@@ -6,39 +6,28 @@ export function getColumns(props: any):ColumnsType {
 
   return [
     {
-      title: getLocal?.("Base.Index"),
-      dataIndex: "order",
+      title: "序号",
+      dataIndex: "index",
       align: "center",
       width: 300,
     },
     {
-      title: getLocal?.("Sbom.ProcessTime"),
+      title: "订单号",
       dataIndex: "createTime",
       align: "center",
       width: 300,
     },
     {
-      title: getLocal?.("Sbom.ProcessUser"),
+      title: "订单名称",
       dataIndex: "userName",
       align: "center",
       width: 300,
     },
     {
-      title: getLocal?.("Sbom.Desc"),
-      dataIndex: "user",
+      title: "创建时间",
+      dataIndex: "userName",
       align: "center",
       width: 300,
-    },
-    {
-      title: getLocal?.("Sbom.ObjectType"),
-      dataIndex: "objectType",
-      align: "center",
-      width: 300,
-    },
-    {
-      title: getLocal?.("Sbom.InfoType"),
-      dataIndex: "infoType",
-      align: "center",
     },
   ];
 }

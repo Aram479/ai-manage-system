@@ -15,7 +15,7 @@ export const search_User = {
   type: "function",
   function: {
     name: UserToolsEvents.Search_User,
-    description: "跳转到指定系统页面，并搜索或输入查询数据",
+    description: "跳转到用户管理页面，并搜索或输入查询数据",
     parameters: {
       type: "object",
       properties: {
@@ -27,7 +27,7 @@ export const search_User = {
         path: {
           type: "string",
           description: "目标页面路径",
-          enum: ["/Main", "/UserManage"], // getAllPaths(routes)
+          enum: ["/UserManage"], // getAllPaths(routes)
         },
         user: {
           type: "string",
@@ -63,7 +63,7 @@ export const search_User = {
         //   required: ["street"],
         // },
       },
-      required: ["event", "user", "createTime"],
+      required: ["event", "path", "user", "createTime"],
     },
   },
 } as const;

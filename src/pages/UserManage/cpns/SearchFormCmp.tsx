@@ -1,5 +1,5 @@
-import { UserToolsNames } from "@/constant/tools.constant";
 import { useChatEvent } from "@/hooks/useChatEvent";
+import { TUserTools, UserToolsEvents } from "@/tools/userTools";
 import { Button, Col, DatePicker, Form, FormProps, Input, Row } from "antd";
 import dayjs from "dayjs";
 
@@ -24,8 +24,8 @@ const SearchForm = (props: Partial<ISearchForm>) => {
     onReset?.({});
   };
 
-  useChatEvent((event) => {
-    if (event.event == UserToolsNames.Search_User) {
+  useChatEvent<TUserTools>((event) => {
+    if (event.event == UserToolsEvents.Search_User) {
       form.setFieldsValue({
         user: event.user,
         createTime: dayjs(event.createTime),
