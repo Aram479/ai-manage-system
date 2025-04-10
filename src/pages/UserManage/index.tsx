@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExportOutlined } from "@ant-design/icons";
+import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
 import { Button, Card, PaginationProps, Table } from "antd";
 import { TableProps } from "antd/lib";
@@ -110,8 +110,8 @@ const UserManagePage = () => {
       </Card>
       <Card title={"结果"}>
         <div className="sbom-btn-box">
-          <Button type="primary" icon={<ExportOutlined />}>
-            导出
+          <Button type="primary" icon={<PlusOutlined />}>
+            创建角色
           </Button>
         </div>
         <Table

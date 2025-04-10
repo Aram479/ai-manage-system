@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExportOutlined } from "@ant-design/icons";
+import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
 import { Button, Card, PaginationProps, Table } from "antd";
 import { TableProps } from "antd/lib";
@@ -9,12 +9,16 @@ import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ColumnType } from "antd/es/table";
+import CreateOrderModalCmp from "./cpns/CreateOrderModalCmp";
+import { OrderToolsEvents, TOrderTools } from "@/tools/orderTools";
 
 type IDataType = any;
 
 // MBOMPage页面
 const OrderManagePage = () => {
   const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
+  const [createOrderOpen, setCreateOrderOpen] = useState(false);
+  const [createOrderLoading, setCreateOrderLoading] = useState(false);
 
   const [tableData, setTableData] = useState<IDataType[]>([]);
   const [searchData, setSearchData] = useState({});
@@ -74,6 +78,18 @@ const OrderManagePage = () => {
       onSuccess: (res) => {},
     }
   );
+
+  const handleCreatOrderSubmit = () => {
+    if (!createOrderLoading) {
+      setCreateOrderLoading(true);
+
+      // 模拟提交成功
+      setTimeout(() => {
+        setCreateOrderLoading(false);
+        setCreateOrderOpen(false);
+      }, 1500);
+    }
+  };
   // 搜索事件
   const handleSearch = (searchValues: any) => {
     setSearchData({ ...searchValues });
@@ -104,6 +120,13 @@ const OrderManagePage = () => {
     getEntityListReq();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
+  useChatEvent<TOrderTools>((event) => {
+    if (event.event == OrderToolsEvents.Create_Order) {
+      setCreateOrderOpen(true);
+      // handleSearch();
+    }
+  });
+
   return (
     <div className={`${styles.orderManagePage} dap-main-content`}>
       <Card>
@@ -111,8 +134,12 @@ const OrderManagePage = () => {
       </Card>
       <Card title={"结果"}>
         <div className="sbom-btn-box">
-          <Button type="primary" icon={<ExportOutlined />}>
-            导出
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setCreateOrderOpen(true)}
+          >
+            新增订单
           </Button>
         </div>
         <Table
@@ -125,6 +152,14 @@ const OrderManagePage = () => {
           onChange={handleTableChange}
         />
       </Card>
+      <CreateOrderModalCmp
+        open={createOrderOpen}
+        onOk={handleCreatOrderSubmit}
+        onCancel={setCreateOrderOpen}
+        okButtonProps={{
+          loading: createOrderLoading,
+        }}
+      />
     </div>
   );
 };

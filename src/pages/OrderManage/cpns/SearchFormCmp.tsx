@@ -2,6 +2,8 @@ import { useChatEvent } from "@/hooks/useChatEvent";
 import { OrderToolsEvents, TOrderTools } from "@/tools/orderTools";
 import { Button, Col, DatePicker, Form, FormProps, Input, Row } from "antd";
 import dayjs from "dayjs";
+import CreateOrderModalCmp from "./CreateOrderModalCmp";
+import { useState } from "react";
 
 interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
@@ -37,7 +39,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
 
   return (
     <div className="searchFormCmp">
-      <Form name="form_in_modal" layout="vertical" form={form} preserve={false}>
+      <Form layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={6}>
             <Form.Item name="orderNo" label="订单号">
