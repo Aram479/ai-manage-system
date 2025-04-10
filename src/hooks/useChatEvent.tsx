@@ -1,14 +1,13 @@
 import { useEffect } from "react";
-import { message } from "antd";
-import { history, useModel } from "@umijs/max";
+import { useModel } from "@umijs/max";
 
 type TCallbackEvent = {
   [key: string]: any;
   event?: string;
 };
-type TUseChatEvent = (eventInfo: TCallbackEvent) => void;
+type TUseChatEvent<T = TCallbackEvent> = (eventInfo: T) => void;
 
-export const useChatEvent = (callback: TUseChatEvent) => {
+export const useChatEvent = <T = any>(callback: TUseChatEvent<T>) => {
   const { events } = useModel("chat");
 
   // 执行分发器

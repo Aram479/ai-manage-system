@@ -23,6 +23,22 @@ const routes: RoutesType = [
           title: "用户管理",
         },
       },
+      {
+        name: "OrderManage",
+        path: "/OrderManage",
+        component: "@/pages/OrderManage",
+        meta: {
+          title: "订单管理",
+        },
+      },
+      {
+        name: "RoleManage",
+        path: "/RoleManage",
+        component: "@/pages/RoleManage",
+        meta: {
+          title: "角色管理",
+        },
+      },
     ],
   },
   /* 聊天相关页面 */

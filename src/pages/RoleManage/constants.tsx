@@ -12,8 +12,8 @@ export function getColumns(props: any):ColumnsType {
       width: 300,
     },
     {
-      title: "用户名称",
-      dataIndex: "userName",
+      title: "角色名称",
+      dataIndex: "RoleName",
       align: "center",
       width: 300,
     },

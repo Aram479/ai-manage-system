@@ -1,17 +1,27 @@
-import { BaseToolsNames } from "@/constant/tools.constant";
+export enum BaseToolsEvents {
+  Navigate_Page = "Navigate_Page",
+}
 
-const navigate_page_tool = {
+/* 根据Schema模型推导结果类型 */
+export type INavigate_page = JSONSchemaToType<
+  typeof navigate_page.function.parameters
+>;
+
+/* 整合 结果类型 */
+export type TBaseTools = INavigate_page;
+
+export const navigate_page = {
   type: "function",
   function: {
-    name: BaseToolsNames.Navigate_Page,
+    name: BaseToolsEvents.Navigate_Page,
     description: "跳转到指定系统页面",
     parameters: {
       type: "object",
       properties: {
         event: {
           type: "string",
-          description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
-          emun: [BaseToolsNames.Navigate_Page],
+          description: "事件名称", // 设置 "必填" 二字，AI才会保证输出此字段
+          enum: [BaseToolsEvents.Navigate_Page],
         },
         path: {
           type: "string",
@@ -19,9 +29,7 @@ const navigate_page_tool = {
           enum: ["/Main", "/UserManage"], // getAllPaths(routes)
         },
       },
+      required: ["event", "path"],
     },
-    required: ["path"],
   },
-};
-
-export { navigate_page_tool };
+} as const;

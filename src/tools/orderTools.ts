@@ -1,20 +1,20 @@
-export enum UserToolsEvents {
-  Search_User = "Search_User",
+
+export enum OrderToolsEvents {
+  Search_Order = "Search_Order",
 }
 
 /* 根据Schema模型推导结果类型 */
-export type ISearch_User = JSONSchemaToType<
-  typeof search_User.function.parameters
+export type ISearch_Order = JSONSchemaToType<
+  typeof search_Order.function.parameters
 >;
 
 /* 整合 结果类型 */
-export type TUserTools = ISearch_User;
+export type TOrderTools = ISearch_Order;
 
-/* 数据模型Schema */
-export const search_User = {
+export const search_Order = {
   type: "function",
   function: {
-    name: UserToolsEvents.Search_User,
+    name: OrderToolsEvents.Search_Order,
     description: "跳转到指定系统页面，并搜索或输入查询数据",
     parameters: {
       type: "object",
@@ -22,7 +22,7 @@ export const search_User = {
         event: {
           type: "string",
           description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
-          emun: [UserToolsEvents.Search_User],
+          emun: [OrderToolsEvents.Search_Order],
         },
         path: {
           type: "string",
