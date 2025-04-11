@@ -17,7 +17,6 @@ import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import styles from "./index.less";
 import { allTools } from "@/tools";
-import { BaseToolsNames, UserToolsNames } from "@/constant/tools.constant";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
