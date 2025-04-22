@@ -55,7 +55,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          <Col flex="auto" className="sbom-form-btn-box">
+          <Col flex="auto" className="form-btn-box">
             <Button type="primary" onClick={handleSearch}>
               查询
             </Button>

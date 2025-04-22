@@ -21,14 +21,5 @@ export const useGlobalChatEvent = () => {
     } else if (event.name === RoleManageToolsEvents.Export_RoleList) {
       exportRoleListReq.run();
     }
-    // if (event.name === SbomDeviateConfigToolsEvents.Export_Deviate) {
-    //   const chatDataReqData = event.data;
-    //   if (chatDataReqData) {
-    //     // exportSBOMDevReq.run({
-    //     //   ...chatDataReqData,
-    //     //   buildDate: dayjs(chatDataReqData.buildDate).toISOString(),
-    //     // } as any);
-    //   }
-    // }
   });
 };

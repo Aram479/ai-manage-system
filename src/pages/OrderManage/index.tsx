@@ -135,7 +135,7 @@ const OrderManagePage = () => {
         <SearchFormCmp onSearch={handleSearch} onReset={handleResetSearch} />
       </Card>
       <Card title={"结果"}>
-        <div className="sbom-btn-box">
+        <div className="btn-box">
           <Button
             type="primary"
             icon={<PlusOutlined />}
