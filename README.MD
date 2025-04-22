@@ -54,7 +54,7 @@ export default {
 
 DeepSeek ApiKey查询：https://platform.deepseek.com/api_keys
 
-通义千文 ApiKey查询：https://bailian.console.aliyun.com/?tab=model#/api-key
+通义千问 ApiKey查询：https://bailian.console.aliyun.com/?tab=model#/api-key
 
 **页面首次进入白屏解决方案**：地址栏手动加上/main，作者很懒，没加重定向
 
