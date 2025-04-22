@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
@@ -52,6 +52,7 @@ const ChatCmp = () => {
   const isDeep = useRef(false);
 
   const defaultRequestConfig = useMemo(() => {
+    console.log("model", model);
     return {
       requestBody: {
         stream: true,
@@ -71,7 +72,7 @@ const ChatCmp = () => {
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
     };
-  }, [currentTag?.id]);
+  }, [currentTag?.id, model]);
 
   // 通义千问
   const Ai_Qwen = useQwenXChat(defaultRequestConfig);
@@ -96,23 +97,13 @@ const ChatCmp = () => {
         },
       },
     },
-    system: {
-      placement: "start",
-      avatar: { icon: <UserOutlined />, style: { background: "#fde3cf" } },
-      typing: { step: 5, interval: 20 },
-      styles: {
-        content: {
-          minWidth: "calc(100% - 50px)",
-          background: "skyblue",
-        },
-      },
-    },
     local: {
       placement: "end",
       avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
       // typing: { step: 5, interval: 20 },
       styles: {
         content: {
+          padding: "12px 8px",
           background: "#e0dfff",
         },
       },
@@ -174,6 +165,26 @@ const ChatCmp = () => {
     </Badge>
   );
 
+  useEffect(() => {
+    const deepTagIndex = messageTags.findIndex((item) => item.id == "deep")!;
+
+    if (chatUploadFiles.current.length) {
+      // 文档解析不能用深度思考
+      messageTags[deepTagIndex].disabled = true;
+      if (currentTag?.id === "deep") {
+        isDeep.current = false;
+        setCurrentTag(undefined);
+        setPlaceholder(defaultPlaceholder);
+      }
+      // 解析文件要用qwen-long
+      setModel("qwen-long");
+    } else {
+      messageTags[deepTagIndex].disabled = false;
+      setModel(defaultModelInfo.model?.default!);
+    }
+    setMessageTags(messageTags);
+  }, [chatUploadFiles.current]);
+
   return (
     <div className={styles.chatBox}>
       <div className={styles.chatListBox}>
@@ -188,7 +199,9 @@ const ChatCmp = () => {
             <Tooltip key={item.id} title={item.desc} placement="top">
               <Button
                 {...item}
-                disabled={currentTag && currentTag?.id !== item.id}
+                disabled={
+                  (currentTag && currentTag?.id !== item.id) || item.disabled
+                }
                 color={currentTag?.id === item.id ? "primary" : undefined}
                 variant="outlined"
                 onClick={() => handleTagItem(item)}

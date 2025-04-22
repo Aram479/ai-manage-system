@@ -7,7 +7,7 @@ const HeaderCmp = () => {
   const [title, setTile] = useState("欢迎来到Ant Design X Chat 系统");
 
   useChatEvent<TBaseTools>((event) => {
-    if (event.event === BaseToolsEvents.Update_System_Title) {
+    if (event.name === BaseToolsEvents.Update_System_Title) {
       if (event.title) setTile(event.title);
     }
   });
