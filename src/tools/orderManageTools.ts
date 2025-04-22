@@ -55,17 +55,17 @@ const createOrderProperties = (props: TToolsProps) => {
     },
     goodsName: {
       type: "string",
-      description: "商品的名称，值为value字段",
+      description: "商品的名称，必填项，值为value字段",
       enum: GoodsOptions,
     },
     payType: {
       type: "string",
-      description: "用户支付方式，值为value字段",
+      description: "用户支付方式，必填项，值为value字段",
       enum: PayTypeOptions,
     },
     deliveryType: {
       type: "string",
-      description: "配送方式，值为value字段",
+      description: "配送方式：必填项，值为value字段",
       enum: DeliveryTypeOptions,
     },
     deliveryTime: {

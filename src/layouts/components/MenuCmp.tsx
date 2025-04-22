@@ -1,7 +1,12 @@
 import { Menu, MenuProps } from "antd";
-import { history, useRouteData, useRouteProps, useSelectedRoutes } from "@umijs/max";
+import {
+  history,
+  useRouteData,
+  useRouteProps,
+  useSelectedRoutes,
+} from "@umijs/max";
 import styles from "./index.less";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import _ from "lodash";
 
 interface IMenuCmp extends MenuProps {}

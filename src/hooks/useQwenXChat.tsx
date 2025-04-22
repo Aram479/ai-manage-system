@@ -1,20 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { CopyOutlined, CopyrightOutlined, DislikeOutlined, LikeOutlined } from '@ant-design/icons';
-import { Attachments, SenderProps, useXAgent, useXChat } from '@ant-design/x';
-import { BubbleDataType } from '@ant-design/x/es/bubble/BubbleList';
-import { XAgentConfigCustom } from '@ant-design/x/es/use-x-agent';
-import { useModel } from '@umijs/max';
-import { message as AMessage, Upload } from 'antd';
-import dayjs, { Dayjs } from 'dayjs';
-import _ from 'lodash';
-import { qwenXRequest } from '@/services/qwen.api';
-import MarkDownCmp from '@/components/MarkDownCmp';
-import { chatPrompt } from '@/constant/base';
-import ClipboardUtil from '@/utils/clipboardUtil';
-import { StreamDataProcessor } from '@/utils/deepseek.utils';
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CaretRightOutlined,
+  CopyOutlined,
+  CopyrightOutlined,
+  DislikeOutlined,
+  LikeOutlined,
+  PlayCircleOutlined,
+} from "@ant-design/icons";
+import { Attachments, SenderProps, useXAgent, useXChat } from "@ant-design/x";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
+import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
+import { useModel } from "@umijs/max";
+import { message as AMessage, Tooltip, Upload } from "antd";
+import dayjs, { Dayjs } from "dayjs";
+import _ from "lodash";
+import { qwenXRequest } from "@/services/qwen.api";
+import MarkDownCmp from "@/components/MarkDownCmp";
+import { chatPrompt } from "@/constant/base";
+import ClipboardUtil from "@/utils/clipboardUtil";
+import { StreamDataProcessor } from "@/utils/deepseek.utils";
 
 export const useStreamController = () => {
-  const streamController = useRef<TransformStreamDefaultController | null>(null);
+  const streamController = useRef<TransformStreamDefaultController | null>(
+    null
+  );
 
   const streamClass = useRef<TransformStream | null>(null);
 
@@ -46,10 +55,10 @@ interface IUseQwenXChat {
 }
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
-  const { chatUploadFiles, setCommandExecutor } = useModel('chat');
+  const { chatUploadFiles, setCommandExecutor } = useModel("chat");
   const requestProps = useRef(requestBody);
-  const [userRole, setUserRole] = useState('user');
-  const [aiRole, setAiRole] = useState('assistant');
+  const [userRole, setUserRole] = useState("user");
+  const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<any[]>([]);
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -71,7 +80,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     const allContent = processorRef.current.getAllContent();
     if (!startTime.current) startTime.current = dayjs();
     if (!cmptTime.current && allContent.chatContent) {
-      cmptTime.current = dayjs().diff(startTime.current, 'second');
+      cmptTime.current = dayjs().diff(startTime.current, "second");
     }
 
     return {
@@ -79,25 +88,25 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       abortedReason: window.abortController.signal.reason,
       ctmpLoadingMessage: allContent.ctmpContent
         ? isStreamLocked.current && !allContent.chatContent
-          ? '思考已中止'
+          ? "思考已中止"
           : allContent.chatContent
           ? `已完成深度思考（用时${cmptTime.current}秒）`
-          : '思考中...'
-        : '',
-      chatLoadngMessage: '等待思考完毕...',
+          : "思考中..."
+        : "",
+      chatLoadngMessage: "等待思考完毕...",
     };
   };
 
   // 发起对话请求: chatrequest内部要用useRef变量，否则依赖值不会更新
-  const chatRequest: XAgentConfigCustom<TResultStream>['request'] = async (
+  const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
     messagesData,
-    { onUpdate, onSuccess, onError },
+    { onUpdate, onSuccess, onError }
   ) => {
     if (chatUploadFiles.current.length) {
       chatUploadFiles.current.forEach((item) => {
         // 文档理解(qwen-long) role必须为system
         const fileMessage = {
-          role: 'system',
+          role: "system",
           content: `fileid://${item.response?.id}`,
         };
         chatList.push(fileMessage);
@@ -111,7 +120,11 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       //   chatList.length ? "" : deepSeekPrompt.concise
       // }`,
       content: `${
-        chatList.length ? '' : props.defaultMessage ? chatPrompt.towntalk(props.defaultMessage) : ''
+        chatList.length
+          ? ""
+          : props.defaultMessage
+          ? chatPrompt.towntalk(props.defaultMessage)
+          : ""
       }${messagesData.message?.chatContent}`,
       // content: messagesData.message?.chatContent,
     };
@@ -151,7 +164,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器
-              setCommandExecutor(result.toolContent ?? '');
+              setCommandExecutor(result.toolContent ?? "");
             }
           }
         },
@@ -169,7 +182,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
           onError(error);
         },
       },
-      transformStream(),
+      transformStream()
     );
   };
   // 调度请求
@@ -182,32 +195,33 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     agent,
     defaultMessages: [
       {
-        id: 'local',
+        id: "local",
         message: {
-          ctmpContent: '',
-          ctmpLoadingMessage: '',
-          chatContent: '欢迎使用通义千问',
-          chatLoadngMessage: '',
-          toolContent: '',
-          abortedReason: '',
+          ctmpContent: "",
+          ctmpLoadingMessage: "",
+          chatContent: "欢迎使用通义千问",
+          chatLoadngMessage: "",
+          toolContent: "",
+          abortedReason: "",
           chatFiles: [],
         },
-        status: 'local',
+        status: "local",
       },
     ],
     requestPlaceholder: () => {
       return {
-        ctmpContent: '',
-        ctmpLoadingMessage: '',
-        chatContent: '',
-        chatLoadngMessage: '',
-        toolContent: '',
-        abortedReason: '',
+        ctmpContent: "",
+        ctmpLoadingMessage: "",
+        chatContent: "",
+        chatLoadngMessage: "",
+        toolContent: "",
+        abortedReason: "",
         chatFiles: [],
       };
     },
     requestFallback: () => {
-      const errMsg = window.abortController.signal.reason ?? '服务器繁忙，请稍后再试！';
+      const errMsg =
+        window.abortController.signal.reason ?? "服务器繁忙，请稍后再试！";
       return {
         ctmpContent: errMsg,
         ctmpLoadingMessage: errMsg,
@@ -219,7 +233,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     },
   });
 
-  const handleSendChat: SenderProps['onSubmit'] = (message) => {
+  const handleSendChat: SenderProps["onSubmit"] = (message) => {
     isStreamLocked.current = false;
     // 重置上一次对话状态和信息
     processorRef.current.reset();
@@ -229,12 +243,12 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     });
   };
 
-  const handleStopChat: SenderProps['onCancel'] = () => {
+  const handleStopChat: SenderProps["onCancel"] = () => {
     if (isStreaming.current || agent.isRequesting()) {
       isStreamLocked.current = !!streamClass?.writable.locked;
       // 1.中断请求：流输出前中断
       if (!isStreaming.current) {
-        window.abortController.abort('用户中止了回答。');
+        window.abortController.abort("用户中止了回答。");
         // 流关闭(仅流输出前可用，输出中调用会报错)
         streamClass?.writable.close();
       } else {
@@ -248,17 +262,17 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     let newItems = [];
     const newMessages = messages.map(({ id, ...item }) => ({
       ...item,
-      role: item.status === 'local' ? item.status : 'assistant',
-      content: (item.message.chatContent || item.message.toolContent) ?? item.message,
-      loading: item.status === 'loading' && !streamClass?.readable.locked,
+      role: item.status === "local" ? item.status : "assistant",
+      content:
+        (item.message.chatContent || item.message.toolContent) ?? item.message,
+      loading: item.status === "loading" && !streamClass?.readable.locked,
     }));
 
     newItems = [...newMessages];
-
     return newItems.map(({ message, status, ...item }) => ({
       ...item,
       messageRender: (content) =>
-        status !== 'local' ? (
+        status !== "local" ? (
           !message.abortedReason ? (
             <div>
               {message.ctmpContent && (
@@ -275,19 +289,29 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                 </div>
               )}
 
-              <div style={{ background: 'auto' }}>
+              <div style={{ background: "auto" }}>
                 <MarkDownCmp
                   theme="onDark"
                   content={String(content)}
                   loading={agent.isRequesting()}
                 />
-                {status === 'success' && (
+                {status === "success" && (
                   <div className="messageFooterBox">
+                    {message.toolContent && (
+                      <Tooltip title="重新执行命令">
+                        <PlayCircleOutlined
+                          onClick={_.throttle(() => {
+                            setCommandExecutor(content);
+                          }, 300)}
+                        />
+                      </Tooltip>
+                    )}
+
                     <LikeOutlined
                       onClick={_.throttle(() => {
                         AMessage.success({
-                          key: 'thanks',
-                          content: '感谢您的支持',
+                          key: "thanks",
+                          content: "感谢您的支持",
                         });
                       }, 300)}
                     />
@@ -296,8 +320,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                       onClick={_.throttle(() => {
                         ClipboardUtil.writeText(content);
                         AMessage.success({
-                          key: 'copy',
-                          content: '复制成功',
+                          key: "copy",
+                          content: "复制成功",
                         });
                       }, 300)}
                     />
@@ -317,18 +341,18 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                 loading={agent.isRequesting()}
               />
             ) : (
-              <div style={{ display: 'inline-block', margin: '0 8px' }}>
+              <div style={{ display: "inline-block", margin: "0 8px" }}>
                 <div>{content}</div>
 
                 {/* 文件列表 */}
                 {!!message.chatFiles?.length && (
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexDirection: 'column',
+                      display: "flex",
+                      alignItems: "center",
+                      flexDirection: "column",
                       gap: 5,
-                      marginTop: '8px',
+                      marginTop: "8px",
                     }}
                   >
                     {message.chatFiles?.map((file, index) => (
