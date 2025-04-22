@@ -46,7 +46,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       <Form name="form_in_modal" layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={6}>
-            <Form.Item name="roles" label="角色">
+            <Form.Item name="role" label="角色">
               <Select placeholder="请选择" options={RoleOptions} />
             </Form.Item>
           </Col>
