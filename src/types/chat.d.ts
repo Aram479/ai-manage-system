@@ -1,7 +1,7 @@
-type TAiType = 'qwen' | 'deepseek'
-type TDeepSeekModel = "deepseek-chat" | "deepseek-reasoner"
-type TQwenModel = "qwen-plus" | "qwen-max"
-type TAllModel = TQwenModel | TDeepSeekModel | string
+type TAiType = "qwen" | "deepseek";
+type TDeepSeekModel = "deepseek-chat" | "deepseek-reasoner";
+type TQwenModel = "qwen-plus" | "qwen-max";
+type TAllModel = TQwenModel | TDeepSeekModel | string;
 
 interface ChatCompletionChunk {
   id: string;
@@ -45,10 +45,13 @@ interface ChatCompletionChunk {
 }
 
 type TResultStream = {
-  ctmpContent: string; // 思考内容
-  chatContent: string; // 对话内容
-  toolContent: string; // 工具内容(特指JSON数据)
-  ctmpLoadingMessage: string; // 思考loading
-  chatLoadngMessage: string; // 对话loading
+  ctmpContent?: string; // 思考内容
+  chatContent?: string; // 对话内容
+  toolContent?: string; // 工具内容(特指JSON数据)
+  ctmpLoadingMessage?: string; // 思考loading
+  chatLoadngMessage?: string; // 对话loading
   abortedReason?: string; // 中断内容
+  chatFiles?: import("antd").UploadFile<
+    import("openai/resources.mjs").FileObject
+  >[];
 };

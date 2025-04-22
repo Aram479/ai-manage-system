@@ -1,5 +1,4 @@
-import Assistant from "@/component/Assistant";
-import ConverMenu from "@/component/ConverMenu";
+import ConverMenu from "@/components/ConverMenu";
 import { Outlet } from "@umijs/max";
 import { Layout } from "antd";
 

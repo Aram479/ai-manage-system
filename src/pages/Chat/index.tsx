@@ -15,11 +15,11 @@ import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 
-import WelcomeCmp from "@/component/WelcomeCmp";
+import WelcomeCmp from "@/components/WelcomeCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import SenderHeader from "./cpns/SenderHeader";
-import { Ai_Options } from "@/constant/base.constant";
+import { Ai_Options } from "@/constant//base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";

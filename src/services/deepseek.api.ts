@@ -1,9 +1,9 @@
-import { XRequest } from "@ant-design/x";
-import OpenAI from "openai";
+import { XRequest } from '@ant-design/x';
+import OpenAI from 'openai';
 
 // deepseek-reasoner  deepseek-chat
 export const deepSeekXRequest = XRequest({
-  baseURL: "/api/chat/completions",
+  baseURL: '/api/chat/completions',
   // model: "deepseek-chat",
   dangerouslyApiKey: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
   fetch: (url, config) => {

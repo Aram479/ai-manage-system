@@ -15,9 +15,8 @@ import {
   DeliveryTypeOptions,
   GoodsOptions,
   PayTypeOptions,
-} from "@/constant/options.constant";
+} from "@/constant//options";
 import { useChatEvent } from "@/hooks/useChatEvent";
-import { OrderToolsEvents, TOrderTools } from "@/tools/orderTools";
 import dayjs from "dayjs";
 
 interface ICreateOrderModalCmp extends ModalProps {
@@ -77,18 +76,7 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
     }
   }, [open]);
 
-  useChatEvent<TOrderTools>((event) => {
-    if (event.event == OrderToolsEvents.Create_Order) {
-      form.setFieldsValue({
-        username: event.username,
-        goodsName: event.goodsName,
-        payType: event.payType,
-        deliveryType: event.deliveryType,
-        deliveryTime: dayjs(event.deliveryTime),
-      });
-      // handleSearch();
-    }
-  });
+  useChatEvent((event) => {});
 
   return (
     <div>

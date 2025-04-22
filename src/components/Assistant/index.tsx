@@ -1,16 +1,15 @@
-import _ from "lodash";
-import { Popover } from "antd";
-
-import styles from "./index.less";
-import ChatCmp from "./ChatCmp";
-import { ChromeOutlined } from "@ant-design/icons";
+import { ChromeOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
+import _ from 'lodash';
+import ChatCmp from './ChatCmp';
+import styles from './index.less';
 
 const Assistant = () => {
   return (
     <div className={styles.assistant}>
       <Popover
         placement="leftTop"
-        trigger={["click"]}
+        trigger={['click']}
         content={<ChatCmp />}
         classNames={{
           body: styles.popoverContent,

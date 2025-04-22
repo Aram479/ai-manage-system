@@ -1,14 +1,19 @@
-import { navigate_page, update_system_title } from "./baseTools";
-import { search_User } from "./userTools";
-import { search_Role, export_Role } from "./roleTools";
-import { search_Order, create_Order } from "./orderTools";
+import { BaseToolsFunctions, TBaseTools } from './baseTools';
+import { MenuToolsFunctions, TMenuTools } from './menuTools';
+import { SbomDeviateConfigToolsFunctions, TSbomDeviateConfigTools } from './sbomDeviateConfigTools';
+import { SbomEBUToolsFunctions, TSbomEBUTools } from './sbomEBUTools';
 
-export const allTools = [
-  navigate_page,
-  update_system_title,
-  search_User,
-  search_Role,
-  export_Role,
-  search_Order,
-  create_Order
-];
+export type TGlobalToolsEvent = TBaseTools | TSbomEBUTools | TSbomDeviateConfigTools | TMenuTools;
+
+// 合并所有工具函数集合
+const allToolsFunctions = {
+  ...BaseToolsFunctions,
+  ...SbomEBUToolsFunctions,
+  ...SbomDeviateConfigToolsFunctions,
+  ...MenuToolsFunctions,
+};
+
+// 动态调用所有工具函数
+export const allTools = (props: any) => {
+  return Object.values(allToolsFunctions).map((func) => func(props));
+};

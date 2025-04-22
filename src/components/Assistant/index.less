@@ -1,13 +1,15 @@
 .assistant {
   position: fixed;
-  bottom: 140px;
+  bottom: 100px;
   right: 0;
   z-index: 10000 !important;
 }
+
 .chatBox {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 
   .chatListBox {
     display: flex;
@@ -26,7 +28,8 @@
 }
 
 .popoverContent {
-  width: 400px;
-  max-height: 500px;
+  width: 600px;
+  max-height: 70vh;
   background-color: #f5f5f5 !important;
+  overflow-y: auto;
 }

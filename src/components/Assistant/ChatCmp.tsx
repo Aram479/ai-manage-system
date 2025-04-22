@@ -1,6 +1,10 @@
 import { useMemo, useRef, useState } from "react";
-import _ from "lodash";
+import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
+import { Bubble, Sender, SenderProps } from "@ant-design/x";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
+import { useModel } from "@umijs/max";
 import {
+  Badge,
   Button,
   ButtonProps,
   Dropdown,
@@ -8,19 +12,21 @@ import {
   GetProp,
   GetRef,
   Tooltip,
+  UploadFile,
 } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
-import { Bubble, Sender, SenderProps } from "@ant-design/x";
-import { Ai_Options } from "@/constant/base.constant";
+import _ from "lodash";
+import { Ai_Options } from "@/constant/base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
-import styles from "./index.less";
 import { allTools } from "@/tools";
+import SenderHeader from "@/pages/Chat/cpns/SenderHeader";
+import styles from "./index.less";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
 const ChatCmp = () => {
+  const { menuList, userMenus } = useModel("user");
+  const { chatUploadFiles } = useModel("chat");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
   const defaultModelInfo = Ai_Options[0];
   const [model, setModel] = useState<TAllModel>(
@@ -29,7 +35,8 @@ const ChatCmp = () => {
   const [currentAi, setCurrentAi] = useState(defaultModelInfo);
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
-
+  const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
   >([
@@ -53,7 +60,13 @@ const ChatCmp = () => {
         // top_p: 0.9, // 调整此值也可能影响简洁性
         model,
         // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
-        tools: currentTag?.id === "deep" ? undefined : allTools, // 深度思考不支持
+        tools:
+          currentTag?.id === "deep"
+            ? undefined
+            : allTools({
+                menuList,
+                userMenus,
+              }), // 深度思考不支持
         // tool_choice: 'auto',
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
@@ -117,6 +130,8 @@ const ChatCmp = () => {
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     setContent("");
     Ai_Primary.onRequest(message as any);
+    setUploadFiles([]);
+    setSenderHeaderOpen(false);
   };
 
   const handleStopChat: SenderProps["onCancel"] = () => {
@@ -143,6 +158,21 @@ const ChatCmp = () => {
     setCurrentTag(item);
     setModel(currentAi.model?.deep!);
   };
+
+  const handleUploadFile = async (files: UploadFile[]) => {
+    setUploadFiles(files);
+  };
+
+  // 输入框左侧图标
+  const attachmentsNode = (
+    <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
+      <Button
+        type="text"
+        icon={<PaperClipOutlined />}
+        onClick={() => setSenderHeaderOpen(!senderHeaderOpen)}
+      />
+    </Badge>
+  );
 
   return (
     <div className={styles.chatBox}>
@@ -187,6 +217,16 @@ const ChatCmp = () => {
         </Flex>
         <Sender
           value={content}
+          header={
+            <SenderHeader
+              files={uploadFiles}
+              open={senderHeaderOpen}
+              onUpload={handleUploadFile}
+              onOpenChange={setSenderHeaderOpen}
+            />
+          }
+          disabled={!!uploadFiles.find((item) => item.status === "uploading")}
+          prefix={attachmentsNode}
           placeholder={placeholder}
           loading={Ai_Primary.loading}
           onChange={setContent}

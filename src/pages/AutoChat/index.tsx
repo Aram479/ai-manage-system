@@ -15,12 +15,12 @@ import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 
-import WelcomeCmp from "@/component/WelcomeCmp";
+import WelcomeCmp from "@/components/WelcomeCmp";
 import styles from "./index.less";
 import _ from "lodash";
 import { chatsCrossMerge } from "@/utils/deepseek.utils";
 import SenderHeader from "./cpns/SenderHeader";
-import { Ai_Options } from "@/constant/base.constant";
+import { Ai_Options } from "@/constant//base";
 import useQwenXChat from "@/hooks/useQwenXChat";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
@@ -66,14 +66,14 @@ const AutoChatPage = () => {
     }
     // TODO 切换聊天类型时，消息不应该随时改变
     if (!Ai_Two.streamClass?.writable.locked && isAutoChat.current) {
-      Ai_Two.onRequest(messageData.chatContent);
+      Ai_Two.onRequest(messageData.chatContent || '');
     }
   };
 
   // AI2 对话完成事件
   const Ai_Two_SuccessAction = (messageData: TResultStream) => {
     // isAutoChat.current = true;
-    Ai_One.onRequest(messageData.chatContent);
+    Ai_One.onRequest(messageData.chatContent || '');
   };
 
   const requestConfig = {

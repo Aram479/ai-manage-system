@@ -1,6 +1,6 @@
 import "./global.less";
 import { type RequestConfig } from "@umijs/max";
-import Assistant from "./component/Assistant";
+import Assistant from "./components/Assistant";
 const { API_BASE_URL } = process.env;
 import routes from "../config/routes";
 

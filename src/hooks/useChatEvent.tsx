@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useModel } from "@umijs/max";
+import { useEffect } from 'react';
+import { useModel } from '@umijs/max';
 
 type TCallbackEvent = {
   [key: string]: any;
@@ -7,8 +7,8 @@ type TCallbackEvent = {
 };
 type TUseChatEvent<T = TCallbackEvent> = (eventInfo: T) => void;
 
-export const useChatEvent = <T = any>(callback: TUseChatEvent<T>) => {
-  const { events } = useModel("chat");
+export const useChatEvent = <T = any,>(callback: TUseChatEvent<T>) => {
+  const { events } = useModel('chat');
 
   // 执行分发器
   const handleCommandExecutor = () => {
