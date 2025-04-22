@@ -21,6 +21,11 @@ export default {
       changeOrigin: true,
       pathRewrite: { "^/api": "" },
     },
+    "/ali": {
+      target: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      changeOrigin: true,
+      pathRewrite: { "^/ali": "" },
+    },
   },
   uat: {
     "/api": {
