@@ -58,8 +58,8 @@ const update_system_title = (props: TToolsProps) => {
           },
           title: {
             type: "string",
-            description: "根据html+css语言，美化系统名称/系统标题",
-            enum: ["EBU Service Engineering Digital Platform"],
+            description:
+              "系统标题：必填项，根据html+css语言，美化系统名称/系统标题",
           },
         },
         required: ["name", "title"],

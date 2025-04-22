@@ -199,7 +199,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
         message: {
           ctmpContent: "",
           ctmpLoadingMessage: "",
-          chatContent: "欢迎使用通义千问",
+          chatContent: "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
           chatLoadngMessage: "",
           toolContent: "",
           abortedReason: "",

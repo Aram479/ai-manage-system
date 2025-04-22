@@ -4,7 +4,7 @@ import { useChatEvent } from "@/hooks/useChatEvent";
 import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
 
 const HeaderCmp = () => {
-  const [title, setTile] = useState("欢迎来到Ant Design X Chat 系统");
+  const [title, setTile] = useState("智能管理系统");
 
   useChatEvent<TBaseTools>((event) => {
     if (event.name === BaseToolsEvents.Update_System_Title) {
