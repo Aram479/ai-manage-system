@@ -8,7 +8,7 @@ export type TBaseTools = ExtractFunctionParameters<
   typeof BaseToolsFunctions
 >[keyof typeof BaseToolsFunctions];
 
-const eventProperties = (props: any) => {
+const eventProperties = (props: TToolsProps) => {
   const { userMenus } = props;
 
   return {
@@ -20,7 +20,7 @@ const eventProperties = (props: any) => {
   } as const;
 };
 
-const navigate_page = (props?: any) => {
+const navigate_page = (props: TToolsProps) => {
   return {
     type: "function",
     function: {
@@ -42,7 +42,7 @@ const navigate_page = (props?: any) => {
   } as const;
 };
 
-const update_system_title = (props?: any) => {
+const update_system_title = (props: TToolsProps) => {
   return {
     type: "function",
     function: {

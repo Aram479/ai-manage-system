@@ -10,7 +10,7 @@ type JSONSchemaToType<T> = T extends { type: 'object'; properties: infer P; requ
 type JSONSchemaPropertyToType<T> =
   // 枚举类型
   T extends { type: 'string'; enum: infer E }
-    ? E[number] // 映射为联合类型
+    ? E[number] extends {value: string} ? E[number]['value'] : E[number] // 映射为联合类型
     : // 数组类型
     T extends { type: 'array'; items: infer I }
     ? JSONSchemaPropertyToType<I>[] // 递归处理数组元素

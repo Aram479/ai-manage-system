@@ -52,7 +52,10 @@ const ChatCmp = () => {
   const isDeep = useRef(false);
 
   const defaultRequestConfig = useMemo(() => {
-    console.log("model", model);
+    const toolsProps = {
+      menuList,
+      userMenus,
+    };
     return {
       requestBody: {
         stream: true,
@@ -61,13 +64,7 @@ const ChatCmp = () => {
         // top_p: 0.9, // 调整此值也可能影响简洁性
         model,
         // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
-        tools:
-          currentTag?.id === "deep"
-            ? undefined
-            : allTools({
-                menuList,
-                userMenus,
-              }), // 深度思考不支持
+        tools: currentTag?.id === "deep" ? undefined : allTools(toolsProps), // 深度思考不支持tools
         // tool_choice: 'auto',
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),

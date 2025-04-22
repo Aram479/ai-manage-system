@@ -3,6 +3,10 @@ import { Button, Col, DatePicker, Form, FormProps, Input, Row } from "antd";
 import dayjs from "dayjs";
 import CreateOrderModalCmp from "./CreateOrderModalCmp";
 import { useState } from "react";
+import {
+  OrderManageToolsEvents,
+  TOrderManageTools,
+} from "@/tools/orderManageTools";
 
 interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
@@ -25,7 +29,17 @@ const SearchForm = (props: Partial<ISearchForm>) => {
     onReset?.({});
   };
 
-  // useChatEvent
+  useChatEvent<TOrderManageTools>((event) => {
+    if (event.name === OrderManageToolsEvents.Search_Order) {
+      const chatData = event.data;
+      form.setFieldsValue({
+        ...chatData,
+        createTime: chatData?.createTime
+          ? dayjs(chatData?.createTime)
+          : undefined,
+      });
+    }
+  });
 
   return (
     <div className="searchFormCmp">

@@ -29,26 +29,39 @@ export const GoodsOptions = [
   },
 ];
 
-export const PayTypes = ["weChat", "alipay"] as const; // tools的定义需要用
 export const PayTypeOptions = [
   {
     label: "微信",
-    value: PayTypes[0],
+    value: "weChat",
   },
   {
     label: "支付宝",
-    value: PayTypes[1],
+    value: "alipay",
   },
 ];
 
-export const DeliveryTypes = ["home", "self"] as const;
 export const DeliveryTypeOptions = [
   {
     label: "送货上门",
-    value: DeliveryTypes[0],
+    value: "home",
   },
   {
     label: "商品自提",
-    value: DeliveryTypes[1],
+    value: "self",
+  },
+];
+
+export const RoleOptions = [
+  {
+    label: "普通用户",
+    value: "user",
+  },
+  {
+    label: "组织管理员",
+    value: "leader",
+  },
+  {
+    label: "系统管理员",
+    value: "admin",
   },
 ];

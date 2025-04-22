@@ -8,7 +8,7 @@ export type TMenuTools = ExtractFunctionParameters<
   typeof MenuToolsFunctions
 >[keyof typeof MenuToolsFunctions];
 
-const eventProperties = (props: any) => {
+const eventProperties = (props: TToolsProps) => {
   return {
     path: {
       type: 'string',
@@ -18,7 +18,7 @@ const eventProperties = (props: any) => {
   } as const;
 };
 
-const menuProperties = (props: any) => {
+const menuProperties = (props: TToolsProps) => {
   console.log(props);
   const { userMenus } = props;
   return {

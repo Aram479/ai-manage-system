@@ -55,3 +55,8 @@ type TResultStream = {
     import("openai/resources.mjs").FileObject
   >[];
 };
+
+type TToolsProps = {
+  menuList?: any[];
+  userMenus?: Extract<typeof import("../../config/routes")["default"], any[]>;
+};

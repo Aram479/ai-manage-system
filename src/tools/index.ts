@@ -1,19 +1,23 @@
-import { BaseToolsFunctions, TBaseTools } from './baseTools';
-import { MenuToolsFunctions, TMenuTools } from './menuTools';
-import { SbomDeviateConfigToolsFunctions, TSbomDeviateConfigTools } from './sbomDeviateConfigTools';
-import { SbomEBUToolsFunctions, TSbomEBUTools } from './sbomEBUTools';
+import { BaseToolsFunctions, TBaseTools } from "./baseTools";
+import {
+  OrderManageToolsFunctions,
+  TOrderManageTools,
+} from "./orderManageTools";
+import { TUserManageTools, UserManageToolsFunctions } from "./userManageTools";
 
-export type TGlobalToolsEvent = TBaseTools | TSbomEBUTools | TSbomDeviateConfigTools | TMenuTools;
+export type TGlobalToolsEvent =
+  | TBaseTools
+  | TUserManageTools
+  | TOrderManageTools;
 
 // 合并所有工具函数集合
 const allToolsFunctions = {
   ...BaseToolsFunctions,
-  ...SbomEBUToolsFunctions,
-  ...SbomDeviateConfigToolsFunctions,
-  ...MenuToolsFunctions,
+  ...UserManageToolsFunctions,
+  ...OrderManageToolsFunctions,
 };
 
 // 动态调用所有工具函数
-export const allTools = (props: any) => {
+export const allTools = (props: TToolsProps) => {
   return Object.values(allToolsFunctions).map((func) => func(props));
 };

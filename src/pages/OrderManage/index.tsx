@@ -10,6 +10,10 @@ import useTableColFilter from "@/hooks/useTableColFilter";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ColumnType } from "antd/es/table";
 import CreateOrderModalCmp from "./cpns/CreateOrderModalCmp";
+import {
+  OrderManageToolsEvents,
+  TOrderManageTools,
+} from "@/tools/orderManageTools";
 
 type IDataType = any;
 
@@ -119,7 +123,11 @@ const OrderManagePage = () => {
     getEntityListReq();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
-  // useChatEvent
+  useChatEvent<TOrderManageTools>((event) => {
+    if (event.name === OrderManageToolsEvents.Create_Order) {
+      setCreateOrderOpen(true);
+    }
+  });
 
   return (
     <div className={`${styles.orderManagePage} dap-main-content`}>

@@ -18,6 +18,10 @@ import {
 } from "@/constant//options";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import dayjs from "dayjs";
+import {
+  OrderManageToolsEvents,
+  TOrderManageTools,
+} from "@/tools/orderManageTools";
 
 interface ICreateOrderModalCmp extends ModalProps {
   onOk?: (data?: any) => void;
@@ -76,7 +80,21 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
     }
   }, [open]);
 
-  useChatEvent((event) => {});
+  useChatEvent<TOrderManageTools>((event) => {
+    if (event.name === OrderManageToolsEvents.Create_Order) {
+      const chatData = event.data;
+      form.setFieldsValue({
+        ...chatData,
+        deliveryTime: chatData?.deliveryTime
+          ? dayjs(chatData?.deliveryTime)
+          : undefined,
+      });
+      if(chatData?.goodsName) {
+        const currentGood = GoodsOptions.find(item=> item.value === chatData.goodsName)
+        handleGoodsChange(chatData?.goodsName, currentGood)
+      }
+    }
+  });
 
   return (
     <div>
