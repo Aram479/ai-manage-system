@@ -1,15 +1,15 @@
 import { RoleOptions } from "@/constant/options";
 
 /* 事件集合 */
-export enum UserManageToolsEvents {
-  Search_User = "Search_User",
-  Export_UserList = "Export_UserList",
+export enum RoleManageToolsEvents {
+  Search_Role = "Search_Role",
+  Export_RoleList = "Export_RoleList",
 }
 
 /* 整合 结果类型 */
-export type TUserManageTools = ExtractFunctionParameters<
-  typeof UserManageToolsFunctions
->[keyof typeof UserManageToolsFunctions];
+export type TRoleManageTools = ExtractFunctionParameters<
+  typeof RoleManageToolsFunctions
+>[keyof typeof RoleManageToolsFunctions];
 
 // 事件统一字段
 const eventProperties = (props: TToolsProps) => {
@@ -17,7 +17,7 @@ const eventProperties = (props: TToolsProps) => {
     path: {
       type: "string",
       description: "目标页面路径",
-      enum: ["/UserManage"],
+      enum: ["/RoleManage"],
     },
   } as const;
 };
@@ -25,13 +25,9 @@ const eventProperties = (props: TToolsProps) => {
 // 搜索字段
 const searchProperties = (props: TToolsProps) => {
   return {
-    user: {
-      type: "string",
-      description: "用户名称",
-    },
     role: {
       type: "string",
-      description: "用户角色，值为某项的value",
+      description: "用户角色：值为value字段",
       enum: RoleOptions,
     },
     createTime: {
@@ -42,12 +38,12 @@ const searchProperties = (props: TToolsProps) => {
   } as const;
 };
 
-const search_user = (props?: any) => {
+const search_role = (props?: any) => {
   return {
     type: "function",
     function: {
-      name: UserManageToolsEvents.Search_User,
-      description: "搜索用户数据",
+      name: RoleManageToolsEvents.Search_Role,
+      description: "搜索角色数据",
       parameters: {
         type: "object",
         properties: {
@@ -55,7 +51,7 @@ const search_user = (props?: any) => {
           name: {
             type: "string",
             description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
-            enum: [UserManageToolsEvents.Search_User],
+            enum: [RoleManageToolsEvents.Search_Role],
           },
           // 定义此项时，将不支持页面跳转
           // toolType: {
@@ -69,6 +65,7 @@ const search_user = (props?: any) => {
             properties: {
               ...searchProperties(props),
             },
+            required: [],
           },
         },
         required: ["name", "data"],
@@ -77,12 +74,12 @@ const search_user = (props?: any) => {
   } as const;
 };
 
-const export_userList = (props?: any) => {
+const export_roleList = (props?: any) => {
   return {
     type: "function",
     function: {
-      name: UserManageToolsEvents.Export_UserList,
-      description: "导出用户数据",
+      name: RoleManageToolsEvents.Export_RoleList,
+      description: "导出角色数据",
       parameters: {
         type: "object",
         properties: {
@@ -90,7 +87,7 @@ const export_userList = (props?: any) => {
           name: {
             type: "string",
             description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
-            enum: [UserManageToolsEvents.Export_UserList],
+            enum: [RoleManageToolsEvents.Export_RoleList],
           },
           // 定义此项时，将不支持页面跳转
           toolType: {
@@ -105,7 +102,7 @@ const export_userList = (props?: any) => {
   } as const;
 };
 
-export const UserManageToolsFunctions = {
-  search_user,
-  export_userList,
+export const RoleManageToolsFunctions = {
+  search_role,
+  export_roleList,
 } as const;

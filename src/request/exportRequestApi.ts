@@ -7,7 +7,7 @@ export const exportUserListApi = () => {
     () => {
       message.loading({
         key: "export",
-        content: "加载中...",
+        content: "导出用户中...",
         duration: 0,
       });
       return new Promise((resolve, reject) => {
@@ -37,7 +37,7 @@ export const exportOrderListApi = () => {
     () => {
       message.loading({
         key: "export",
-        content: "加载中...",
+        content: "导出订单中...",
         duration: 0,
       });
       return new Promise((resolve, reject) => {
@@ -51,6 +51,36 @@ export const exportOrderListApi = () => {
       fetchKey: () => Date.now().toString(),
       onSuccess: (file) => {
         window.open("/orderList.xlsx");
+        message.destroy("export");
+      },
+      onError: () => {
+        message.destroy("export");
+      },
+    }
+  );
+  return request;
+};
+
+// 模拟导出角色列表
+export const exportRoleListApi = () => {
+  const request = useRequest(
+    () => {
+      message.loading({
+        key: "export",
+        content: "导出角色中...",
+        duration: 0,
+      });
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve(true);
+        }, 1000);
+      });
+    },
+    {
+      manual: true,
+      fetchKey: () => Date.now().toString(),
+      onSuccess: (file) => {
+        window.open("/roleList.xlsx");
         message.destroy("export");
       },
       onError: () => {

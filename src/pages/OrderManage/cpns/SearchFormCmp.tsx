@@ -32,12 +32,12 @@ const SearchForm = (props: Partial<ISearchForm>) => {
   useChatEvent<TOrderManageTools>((event) => {
     if (event.name === OrderManageToolsEvents.Search_Order) {
       const chatData = event.data;
-      form.setFieldsValue({
-        ...chatData,
-        createTime: chatData?.createTime
-          ? dayjs(chatData?.createTime)
-          : undefined,
-      });
+      if (chatData) {
+        form.setFieldsValue({
+          ...chatData,
+          createTime: [dayjs(chatData.startTime), dayjs(chatData.endTime)],
+        });
+      }
     }
   });
 

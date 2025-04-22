@@ -8,13 +8,14 @@ import SearchFormCmp from "./cpns/SearchFormCmp";
 import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
 import { useChatEvent } from "@/hooks/useChatEvent";
+import { exportRoleListApi } from "@/request/exportRequestApi";
 
 type IDataType = any;
 
 // MBOMPage页面
 const RoleManagePage = () => {
   const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
-
+  const exportRoleListReq = exportRoleListApi();
   const [tableData, setTableData] = useState<IDataType[]>([]);
   const [searchData, setSearchData] = useState({});
   // 整合搜索条件
@@ -110,7 +111,11 @@ const RoleManagePage = () => {
       </Card>
       <Card title={"结果"}>
         <div className="sbom-btn-box">
-          <Button type="primary" icon={<ExportOutlined />}>
+          <Button
+            type="primary"
+            icon={<ExportOutlined />}
+            onClick={exportRoleListReq.run}
+          >
             导出
           </Button>
         </div>

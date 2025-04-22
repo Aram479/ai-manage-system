@@ -1,16 +1,11 @@
+import { RoleOptions } from "@/constant/options";
+import { useChatEvent } from "@/hooks/useChatEvent";
 import {
-  Button,
-  Col,
-  DatePicker,
-  Form,
-  FormProps,
-  Input,
-  Row,
-  Select,
-  SelectProps,
-} from "antd";
+  RoleManageToolsEvents,
+  TRoleManageTools,
+} from "@/tools/roleManageTools";
+import { Button, Col, DatePicker, Form, FormProps, Row, Select } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
 
 interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
@@ -22,7 +17,6 @@ const { RangePicker } = DatePicker;
 const SearchForm = (props: Partial<ISearchForm>) => {
   const { onSearch, onReset } = props;
   const [form] = Form.useForm();
-  const [roleOptions, setRoleOptions] = useState<SelectProps["options"]>([]);
   const handleSearch = () => {
     const values = form.getFieldsValue();
     onSearch?.(values);
@@ -33,7 +27,19 @@ const SearchForm = (props: Partial<ISearchForm>) => {
     onReset?.({});
   };
 
-  // useChatEvent
+  useChatEvent<TRoleManageTools>((event) => {
+    if (event.name === RoleManageToolsEvents.Search_Role) {
+      const chatData = event.data;
+      if (chatData) {
+        form.setFieldsValue({
+          ...chatData,
+          createTime: chatData.createTime
+            ? dayjs(chatData.createTime)
+            : undefined,
+        });
+      }
+    }
+  });
 
   return (
     <div className="searchFormCmp">
@@ -41,7 +47,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
         <Row gutter={24}>
           <Col span={6}>
             <Form.Item name="roles" label="角色">
-              <Select placeholder="请选择" options={roleOptions} />
+              <Select placeholder="请选择" options={RoleOptions} />
             </Form.Item>
           </Col>
           <Col span={6}>

@@ -32,16 +32,21 @@ const searchProperties = (props: TToolsProps) => {
   return {
     orderNo: {
       type: "string",
-      description: "订单号，命名规则：O[订单日期][订单排号]",
+      description: "订单号：必填项，命名规则：O[订单日期][订单排号]",
     },
     orderName: {
       type: "string",
       description: "订单名称",
     },
-    createTime: {
+    startTime: {
       type: "string",
       format: "date",
-      description: "创建时间 或者 构建时间 或者 Build date",
+      description: "订单开始时间",
+    },
+    endTime: {
+      type: "string",
+      format: "date",
+      description: "订单结束时间",
     },
   } as const;
 };
@@ -55,12 +60,12 @@ const createOrderProperties = (props: TToolsProps) => {
     },
     goodsName: {
       type: "string",
-      description: "商品的名称，必填项，值为value字段",
+      description: "商品的名称：必填项，值为value字段",
       enum: GoodsOptions,
     },
     payType: {
       type: "string",
-      description: "用户支付方式，必填项，值为value字段",
+      description: "用户支付方式：必填项，值为value字段",
       enum: PayTypeOptions,
     },
     deliveryType: {
@@ -166,11 +171,11 @@ const export_orderList = (props?: any) => {
           // 定义此项时，将不支持页面跳转
           toolType: {
             type: "string",
-            description: "工具类型，api：调用接口",
+            description: "工具类型: 必填项，api：调用接口",
             enum: ["api"],
           },
         },
-        required: ["name"],
+        required: ["name", "toolType"],
       },
     },
   } as const;
