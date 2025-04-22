@@ -1,8 +1,6 @@
 import "./global.less";
 import { type RequestConfig } from "@umijs/max";
-import Assistant from "./components/Assistant";
 const { API_BASE_URL } = process.env;
-import routes from "../config/routes";
 
 export const request: RequestConfig = {
   timeout: 60 * 60 * 1000,
@@ -60,9 +58,3 @@ export const request: RequestConfig = {
     ],
   ],
 };
-
-export async function getInitialState() {
-  return {
-    routes, // 将路由信息注入到 initialState
-  };
-}

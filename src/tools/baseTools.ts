@@ -1,6 +1,6 @@
 export enum BaseToolsEvents {
-  Navigate_Page = 'Navigate_Page',
-  Update_System_Title = 'Update_System_Title',
+  Navigate_Page = "Navigate_Page",
+  Update_System_Title = "Update_System_Title",
 }
 
 /* 整合 结果类型 */
@@ -13,8 +13,8 @@ const eventProperties = (props: any) => {
 
   return {
     path: {
-      type: 'string',
-      description: '目标页面路径',
+      type: "string",
+      description: "目标页面路径",
       enum: userMenus,
     },
   } as const;
@@ -22,21 +22,21 @@ const eventProperties = (props: any) => {
 
 const navigate_page = (props?: any) => {
   return {
-    type: 'function',
+    type: "function",
     function: {
       name: BaseToolsEvents.Navigate_Page,
-      description: '跳转到指定系统页面',
+      description: "跳转到指定系统页面",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
           ...eventProperties(props),
           name: {
-            type: 'string',
-            description: '事件名称', // 设置 "必填" 二字，AI才会保证输出此字段
+            type: "string",
+            description: "事件名称", // 设置 "必填" 二字，AI才会保证输出此字段
             enum: [BaseToolsEvents.Navigate_Page],
           },
         },
-        required: ['name', 'path'],
+        required: ["name", "path"],
       },
     },
   } as const;
@@ -44,25 +44,25 @@ const navigate_page = (props?: any) => {
 
 const update_system_title = (props?: any) => {
   return {
-    type: 'function',
+    type: "function",
     function: {
       name: BaseToolsEvents.Update_System_Title,
-      description: '根据html+css语言，修改当前系统名称/系统标题或者样式',
+      description: "根据html+css语言，修改当前系统名称/系统标题或者样式",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
           name: {
-            type: 'string',
-            description: '事件名称', // 设置 "必填" 二字，AI才会保证输出此字段
+            type: "string",
+            description: "事件名称", // 设置 "必填" 二字，AI才会保证输出此字段
             enum: [BaseToolsEvents.Update_System_Title],
           },
           title: {
-            type: 'string',
-            description: '根据html+css语言，美化系统名称/系统标题',
-            enum: ['EBU Service Engineering Digital Platform'],
+            type: "string",
+            description: "根据html+css语言，美化系统名称/系统标题",
+            enum: ["EBU Service Engineering Digital Platform"],
           },
         },
-        required: ['name', 'title'],
+        required: ["name", "title"],
       },
     },
   } as const;

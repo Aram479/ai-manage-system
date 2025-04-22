@@ -1,5 +1,3 @@
-import { useChatEvent } from "@/hooks/useChatEvent";
-import { RoleToolsEvents, TRoleTools } from "@/tools/roleTools";
 import {
   Button,
   Col,
@@ -35,16 +33,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
     onReset?.({});
   };
 
-  useChatEvent<TRoleTools>((event) => {
-    if (event.event == RoleToolsEvents.Search_Role) {
-      setRoleOptions(event.roles);
-      form.setFieldsValue({
-        roles: event.roles?.[0].value,
-        createTime: dayjs(event.createTime),
-      });
-      handleSearch();
-    }
-  });
+  // useChatEvent
 
   return (
     <div className="searchFormCmp">

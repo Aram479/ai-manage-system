@@ -185,7 +185,7 @@ const ChatCmp = () => {
         />
         <Flex gap="8px">
           {messageTags.map((item) => (
-            <Tooltip title={item.desc} placement="top">
+            <Tooltip key={item.id} title={item.desc} placement="top">
               <Button
                 {...item}
                 disabled={currentTag && currentTag?.id !== item.id}

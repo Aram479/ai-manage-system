@@ -1,5 +1,4 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
-import { OrderToolsEvents, TOrderTools } from "@/tools/orderTools";
 import { Button, Col, DatePicker, Form, FormProps, Input, Row } from "antd";
 import dayjs from "dayjs";
 import CreateOrderModalCmp from "./CreateOrderModalCmp";
@@ -26,16 +25,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
     onReset?.({});
   };
 
-  useChatEvent<TOrderTools>((event) => {
-    if (event.event == OrderToolsEvents.Search_Order) {
-      form.setFieldsValue({
-        orderNo: event.orderNo,
-        orderName: event.orderName,
-        createTime: [dayjs(event.startTime), dayjs(event.endTime)],
-      });
-      handleSearch();
-    }
-  });
+  // useChatEvent
 
   return (
     <div className="searchFormCmp">

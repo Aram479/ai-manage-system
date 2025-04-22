@@ -1,20 +1,12 @@
 import { Menu, MenuProps } from "antd";
-import {
-  history,
-  useModel,
-  useRouteProps,
-  useSelectedRoutes,
-} from "@umijs/max";
+import { history, useRouteData, useRouteProps, useSelectedRoutes } from "@umijs/max";
 import styles from "./index.less";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import _ from "lodash";
-import { getAllPaths } from "@/utils";
 
 interface IMenuCmp extends MenuProps {}
 
 const MenuCmp = (props: IMenuCmp) => {
-  const { initialState } = useModel("@@initialState");
-  const allroutes = initialState?.routes;
   const routes = useSelectedRoutes();
   const currentRoute = useRouteProps();
   // 查找routes下System的子route
@@ -36,9 +28,6 @@ const MenuCmp = (props: IMenuCmp) => {
     history.push(menuItem.key);
   };
 
-  useEffect(() => {
-    console.log(getAllPaths(allroutes));
-  }, [allroutes]);
   return (
     <div className={styles.menuCmp}>
       <Menu

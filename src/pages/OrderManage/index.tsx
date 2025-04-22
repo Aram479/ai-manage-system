@@ -10,7 +10,6 @@ import useTableColFilter from "@/hooks/useTableColFilter";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ColumnType } from "antd/es/table";
 import CreateOrderModalCmp from "./cpns/CreateOrderModalCmp";
-import { OrderToolsEvents, TOrderTools } from "@/tools/orderTools";
 
 type IDataType = any;
 
@@ -120,12 +119,7 @@ const OrderManagePage = () => {
     getEntityListReq();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
-  useChatEvent<TOrderTools>((event) => {
-    if (event.event == OrderToolsEvents.Create_Order) {
-      setCreateOrderOpen(true);
-      // handleSearch();
-    }
-  });
+  // useChatEvent
 
   return (
     <div className={`${styles.orderManagePage} dap-main-content`}>
