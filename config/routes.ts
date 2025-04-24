@@ -39,6 +39,14 @@ const routes: RoutesType = [
           title: "角色管理",
         },
       },
+      {
+        name: "WorkFlow",
+        path: "/WorkFlow",
+        component: "@/pages/WorkFlow",
+        meta: {
+          title: "工作流",
+        },
+      },
     ],
   },
   /* 聊天相关页面 */
