@@ -32,6 +32,7 @@
     "lodash": "^4.17.21",
     "openai": "^4.89.0",
     "query-string": "^9.1.1",
+    "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.1",
     "rehype-katex": "^7.0.1",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "@types/node": "^20.4.10",
     "@types/react": "^17.0.0",
+    "@types/react-dom": "^19.1.2",
     "@types/react-syntax-highlighter": "15.5.10",
     "@umijs/fabric": "^4.0.1",
     "click-to-react-component": "1.1.0",

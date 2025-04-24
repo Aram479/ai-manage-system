@@ -1,0 +1,14 @@
+.react-flow {
+  /* Custom Variables */
+  --xy-theme-selected: #f57dbd;
+  --xy-theme-hover: #c5c5c5;
+}
+
+.react-flow__node {
+  border: 1px solid #00000000;
+}
+
+.react-flow__node.selectable.selected {
+  border-color: var(--xy-theme-selected);
+  box-shadow: var(--xy-node-boxshadow-default);
+}

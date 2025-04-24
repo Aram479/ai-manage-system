@@ -1,10 +1,12 @@
 .baseNodeCmp {
   padding: 10px;
   background-color: #fff;
+  border-radius: 8px;
   .nodeBox {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    min-width: 250px;
+    gap: 10px;
     .labelBox {
       display: flex;
       align-items: center;
@@ -17,9 +19,36 @@
     }
     .descBox {
       color: #8c8c8d;
-      font-size: 14px;
+      font-size: 12px;
     }
     .container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      .commandsBox {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+        .command-item {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 5px;
+          font-size: 14px;
+          border-radius: 5px;
+          background-color: #f6f7fb;
+          .item-label {
+            font-weight: bold;
+          }
+          .item-desc {
+            padding: 0px 5px;
+            border-left: 1px solid #8f9094;
+            color: #8f9094;
+          }
+        }
+      }
     }
   }
 }
