@@ -1,12 +1,19 @@
 .baseNodeCmp {
-  padding: 10px;
   background-color: #fff;
   border-radius: 8px;
+
   .nodeBox {
     display: flex;
     flex-direction: column;
     min-width: 250px;
+    padding: 8px 0px;
     gap: 10px;
+
+    .labelBox,
+    .descBox,
+    .command-itemBox {
+      padding: 0px 10px;
+    }
     .labelBox {
       display: flex;
       align-items: center;
@@ -17,35 +24,46 @@
         font-size: 18px;
       }
     }
+
     .descBox {
       color: #8c8c8d;
       font-size: 12px;
     }
+
     .container {
       display: flex;
       flex-direction: column;
       gap: 5px;
+
       .commandsBox {
         display: flex;
         flex-direction: column;
         width: 100%;
+        padding-bottom: 10px;
         gap: 5px;
-        .command-item {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 5px;
-          font-size: 14px;
-          border-radius: 5px;
-          background-color: #f6f7fb;
-          .item-label {
-            font-weight: bold;
-          }
-          .item-desc {
-            padding: 0px 5px;
-            border-left: 1px solid #8f9094;
-            color: #8f9094;
+
+        .command-itemBox {
+          position: relative;
+
+          .command-item {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+            background-color: #f6f7fb;
+
+            .item-label {
+              font-weight: bold;
+            }
+
+            .item-desc {
+              padding: 0px 5px;
+              border-left: 1px solid #8f9094;
+              color: #8f9094;
+            }
           }
         }
       }

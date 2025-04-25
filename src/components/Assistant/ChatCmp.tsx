@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
@@ -24,7 +32,17 @@ import styles from "./index.less";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
-const ChatCmp = () => {
+export type TChatRef = {
+  sendChat: (message: string) => void;
+};
+interface IChatCmpProps {
+  isSender?: boolean;
+  content?: string;
+  onSuccess?: (messageData: TResultStream) => void;
+}
+
+const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
+  const { content: contentProp, isSender = true, onSuccess } = props;
   const { menuList, userMenus } = useModel("user");
   const { chatUploadFiles } = useModel("chat");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
@@ -108,6 +126,7 @@ const ChatCmp = () => {
   };
 
   const Ai_SuccessAction = (messageData: TResultStream) => {
+    onSuccess?.(messageData);
     // console.log("messageData", messageData);
   };
 
@@ -116,6 +135,7 @@ const ChatCmp = () => {
   }, [Ai_Primary?.messages]);
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
+    console.log("发送数据", message);
     setContent("");
     Ai_Primary.onRequest(message as any);
     setUploadFiles([]);
@@ -182,6 +202,16 @@ const ChatCmp = () => {
     setMessageTags(messageTags);
   }, [chatUploadFiles.current]);
 
+  // 暴露给父组件的属性
+  useImperativeHandle(ref, () => ({
+    sendChat: handleSendChat,
+  }));
+
+  // useEffect(() => {
+  //   if (contentProp) {
+  //     setContent(contentProp);
+  //   }
+  // }, [contentProp]);
   return (
     <div className={styles.chatBox}>
       <div className={styles.chatListBox}>
@@ -191,61 +221,71 @@ const ChatCmp = () => {
           items={newItems}
           roles={roles}
         />
-        <Flex gap="8px">
-          {messageTags.map((item) => (
-            <Tooltip key={item.id} title={item.desc} placement="top">
-              <Button
-                {...item}
-                disabled={
-                  (currentTag && currentTag?.id !== item.id) || item.disabled
-                }
-                color={currentTag?.id === item.id ? "primary" : undefined}
-                variant="outlined"
-                onClick={() => handleTagItem(item)}
-              />
-            </Tooltip>
-          ))}
-          <Dropdown
-            placement="top"
-            menu={{
-              items: Ai_Options,
-              onClick: (item: (typeof Ai_Options)[number]) => {
-                const newCurrentAiInfo = _.find(Ai_Options, ["key", item.key])!;
-                setModel(
-                  isDeep.current
-                    ? newCurrentAiInfo.model?.deep!
-                    : newCurrentAiInfo.model?.default!
-                );
-                setCurrentAi(newCurrentAiInfo!);
-              },
-            }}
-          >
-            <Button>
-              当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
-            </Button>
-          </Dropdown>
-        </Flex>
-        <Sender
-          value={content}
-          header={
-            <SenderHeader
-              files={uploadFiles}
-              open={senderHeaderOpen}
-              onUpload={handleUploadFile}
-              onOpenChange={setSenderHeaderOpen}
+        {isSender && (
+          <>
+            <Flex gap="8px">
+              {messageTags.map((item) => (
+                <Tooltip key={item.id} title={item.desc} placement="top">
+                  <Button
+                    {...item}
+                    disabled={
+                      (currentTag && currentTag?.id !== item.id) ||
+                      item.disabled
+                    }
+                    color={currentTag?.id === item.id ? "primary" : undefined}
+                    variant="outlined"
+                    onClick={() => handleTagItem(item)}
+                  />
+                </Tooltip>
+              ))}
+              <Dropdown
+                placement="top"
+                menu={{
+                  items: Ai_Options,
+                  onClick: (item: (typeof Ai_Options)[number]) => {
+                    const newCurrentAiInfo = _.find(Ai_Options, [
+                      "key",
+                      item.key,
+                    ])!;
+                    setModel(
+                      isDeep.current
+                        ? newCurrentAiInfo.model?.deep!
+                        : newCurrentAiInfo.model?.default!
+                    );
+                    setCurrentAi(newCurrentAiInfo!);
+                  },
+                }}
+              >
+                <Button>
+                  当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
+                </Button>
+              </Dropdown>
+            </Flex>
+            <Sender
+              value={content}
+              header={
+                <SenderHeader
+                  files={uploadFiles}
+                  open={senderHeaderOpen}
+                  onUpload={handleUploadFile}
+                  onOpenChange={setSenderHeaderOpen}
+                />
+              }
+              disabled={
+                !!uploadFiles.find((item) => item.status === "uploading")
+              }
+              prefix={attachmentsNode}
+              placeholder={placeholder}
+              loading={Ai_Primary.loading}
+              onChange={setContent}
+              onSubmit={handleSendChat}
+              onCancel={handleStopChat}
             />
-          }
-          disabled={!!uploadFiles.find((item) => item.status === "uploading")}
-          prefix={attachmentsNode}
-          placeholder={placeholder}
-          loading={Ai_Primary.loading}
-          onChange={setContent}
-          onSubmit={handleSendChat}
-          onCancel={handleStopChat}
-        />
+          </>
+        )}
       </div>
     </div>
   );
 };
 
-export default ChatCmp;
+export default forwardRef(ChatCmp);

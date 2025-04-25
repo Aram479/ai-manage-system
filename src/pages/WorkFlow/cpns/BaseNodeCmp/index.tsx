@@ -4,7 +4,11 @@ import {
   NodeProps,
   NodeTypes,
   Position,
+  useInternalNode,
   useNodeConnections,
+  useNodeId,
+  useNodesData,
+  useUpdateNodeInternals,
 } from "@xyflow/react";
 import React, { DOMAttributes, useCallback } from "react";
 import "./index.less";
@@ -27,40 +31,44 @@ const BaseNodeCmp = (props: Partial<BaseNodeProps & DOMAttributes<any>>) => {
     console.log(evt.target.value);
   }, []);
   return (
-    <div className="baseNodeCmp" {...props}>
-      <div className="nodeBox">
-        <div className="labelBox">
-          <div className="label-icon">
-            <ChromeOutlined />
+    <>
+      <div className="baseNodeCmp" onClick={props.onClick}>
+        <div className="nodeBox">
+          <div className="labelBox">
+            <div className="label-icon">
+              <ChromeOutlined />
+            </div>
+            <div className="label-text">{title}</div>
           </div>
-          <div className="label-text">{title}</div>
-        </div>
-        <div className="descBox">{desc}</div>
-        <div className="container">
-          {/* 指令列表 */}
-          <div className="commandsBox">
-            {list?.map((item, index) => (
-              <div key={item.label} className="command-item">
-                <div className="item-label">{item.label}</div>
-                {item.value && <div className="item-desc">{item.value}</div>}
-              </div>
-            ))}
+          <div className="descBox">{desc}</div>
+          <div className="container">
+            {/* 指令列表 */}
+            <div className="commandsBox">
+              {list?.map((item, index) => (
+                <div key={item.label} className="command-itemBox">
+                  <div className="command-item">
+                    <div className="item-label">{item.label}</div>
+                    {item.value && (
+                      <div className="item-desc">{item.value}</div>
+                    )}
+                  </div>
+                  {item.handles?.map((handleItem) => (
+                    <Handle
+                      key={handleItem.id}
+                      {...handleItem}
+                      // id={item.value}
+                      // type="source"
+                      // position={Position.Left}
+                      // isConnectable={isConnectable}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="a"
-        isConnectable={isConnectable}
-      />
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="b"
-        isConnectable={connections.length < maxLineCount}
-      />
-    </div>
+    </>
   );
 };
 

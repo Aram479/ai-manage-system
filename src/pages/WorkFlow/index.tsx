@@ -14,6 +14,7 @@ import {
   getConnectedEdges,
   ReactFlowProps,
   OnNodesDelete,
+  NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useState } from "react";
@@ -36,35 +37,42 @@ const WorkFlowPage = () => {
     {
       id: "2",
       type: "ClassNode",
-      position: { x: 500, y: 0 },
+      position: { x: 400, y: 0 },
       dragHandle: ".labelBox",
       data: {},
     },
     {
       id: "3",
+      type: "ClassNode",
+      position: { x: 800, y: 0 },
+      dragHandle: ".labelBox",
+      data: {},
+    },
+    {
+      id: "4",
       type: "EndNode",
-      position: { x: 1000, y: 0 },
+      position: { x: 1200, y: 0 },
       dragHandle: ".labelBox",
       data: {},
     },
   ]);
   // 连接线
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([
-    {
-      id: "1->2",
-      source: "1",
-      target: "2",
-      // label: "", // 连接线名称
-      // type: "step", // 连接线类型
-    },
-    {
-      id: "2->3",
-      source: "2",
-      target: "3",
-    },
+    // {
+    //   id: "1->2",
+    //   source: "1",
+    //   target: "2",
+    //   // label: "", // 连接线名称
+    //   // type: "step", // 连接线类型
+    // },
+    // {
+    //   id: "2->3",
+    //   source: "2",
+    //   target: "3",
+    // },
   ]);
 
-  const nodeTypes = { StartNode, ClassNode, EndNode };
+  const nodeTypes: NodeTypes = { StartNode, ClassNode, EndNode };
 
   // 删除中间连接线自动添加连接线
   const onNodesDelete = useCallback<OnNodesDelete>(
