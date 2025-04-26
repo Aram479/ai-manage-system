@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BaseNodeCmp from "../BaseNodeCmp";
 import {
-  Handle,
   Node,
   NodeProps,
   Position,
-  useNodeConnections,
+  useNodeId,
   useReactFlow,
 } from "@xyflow/react";
 import Portal from "@/components/Portal";
@@ -29,51 +28,16 @@ const ClassNode = (props: Partial<IClassNodeProps>) => {
     maxLineCount = 1,
   } = data!;
 
-  const { updateNode } = useReactFlow();
+  const nodeId = useNodeId();
+  const { updateNode, updateNodeData, getNodeConnections, getNode } =
+    useReactFlow();
+  const currentNodeData = getNode(nodeId!);
   const [isOpen, setIsOpen] = useState(false);
 
-  // 更新当前节点状态
-  const updateNodeAction = (node: Partial<Node>) => {
-    updateNode(props.id!, {
-      ...node,
-    });
-  };
+  const handleAddCommand = (formData: any) => {};
 
-  const handleConfirm = (formData: any) => {
-    const { message } = formData;
-    const newList: ClassNodeData["list"] = [];
-    if (message) {
-      newList.push({
-        label: "测试对话",
-        value: message,
-        handles: [
-          {
-            id: "handle-3",
-            type: "target",
-            position: Position.Left,
-            isConnectable: true,
-          },
-          {
-            id: "handle-4",
-            type: "source",
-            position: Position.Right,
-            isConnectable: true,
-          },
-        ],
-      });
-    }
-    updateNodeAction({
-      data: {
-        ...formData,
-        list: newList,
-      },
-    });
-    setIsOpen(false);
-  };
   useEffect(() => {
-    if (selected && !dragging) {
-      setIsOpen(true);
-    } else {
+    if (!selected || dragging) {
       setIsOpen(false);
     }
   }, [selected, dragging]);
@@ -86,8 +50,18 @@ const ClassNode = (props: Partial<IClassNodeProps>) => {
         desc={desc}
         maxLineCount={maxLineCount}
         list={list}
-        onClick={() => {
-          setIsOpen(true);
+        onAddClick={() => setIsOpen(true)}
+        onItemDelete={(deleteItem) => {
+          const nodeDataList =
+            (currentNodeData?.data.list as BaseNodeProps["list"]) ?? [];
+          console.log("nodeDataList", nodeDataList);
+          const newList = nodeDataList.filter(
+            (item) => item.id != deleteItem.id
+          );
+          updateNodeData(nodeId!, {
+            list: newList,
+          });
+          console.log("aaa", newList);
         }}
       />
       <Portal targetClassName="workflowPage">
@@ -98,7 +72,7 @@ const ClassNode = (props: Partial<IClassNodeProps>) => {
           onCancel={() => {
             setIsOpen(false);
           }}
-          onConfirm={handleConfirm}
+          onConfirm={handleAddCommand}
         />
       </Portal>
     </>

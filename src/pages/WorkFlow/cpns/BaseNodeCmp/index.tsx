@@ -1,20 +1,22 @@
-import {
-  Handle,
-  Node,
-  NodeProps,
-  NodeTypes,
-  Position,
-  useInternalNode,
-  useNodeConnections,
-  useNodeId,
-  useNodesData,
-  useUpdateNodeInternals,
-} from "@xyflow/react";
+import { Handle, useNodeConnections } from "@xyflow/react";
 import React, { DOMAttributes, useCallback } from "react";
 import "./index.less";
-import { ChromeOutlined } from "@ant-design/icons";
+import {
+  ChromeOutlined,
+  DeleteOutlined,
+  PlayCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { Tooltip } from "antd";
+import _ from "lodash";
 
-const BaseNodeCmp = (props: Partial<BaseNodeProps & DOMAttributes<any>>) => {
+type THandleProps = {
+  onAddClick?: (data?: any) => void;
+  onItemDelete?: (data?: any) => void;
+};
+const BaseNodeCmp = (
+  props: Partial<BaseNodeProps & (DOMAttributes<any> & THandleProps)>
+) => {
   const connections = useNodeConnections({
     handleType: "target",
   });
@@ -25,6 +27,8 @@ const BaseNodeCmp = (props: Partial<BaseNodeProps & DOMAttributes<any>>) => {
     list = [],
     maxLineCount = 0,
     isConnectable,
+    onAddClick,
+    onItemDelete,
   } = props;
   const handleStyle = { left: 10 };
   const onChange = useCallback((evt) => {
@@ -45,12 +49,22 @@ const BaseNodeCmp = (props: Partial<BaseNodeProps & DOMAttributes<any>>) => {
             {/* 指令列表 */}
             <div className="commandsBox">
               {list?.map((item, index) => (
-                <div key={item.label} className="command-itemBox">
+                <div key={item.id} className="command-itemBox">
                   <div className="command-item">
-                    <div className="item-label">{item.label}</div>
-                    {item.value && (
-                      <div className="item-desc">{item.value}</div>
-                    )}
+                    <div className="item-content">
+                      <div className="item-label">{item.label}</div>
+                      {item.value && (
+                        <div className="item-desc">{item.value}</div>
+                      )}
+                    </div>
+                    <div className="commandBox">
+                      <Tooltip title="执行命令">
+                        <PlayCircleOutlined onClick={item.onClick} />
+                      </Tooltip>
+                      <Tooltip title="删除命令">
+                        <DeleteOutlined onClick={() => onItemDelete?.(item)} />
+                      </Tooltip>
+                    </div>
                   </div>
                   {item.handles?.map((handleItem) => (
                     <Handle
@@ -64,6 +78,11 @@ const BaseNodeCmp = (props: Partial<BaseNodeProps & DOMAttributes<any>>) => {
                   ))}
                 </div>
               ))}
+            </div>
+            <div className="messageFooterBox">
+              <Tooltip title="新增指令">
+                <PlusOutlined onClick={onAddClick} />
+              </Tooltip>
             </div>
           </div>
         </div>

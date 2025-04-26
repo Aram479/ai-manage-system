@@ -3,7 +3,7 @@ import { Rule } from "antd/es/form";
 import { useEffect, useRef } from "react";
 import FormDetail from "./FormDetail";
 import ChatCmp, { TChatRef } from "@/components/Assistant/ChatCmp";
-import { useNodeConnections, useReactFlow } from "@xyflow/react";
+import { useNodeConnections, useNodeId, useReactFlow } from "@xyflow/react";
 
 interface IStartDetailProps {
   open?: boolean;
@@ -16,11 +16,7 @@ const { TextArea } = Input;
 
 const ClassDetail = (props: IStartDetailProps) => {
   const { open, title, data, onConfirm, onCancel } = props;
-  const connections = useNodeConnections({
-    handleId: "handle-4",
-    handleType: "source",
-  });
-  const { updateNodeData } = useReactFlow();
+  const { updateNodeData, getNodeConnections } = useReactFlow();
   const { isStart } = data;
   const chatRef = useRef<TChatRef>(null);
   const formRules: Record<string, Rule[]> = {
@@ -28,26 +24,28 @@ const ClassDetail = (props: IStartDetailProps) => {
   };
 
   const handleSuccess = (messageData: any) => {
-    console.log("messageData", messageData);
-    console.log("connections", connections);
-    if (connections.length) {
-      connections.forEach((item) => {
-        updateNodeData(item.target, {
-          isStart: true,
-        });
-      });
-    }
+    // TODO ：请增加分类器的列表处理后再处理success
+    console.log("data", data);
+    // const connections = getNodeConnections
+    // console.log("messageData", messageData);
+    // console.log("connections", connections);
+    // if (connections.length) {
+    //   connections.forEach((item) => {
+    //     updateNodeData(item.target, {
+    //       isStart: true,
+    //     });
+    //   });
+    // }
   };
 
-  useEffect(() => {
-    console.log("connections", connections);
-  }, [connections]);
   const items: TabsProps["items"] = [
     {
       key: "ClassDetail",
       label: "表单",
       forceRender: true,
-      children: <FormDetail data={data} onConfirm={onConfirm} />,
+      children: (
+        <FormDetail data={data} onCancel={onCancel} onConfirm={onConfirm} />
+      ),
     },
     {
       key: "Assistant",
@@ -61,9 +59,7 @@ const ClassDetail = (props: IStartDetailProps) => {
 
   useEffect(() => {
     if (isStart) {
-      if (isStart) {
-        chatRef.current?.sendChat(data.message);
-      }
+      chatRef.current?.sendChat(data.message);
     }
   }, [data]);
   return (

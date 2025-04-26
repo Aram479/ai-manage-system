@@ -49,20 +49,41 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 5px;
             padding: 5px;
             font-size: 14px;
             border-radius: 5px;
             background-color: #f6f7fb;
 
-            .item-label {
-              font-weight: bold;
-            }
+            .item-content {
+              display: flex;
+              align-items: center;
+              gap: 5px;
 
-            .item-desc {
-              padding: 0px 5px;
-              border-left: 1px solid #8f9094;
-              color: #8f9094;
+              .item-label {
+                font-weight: bold;
+              }
+
+              .item-desc {
+                padding: 0px 5px;
+                border-left: 1px solid #8f9094;
+                color: #8f9094;
+              }
+            }
+            .commandBox {
+              display: flex;
+              align-items: center;
+              justify-content: end;
+              gap: 5px;
+              font-size: 16px;
+
+              & > * {
+                cursor: pointer;
+                &:hover {
+                  color: #615ced;
+                }
+              }
             }
           }
         }
