@@ -1,26 +1,26 @@
-import { Position, useNodeId, useReactFlow } from "@xyflow/react";
+import { Node, Position, useNodeId, useReactFlow } from "@xyflow/react";
 import { Button, Col, Form, Row, Input } from "antd";
 import { Rule } from "antd/es/form";
 import { FormItemProps } from "antd/lib";
 import { DOMAttributes, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 type TFormData = {
-  message?: number;
+  message?: string;
 };
 
 interface IStartDetailProps {
-  data?: any;
   onCancel?: (data?: any) => void;
   onConfirm?: (data?: any) => void;
 }
 const { TextArea } = Input;
 
 const FormDetail = (props: IStartDetailProps) => {
-  const { data, onCancel, onConfirm } = props;
-  const nodeId = useNodeId();
+  const { onCancel, onConfirm } = props;
   const { updateNode, updateNodeData, getNodeConnections, getNode } =
-    useReactFlow();
-  const currentNodeData = getNode(nodeId!);
+    useReactFlow<Node<Partial<BaseNodeProps>>>();
+  const nodeId = useNodeId();
+  const currentNode = getNode(nodeId!);
   const [form] = Form.useForm<TFormData>();
   const [formItemProps, setFormItemProps] = useState<
     Record<keyof TFormData, FormItemProps>
@@ -31,28 +31,90 @@ const FormDetail = (props: IStartDetailProps) => {
       rules: [{ required: false }],
     },
   });
+  const resetAction = () => {
+    updateNodeData(nodeId!, {
+      formData: undefined,
+    });
+    form.resetFields();
+  };
 
-  const sourceHandleAction: (
-    handleId?: string
-  ) => Record<keyof TFormData, DOMAttributes<any>> = (handleId) => {
-    const formValues = form.getFieldsValue();
+  const sourceHandleAction: (info: {
+    handleId?: string;
+    message?: string;
+  }) => Record<keyof TFormData, DOMAttributes<any>> = ({
+    handleId,
+    message,
+  }) => {
     return {
       message: {
-        onClick: () => {
+        onClick: (clickItem) => {
+          // 必须重新定义，否则数据拿不到最新的
+          const changeCurrentNode = getNode(nodeId!);
           const connectionsByHandle = getNodeConnections({
             nodeId: nodeId!,
             handleId,
             type: "source",
           });
+
+          const nodeDataList =
+            (changeCurrentNode?.data.list as BaseNodeProps["list"]) ?? [];
+          const executeItem = nodeDataList.find(
+            (item) => item.id === clickItem.id
+          );
+          if (executeItem) {
+            executeItem.isStart = true;
+          }
           connectionsByHandle.forEach((item) => {
-            updateNodeData(item.target, {
-              isStart: true,
+            updateNodeData(item.source, {
+              execute: executeItem,
             });
           });
         },
       },
-      startDate: {},
     };
+  };
+
+  const createAction = async () => {
+    const values = await form.validateFields();
+    const newValues = {
+      ...values,
+    };
+    // const handleId = `${nodeId}-${formItemProps.message.name}`;
+    const itemId = uuidv4();
+    const rightId = uuidv4();
+    const leftId = uuidv4();
+    const handleItem: BaseNodeProps["list"][number] = {
+      id: itemId,
+      label: formItemProps.message.label as string,
+      value: newValues.message,
+      isStart: false,
+      handles: [
+        {
+          id: rightId, // `${handleId}-${Position.Right}`
+          type: "source",
+          position: Position.Right,
+          isConnectable: true,
+        },
+        {
+          id: leftId, // `${handleId}-${Position.Left}`
+          type: "target",
+          position: Position.Left,
+          isConnectable: true,
+        },
+      ],
+      ...sourceHandleAction({
+        handleId: rightId,
+        message: newValues.message,
+      })["message"],
+    };
+    const nodeDataList =
+      (currentNode?.data.list as BaseNodeProps["list"]) ?? [];
+    const newList = [...nodeDataList, handleItem];
+
+    updateNodeData(nodeId!, {
+      list: newList,
+    });
+    resetAction();
   };
 
   const updateAction = async () => {
@@ -60,42 +122,25 @@ const FormDetail = (props: IStartDetailProps) => {
     const newValues = {
       ...values,
     };
-    const valuesToKeys = Object.keys(newValues) as Array<keyof TFormData>;
-    const handleList = valuesToKeys
-      .filter((key) => newValues[key])
-      .map((key, index) => {
-        const handleId = `${nodeId}-${key}`;
-        const handleItem: BaseNodeProps["list"][number] = {
-          id: values[key],
-          label: formItemProps[key].label as string,
-          value: newValues[key],
-          handles: [
-            {
-              id: `${handleId}-${Position.Right}`,
-              type: "source",
-              position: Position.Right,
-              isConnectable: true,
-            },
-            {
-              id: `${handleId}-${Position.Left}`,
-              type: "target",
-              position: Position.Left,
-              isConnectable: true,
-            },
-          ],
-          ...sourceHandleAction(`${handleId}-${Position.Right}`)[key],
-        };
-        return handleItem;
-      });
 
-    const newList = (
-      (currentNodeData?.data.list as BaseNodeProps["list"]) ?? []
-    )?.concat(handleList);
+    const nodeDataList =
+      (currentNode?.data.list as BaseNodeProps["list"]) ?? [];
+    const index = nodeDataList.findIndex(
+      (item) => item.id === currentNode?.data.formData?.id
+    );
+    nodeDataList[index] = {
+      ...nodeDataList[index],
+      value: newValues.message,
+    };
 
     updateNodeData(nodeId!, {
-      ...newValues,
-      list: newList,
+      list: nodeDataList,
     });
+    resetAction();
+  };
+  const handleCancel = () => {
+    resetAction();
+    onCancel?.();
   };
 
   const handleConfirm = async () => {
@@ -103,21 +148,31 @@ const FormDetail = (props: IStartDetailProps) => {
     const newValues = {
       ...values,
     };
-    updateAction();
+    if (!currentNode?.data.formData) {
+      createAction();
+    } else {
+      updateAction();
+    }
     onConfirm?.(newValues);
   };
 
   useEffect(() => {
-    if (data) {
+    if (currentNode?.data.formData) {
       form.setFieldsValue({
-        ...data,
+        ...currentNode?.data.formData,
+        message: currentNode?.data.formData?.value,
       });
     }
-  }, [data]);
+  }, [currentNode?.data]);
 
+  useEffect(() => {
+    if (!currentNode?.selected) {
+      resetAction();
+    }
+  }, [currentNode?.selected]);
   return (
     <>
-      <Form name="form_in_modal" layout="vertical" form={form}>
+      <Form name="form_in_modal" layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={24}>
             <Form.Item {...formItemProps.message}>
@@ -127,7 +182,7 @@ const FormDetail = (props: IStartDetailProps) => {
         </Row>
       </Form>
       <div className="form-btn-box">
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={handleCancel}>取消</Button>
         <Button type="primary" onClick={handleConfirm}>
           确定
         </Button>

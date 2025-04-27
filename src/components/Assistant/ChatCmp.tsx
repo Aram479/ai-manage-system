@@ -127,7 +127,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   const Ai_SuccessAction = (messageData: TResultStream) => {
     onSuccess?.(messageData);
-    // console.log("messageData", messageData);
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {
@@ -135,8 +134,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   }, [Ai_Primary?.messages]);
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
-    console.log("发送数据", message);
-    setContent("");
     Ai_Primary.onRequest(message as any);
     setUploadFiles([]);
     setSenderHeaderOpen(false);

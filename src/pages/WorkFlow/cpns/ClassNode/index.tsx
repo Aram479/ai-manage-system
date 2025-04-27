@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import BaseNodeCmp from "../BaseNodeCmp";
-import {
-  Node,
-  NodeProps,
-  Position,
-  useNodeId,
-  useReactFlow,
-} from "@xyflow/react";
+import { Node, NodeProps, useNodeId, useReactFlow } from "@xyflow/react";
 import Portal from "@/components/Portal";
 import ClassDetail from "../ClassDetail";
 
@@ -32,9 +26,12 @@ const ClassNode = (props: Partial<IClassNodeProps>) => {
   const { updateNode, updateNodeData, getNodeConnections, getNode } =
     useReactFlow();
   const currentNodeData = getNode(nodeId!);
+  const [selectData, setSelectData] = useState<any>();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleAddCommand = (formData: any) => {};
+  const handleAddCommand = (formData: any) => {
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     if (!selected || dragging) {
@@ -51,24 +48,30 @@ const ClassNode = (props: Partial<IClassNodeProps>) => {
         maxLineCount={maxLineCount}
         list={list}
         onAddClick={() => setIsOpen(true)}
-        onItemDelete={(deleteItem) => {
+        onSelect={(data) => {
+          updateNode(nodeId!, {
+            selected: true,
+          });
+          updateNodeData(nodeId!, {
+            formData: data,
+          });
+          setIsOpen(true);
+        }}
+        onDelete={(deleteItem) => {
           const nodeDataList =
             (currentNodeData?.data.list as BaseNodeProps["list"]) ?? [];
-          console.log("nodeDataList", nodeDataList);
           const newList = nodeDataList.filter(
             (item) => item.id != deleteItem.id
           );
           updateNodeData(nodeId!, {
             list: newList,
           });
-          console.log("aaa", newList);
         }}
       />
       <Portal targetClassName="workflowPage">
         <ClassDetail
           open={isOpen}
           title={title}
-          data={data}
           onCancel={() => {
             setIsOpen(false);
           }}

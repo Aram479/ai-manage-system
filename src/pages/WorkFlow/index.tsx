@@ -50,8 +50,15 @@ const WorkFlowPage = () => {
     },
     {
       id: "4",
-      type: "EndNode",
+      type: "ClassNode",
       position: { x: 1200, y: 0 },
+      dragHandle: ".labelBox",
+      data: {},
+    },
+    {
+      id: "5",
+      type: "EndNode",
+      position: { x: 1500, y: 0 },
       dragHandle: ".labelBox",
       data: {},
     },

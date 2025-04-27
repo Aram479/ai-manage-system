@@ -12,7 +12,8 @@ import _ from "lodash";
 
 type THandleProps = {
   onAddClick?: (data?: any) => void;
-  onItemDelete?: (data?: any) => void;
+  onSelect?: (data?: any) => void;
+  onDelete?: (data?: any) => void;
 };
 const BaseNodeCmp = (
   props: Partial<BaseNodeProps & (DOMAttributes<any> & THandleProps)>
@@ -27,8 +28,10 @@ const BaseNodeCmp = (
     list = [],
     maxLineCount = 0,
     isConnectable,
+    isAddOper,
     onAddClick,
-    onItemDelete,
+    onSelect,
+    onDelete,
   } = props;
   const handleStyle = { left: 10 };
   const onChange = useCallback((evt) => {
@@ -50,7 +53,10 @@ const BaseNodeCmp = (
             <div className="commandsBox">
               {list?.map((item, index) => (
                 <div key={item.id} className="command-itemBox">
-                  <div className="command-item">
+                  <div
+                    className="command-item"
+                    onClick={() => onSelect?.(item)}
+                  >
                     <div className="item-content">
                       <div className="item-label">{item.label}</div>
                       {item.value && (
@@ -59,10 +65,20 @@ const BaseNodeCmp = (
                     </div>
                     <div className="commandBox">
                       <Tooltip title="执行命令">
-                        <PlayCircleOutlined onClick={item.onClick} />
+                        <PlayCircleOutlined
+                          onClick={(e) => {
+                            item.onClick?.(item);
+                            e.stopPropagation();
+                          }}
+                        />
                       </Tooltip>
                       <Tooltip title="删除命令">
-                        <DeleteOutlined onClick={() => onItemDelete?.(item)} />
+                        <DeleteOutlined
+                          onClick={(e) => {
+                            onDelete?.(item);
+                            e.stopPropagation();
+                          }}
+                        />
                       </Tooltip>
                     </div>
                   </div>
@@ -79,11 +95,13 @@ const BaseNodeCmp = (
                 </div>
               ))}
             </div>
-            <div className="messageFooterBox">
-              <Tooltip title="新增指令">
-                <PlusOutlined onClick={onAddClick} />
-              </Tooltip>
-            </div>
+            {onAddClick && (
+              <div className="messageFooterBox">
+                <Tooltip title="新增指令">
+                  <PlusOutlined onClick={onAddClick} />
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -160,7 +160,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
             cmptTime.current = 0;
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              props.onSuccess?.(result);
+              props.onSuccess?.(chatList);
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器
@@ -199,7 +199,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
         message: {
           ctmpContent: "",
           ctmpLoadingMessage: "",
-          chatContent: "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
+          chatContent:
+            "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
           chatLoadngMessage: "",
           toolContent: "",
           abortedReason: "",
