@@ -93,13 +93,11 @@ const FormDetail = (props: IStartDetailProps) => {
           id: rightId, // `${handleId}-${Position.Right}`
           type: "source",
           position: Position.Right,
-          isConnectable: true,
         },
         {
           id: leftId, // `${handleId}-${Position.Left}`
           type: "target",
           position: Position.Left,
-          isConnectable: true,
         },
       ],
       ...sourceHandleAction({

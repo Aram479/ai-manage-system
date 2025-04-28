@@ -12,7 +12,7 @@ export const Ai_Options: (MenuItemType & {
     key: "qwen",
     label: "通义千问",
     model: {
-      default: "qwen-max", // qwen-max qwen-plus qwen-vl-max qwen-vl-max-latest qwq-plus-latest qwen-vl-plus qwen-long(处理文件)
+      default: "qwen-max-latest", // qwen-max qwen-plus qwen-vl-max qwen-vl-max-latest qwq-plus-latest qwen-vl-plus qwen-long(处理文件)
       autoChat: "qwen-plus",
       deep: "qwq-plus", // deepseek-r1(deepseek) qwq-plus(通义 深度思考)
     },

@@ -1,5 +1,11 @@
-import { Handle, useNodeConnections } from "@xyflow/react";
-import React, { DOMAttributes, useCallback } from "react";
+import {
+  Handle,
+  Node,
+  useNodeConnections,
+  useNodeId,
+  useReactFlow,
+} from "@xyflow/react";
+import React, { DOMAttributes, useCallback, useEffect, useMemo } from "react";
 import "./index.less";
 import {
   ChromeOutlined,
@@ -18,8 +24,16 @@ type THandleProps = {
 const BaseNodeCmp = (
   props: Partial<BaseNodeProps & (DOMAttributes<any> & THandleProps)>
 ) => {
+  const nodeId = useNodeId();
   const connections = useNodeConnections({
-    handleType: "target",
+    id: nodeId!,
+    handleType: "source",
+  });
+  const { updateNode, updateNodeData, getNodeConnections, getNode } =
+    useReactFlow<Node<Partial<BaseNodeProps>>>();
+  const nodeConnections = getNodeConnections({
+    nodeId: nodeId!,
+    type: "source",
   });
   const {
     data,
@@ -33,10 +47,7 @@ const BaseNodeCmp = (
     onSelect,
     onDelete,
   } = props;
-  const handleStyle = { left: 10 };
-  const onChange = useCallback((evt) => {
-    console.log(evt.target.value);
-  }, []);
+
   return (
     <>
       <div className="baseNodeCmp" onClick={props.onClick}>
@@ -45,7 +56,11 @@ const BaseNodeCmp = (
             <div className="label-icon">
               <ChromeOutlined />
             </div>
-            <div className="label-text">{title}</div>
+            <div className="label-text">
+              {title}
+              {connections.length}
+              {nodeConnections.length}
+            </div>
           </div>
           <div className="descBox">{desc}</div>
           <div className="container">
@@ -83,9 +98,16 @@ const BaseNodeCmp = (
                     </div>
                   </div>
                   {item.handles?.map((handleItem) => (
+                    // source isConnectable最大支持连接一个
                     <Handle
                       key={handleItem.id}
                       {...handleItem}
+                      isConnectable={
+                        handleItem.isConnectable ??
+                        !connections.find(
+                          (item) => item.sourceHandle === handleItem.id
+                        )
+                      }
                       // id={item.value}
                       // type="source"
                       // position={Position.Left}
