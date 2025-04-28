@@ -23,4 +23,5 @@ yarn-error.log
 .stylelintcache
 /node-script/dist
 dist
+pnpm-lock.yaml
 /config/.env.*.ts
