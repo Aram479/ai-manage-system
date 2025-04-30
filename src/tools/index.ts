@@ -22,5 +22,7 @@ const allToolsFunctions = {
 
 // 动态调用所有工具函数
 export const allTools = (props: TToolsProps) => {
-  return Object.values(allToolsFunctions).map((func) => func(props));
+  const tools = Object.values(allToolsFunctions).map((func) => func(props));
+  console.log(tools)
+  return tools;
 };

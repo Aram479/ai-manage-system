@@ -38,5 +38,10 @@ export default {
       changeOrigin: true,
       pathRewrite: { "^/ali": "" },
     },
+    "/dify": {
+      target: "http://127.0.0.1/v1",
+      changeOrigin: true,
+      pathRewrite: { "^/dify": "" },
+    },
   },
 };
