@@ -18,6 +18,7 @@ import MarkDownCmp from "@/components/MarkDownCmp";
 import { chatPrompt } from "@/constant/base";
 import ClipboardUtil from "@/utils/clipboardUtil";
 import { StreamDataProcessor } from "@/utils/dify.utils";
+import { allTools } from "@/tools";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -223,6 +224,7 @@ const useDifyXChat = (props: IUseDifyXChat) => {
   });
 
   const handleSendChat: SenderProps["onSubmit"] = (message) => {
+    console.log(allTools({}));
     isStreamLocked.current = false;
     // 重置上一次对话状态和信息
     processorRef.current.reset();

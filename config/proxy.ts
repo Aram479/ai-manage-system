@@ -39,7 +39,7 @@ export default {
       pathRewrite: { "^/ali": "" },
     },
     "/dify": {
-      target: "http://127.0.0.1/v1",
+      target: "https://api.dify.ai/v1", // https://api.dify.ai/v1 或 http://127.0.0.1/v1
       changeOrigin: true,
       pathRewrite: { "^/dify": "" },
     },
