@@ -135,6 +135,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     Ai_Primary.onRequest(message as any);
+    setContent('')
     setUploadFiles([]);
     setSenderHeaderOpen(false);
   };
