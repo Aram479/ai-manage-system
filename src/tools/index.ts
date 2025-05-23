@@ -1,4 +1,5 @@
 import { BaseToolsFunctions, TBaseTools } from "./baseTools";
+import { MainToolsFunctions, TMainTools } from "./mainTools";
 import {
   OrderManageToolsFunctions,
   TOrderManageTools,
@@ -10,7 +11,8 @@ export type TGlobalToolsEvent =
   | TBaseTools
   | TUserManageTools
   | TOrderManageTools
-  | TRoleManageTools;
+  | TRoleManageTools
+  | TMainTools;
 
 // 合并所有工具函数集合
 const allToolsFunctions = {
@@ -18,6 +20,7 @@ const allToolsFunctions = {
   ...UserManageToolsFunctions,
   ...OrderManageToolsFunctions,
   ...RoleManageToolsFunctions,
+  ...MainToolsFunctions,
 };
 
 // 动态调用所有工具函数

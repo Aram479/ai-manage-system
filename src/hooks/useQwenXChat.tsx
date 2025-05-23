@@ -10,7 +10,7 @@ import {
 import { Attachments, SenderProps, useXAgent, useXChat } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
-import { useModel } from "@umijs/max";
+import { useLocation, useModel } from "@umijs/max";
 import { message as AMessage, Tooltip, Upload } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import _ from "lodash";
@@ -60,6 +60,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<any[]>([]);
+  const location = useLocation();
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
   const { transformStream, controller, streamClass } = useStreamController();
@@ -113,6 +114,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       });
     }
 
+    // 是否是自动对话页面
+    const isAutoRoute = ~location.pathname.indexOf("AutoChat");
     // push 用户当前会话
     const userMessage = {
       role: userRole,
@@ -122,7 +125,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       content: `${
         chatList.length
           ? ""
-          : props.defaultMessage
+          : props.defaultMessage && isAutoRoute
           ? chatPrompt.towntalk(props.defaultMessage)
           : ""
       }${messagesData.message?.chatContent}`,
@@ -160,7 +163,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
             cmptTime.current = 0;
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              props.onSuccess?.(chatList);
+              props.onSuccess?.(result);
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器
@@ -193,22 +196,23 @@ const useQwenXChat = (props: IUseQwenXChat) => {
 
   const { onRequest, messages } = useXChat({
     agent,
-    defaultMessages: [
-      {
-        id: "local",
-        message: {
-          ctmpContent: "",
-          ctmpLoadingMessage: "",
-          chatContent:
-            "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
-          chatLoadngMessage: "",
-          toolContent: "",
-          abortedReason: "",
-          chatFiles: [],
-        },
-        status: "local",
-      },
-    ],
+    defaultMessages: props.defaultMessage
+      ? [
+          {
+            id: "local",
+            message: {
+              ctmpContent: "",
+              ctmpLoadingMessage: "",
+              chatContent: props.defaultMessage,
+              chatLoadngMessage: "",
+              toolContent: "",
+              abortedReason: "",
+              chatFiles: [],
+            },
+            status: "local",
+          },
+        ]
+      : undefined,
     requestPlaceholder: () => {
       return {
         ctmpContent: "",
@@ -302,7 +306,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                       <Tooltip title="重新执行命令">
                         <PlayCircleOutlined
                           onClick={_.throttle(() => {
-                            setCommandExecutor(content);
+                            setCommandExecutor(message.toolContent);
                           }, 300)}
                         />
                       </Tooltip>

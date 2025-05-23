@@ -66,14 +66,14 @@ const AutoChatPage = () => {
     }
     // TODO 切换聊天类型时，消息不应该随时改变
     if (!Ai_Two.streamClass?.writable.locked && isAutoChat.current) {
-      Ai_Two.onRequest(messageData.chatContent || '');
+      Ai_Two.onRequest(messageData.chatContent || "");
     }
   };
 
   // AI2 对话完成事件
   const Ai_Two_SuccessAction = (messageData: TResultStream) => {
     // isAutoChat.current = true;
-    Ai_One.onRequest(messageData.chatContent || '');
+    Ai_One.onRequest(messageData.chatContent || "");
   };
 
   const requestConfig = {
@@ -139,19 +139,6 @@ const AutoChatPage = () => {
         },
       },
     },
-  };
-
-  const aaa = (
-    items: BubbleDataType[],
-    aiName: string,
-    toName: string
-  ): BubbleDataType | unknown => {
-    const lastItem = _.last(items);
-    if (lastItem?.role === aiName) {
-      lastItem.role = toName;
-      return lastItem;
-    }
-    return false;
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {

@@ -9,9 +9,10 @@ const chat = () => {
   const [events, setEvents] = useState<any[]>([]);
   // stream流中使用ref
   const chatUploadFiles = useRef<UploadFile<FileObject>[]>([]);
-  const setCommandExecutor = (chatCommandJson: string) => {
+  const setCommandExecutor = (chatCommandJson?: string) => {
     try {
       if (chatCommandJson) {
+        console.log('chatCommandJson', chatCommandJson)
         // 将多个 JSON 对象分割为独立的 JSON 字符串
         const jsonStrings = chatCommandJson.split(/(?<=\})\s*(?=\{)/);
         // 解析每个 JSON 字符串并存入数组
@@ -28,7 +29,7 @@ const chat = () => {
         }
       }
     } catch (error) {
-      message.error('命令错误，请重试！');
+      message.error('命令错误，请重试1！');
     }
   };
   return { events, chatUploadFiles, setEvents, setCommandExecutor };

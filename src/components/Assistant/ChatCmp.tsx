@@ -7,7 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  ChromeOutlined,
+  PaperClipOutlined,
+  SlackOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { useModel } from "@umijs/max";
@@ -75,6 +80,8 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       userMenus,
     };
     return {
+      defaultMessage:
+        "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
       requestBody: {
         stream: true,
         // max_tokens: 2048,
@@ -103,7 +110,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const roles: GetProp<typeof Bubble.List, "roles"> = {
     assistant: {
       placement: "start",
-      avatar: { icon: <UserOutlined />, style: { background: "#fde3cf" } },
+      avatar: { icon: <ChromeOutlined />, style: { background: "#8985f6" } },
       typing: { step: 5, interval: 20 },
       styles: {
         content: {
@@ -114,7 +121,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     },
     local: {
       placement: "end",
-      avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
+      // avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
       // typing: { step: 5, interval: 20 },
       styles: {
         content: {
@@ -135,7 +142,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     Ai_Primary.onRequest(message as any);
-    setContent('')
+    setContent("");
     setUploadFiles([]);
     setSenderHeaderOpen(false);
   };
