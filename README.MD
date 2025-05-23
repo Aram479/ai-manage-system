@@ -1,4 +1,4 @@
-### 项目介绍
+### 项目介绍 (master为测试分支，建议切换到ai-main分支运行项目)
 
 因为本人在网上找不到AI智能化项目的相关Web代码和解决方案，所以本项目采用UmiMax+Ant Design+Ant Design X 实现承载AI智能化管理系统解决方案，功能简单，无后端支持，仅仅是一个能根据AI Tools处理系统功能的基础解决方案，此系统代码仅供参考！
 
@@ -64,3 +64,9 @@ DeepSeek ApiKey查询：https://platform.deepseek.com/api_keys
 ![alt text](public/image-2.png)
 ![alt text](public/image-3.png)
 ![alt text](public/image-4.png)
+
+
+### 扩展
+**本系统还支持两个AI之间的对话，让对话不再局限于人与AI，而是AI与AI**
+![alt text](public/image-auto-1.png)
+![alt text](public/image-auto-2.png)
