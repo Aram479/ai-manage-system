@@ -64,3 +64,9 @@ DeepSeek ApiKey查询：https://platform.deepseek.com/api_keys
 ![alt text](public/image-2.png)
 ![alt text](public/image-3.png)
 ![alt text](public/image-4.png)
+
+
+### 扩展
+**本系统还支持两个AI之间的对话，让对话不再局限于人与AI，而是AI与AI**
+![alt text](public/image-auto-1.png)
+![alt text](public/image-auto-2.png)
