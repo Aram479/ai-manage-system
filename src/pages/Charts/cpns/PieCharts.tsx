@@ -1,7 +1,7 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import { Pie } from "@ant-design/charts";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const PieCharts = () => {
   // [

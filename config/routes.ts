@@ -8,6 +8,10 @@ const routes: RoutesType = [
     path: "/",
     routes: [
       {
+        path: "/",
+        redirect: "/Main",
+      },
+      {
         name: "Main",
         path: "/Main",
         component: "@/pages/Main",

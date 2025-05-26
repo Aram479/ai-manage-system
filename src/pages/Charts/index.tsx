@@ -1,6 +1,4 @@
-import { Pie } from "@ant-design/charts";
 import styles from "./index.less";
-import { useMemo, useState } from "react";
 import PieCharts from "./cpns/PieCharts";
 
 const ChartsPage = () => {

@@ -22,11 +22,13 @@ const MenuCmp = (props: IMenuCmp) => {
   })?.route.children;
   const selectedKeys = useMemo(() => currentRoute.path, [currentRoute.path]);
   const items = useMemo(() => {
-    return systemRoutes?.map((item) => ({
-      key: item.path,
-      label: item?.meta?.title,
-      children: item.children,
-    }));
+    return systemRoutes
+      ?.filter((item: any) => item?.name)
+      .map((item) => ({
+        key: item.path,
+        label: item?.meta?.title,
+        children: item.children,
+      }));
   }, [systemRoutes]);
 
   const handleMenuItemChange: MenuProps["onSelect"] = (menuItem) => {
