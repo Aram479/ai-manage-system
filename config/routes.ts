@@ -16,6 +16,14 @@ const routes: RoutesType = [
         },
       },
       {
+        name: "Charts",
+        path: "/Charts",
+        component: "@/pages/Charts",
+        meta: {
+          title: "图表",
+        },
+      },
+      {
         name: "UserManage",
         path: "/UserManage",
         component: "@/pages/UserManage",
