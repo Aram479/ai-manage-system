@@ -1,7 +1,13 @@
-import { defineConfig } from "@umijs/max";
+import {
+  HomeOutlined,
+  MergeOutlined,
+  PieChartOutlined,
+  ProfileOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
-type RoutesType = Parameters<typeof defineConfig>[0]["routes"];
-const routes: RoutesType = [
+const routes: IRouteTypes[] = [
   // 管理系统相关页面
   {
     name: "System",
@@ -17,6 +23,7 @@ const routes: RoutesType = [
         component: "@/pages/Main",
         meta: {
           title: "首页",
+          icon: HomeOutlined,
         },
       },
       {
@@ -25,6 +32,7 @@ const routes: RoutesType = [
         component: "@/pages/Charts",
         meta: {
           title: "图表",
+          icon: PieChartOutlined,
         },
       },
       {
@@ -33,6 +41,7 @@ const routes: RoutesType = [
         component: "@/pages/UserManage",
         meta: {
           title: "用户管理",
+          icon: UserOutlined,
         },
       },
       {
@@ -41,6 +50,7 @@ const routes: RoutesType = [
         component: "@/pages/OrderManage",
         meta: {
           title: "订单管理",
+          icon: ProfileOutlined,
         },
       },
       {
@@ -49,6 +59,7 @@ const routes: RoutesType = [
         component: "@/pages/RoleManage",
         meta: {
           title: "角色管理",
+          icon: TeamOutlined,
         },
       },
       {
@@ -56,7 +67,8 @@ const routes: RoutesType = [
         path: "/WorkFlow",
         component: "@/pages/WorkFlow",
         meta: {
-          title: "工作流",
+          title: "工作流(未完善)",
+          icon: MergeOutlined
         },
       },
     ],
@@ -88,5 +100,4 @@ const routes: RoutesType = [
   { path: "/404", component: "@/pages/404", layout: false },
   { path: "*", redirect: "/404", layout: false },
 ];
-
 export default routes;
