@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
-import { Button, Card, PaginationProps, Table } from "antd";
+import { Button, Card, PaginationProps } from "antd";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
 import SearchFormCmp from "./cpns/SearchFormCmp";
 import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
-import { useChatEvent } from "@/hooks/useChatEvent";
+import PageTable from "@/components/PageTable";
+import { deleteUserById, fetchUserList } from "@/services/api/userApi";
+import CreateUserModal from "./cpns/CreateUserModal";
 
 type IDataType = any;
 
@@ -15,8 +17,10 @@ type IDataType = any;
 const UserManagePage = () => {
   const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
 
-  const [tableData, setTableData] = useState<IDataType[]>([]);
+  const [tableData, setTableData] = useState<IUserList[]>([]);
   const [searchData, setSearchData] = useState({});
+  const [currentRecord, setCurrentRecord] = useState<IUserList>();
+  const [createUserOpen, setCreateUserOpen] = useState(false);
   // 整合搜索条件
   const tableSearchData = useMemo(
     () => ({ ...searchData, ...filterData }),
@@ -30,10 +34,12 @@ const UserManagePage = () => {
     showSizeChanger: true,
     pageSizeOptions: [5, 10, 20, 50],
   });
-  const tableCallback = async (record: IDataType, type: string) => {
+  const tableCallback = async (record: IUserList, type: string) => {
+    setCurrentRecord(record);
     if (type === "edit") {
-      // ...做点什么
+      setCreateUserOpen(true);
     } else if (type === "delete") {
+      return deleteUserByIdReq.run();
       // ...做点什么
     } else if (type === "filter") {
       setPatination({
@@ -52,27 +58,24 @@ const UserManagePage = () => {
       }),
     [tableData]
   );
-  // 获取表格数据
-  const { loading: tableLoading, run: getEntityListReq } = useRequest(
-    () => {
-      const { current, pageSize } = pagination;
-      return new Promise((resolve) =>
-        resolve({
-          status: 0,
-          data: {
-            count: 30,
-            rows: [],
-          },
-        })
-      );
-      // return getEntityListApi({ page: current, perPage: pageSize, ...tableSearchData });
+
+  // 获取用户表格数据
+  const getUserListReq = useRequest(() => fetchUserList(), {
+    manual: true,
+    onSuccess: (res) => {
+      const newUserList = res.data;
+      setTableData(newUserList);
     },
-    {
-      debounceInterval: 500,
-      manual: true,
-      onSuccess: (res) => {},
-    }
-  );
+  });
+
+  // 删除用户
+  const deleteUserByIdReq = useRequest(deleteUserById, {
+    manual: true,
+    onSuccess: (res) => {
+      getUserListReq.run();
+    },
+  });
+
   // 搜索事件
   const handleSearch = (searchValues: any) => {
     setSearchData({ ...searchValues });
@@ -100,7 +103,7 @@ const UserManagePage = () => {
   };
 
   useEffect(() => {
-    getEntityListReq();
+    getUserListReq.run();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
   return (
@@ -110,20 +113,33 @@ const UserManagePage = () => {
       </Card>
       <Card title={"结果"}>
         <div className="btn-box">
-          <Button type="primary" icon={<PlusOutlined />}>
-            创建角色
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setCreateUserOpen(true)}
+          >
+            创建用户
           </Button>
         </div>
-        <Table
+        <PageTable
           rowKey="part"
           columns={columns}
           dataSource={tableData}
           pagination={pagination}
+          loading={getUserListReq.loading}
           bordered
-          loading={false}
           onChange={handleTableChange}
         />
       </Card>
+      <CreateUserModal
+        open={createUserOpen}
+        data={currentRecord}
+        onOk={(data) => {
+          console.log(data);
+          setCreateUserOpen(false);
+        }}
+        onCancel={setCreateUserOpen}
+      />
     </div>
   );
 };

@@ -29,6 +29,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
 
   const handleSearch = () => {
     const values = form.getFieldsValue();
+    console.log(values)
     onSearch?.(values);
   };
 

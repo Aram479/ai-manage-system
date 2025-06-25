@@ -46,3 +46,9 @@ type ExtractFunctionParameters<T> = {
 function generateTypeFromSchema<T>(schema: T): JSONSchemaToType<T> {
   return {} as JSONSchemaToType<T>;
 }
+
+type TGetColumns = {
+  filterData?: any;
+  callback?: (record: any, type: string) => void;
+  getLocal?: (key: string, values?: any) => any;
+};
