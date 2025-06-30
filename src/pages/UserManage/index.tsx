@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
-import { Button, Card, PaginationProps } from "antd";
+import { Button, Card, message, PaginationProps } from "antd";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
 import SearchFormCmp from "./cpns/SearchFormCmp";
 import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
 import PageTable from "@/components/PageTable";
-import { deleteUserById, fetchUserList } from "@/services/api/userApi";
+import {
+  createUserApi,
+  deleteUserById,
+  fetchUserList,
+} from "@/services/api/userApi";
 import CreateUserModal from "./cpns/CreateUserModal";
+import dayjs from "dayjs";
 
 type IDataType = any;
 
@@ -29,17 +34,18 @@ const UserManagePage = () => {
   // 分页
   const [pagination, setPatination] = useState<PaginationProps>({
     total: tableData.length,
-    pageSize: 10,
+    pageSize: 5,
     current: 1,
     showSizeChanger: true,
     pageSizeOptions: [5, 10, 20, 50],
   });
+
   const tableCallback = async (record: IUserList, type: string) => {
     setCurrentRecord(record);
     if (type === "edit") {
       setCreateUserOpen(true);
     } else if (type === "delete") {
-      return deleteUserByIdReq.run();
+      return deleteUserByIdReq.run(record.id);
       // ...做点什么
     } else if (type === "filter") {
       setPatination({
@@ -60,7 +66,7 @@ const UserManagePage = () => {
   );
 
   // 获取用户表格数据
-  const getUserListReq = useRequest(() => fetchUserList(), {
+  const getUserListReq = useRequest(fetchUserList, {
     manual: true,
     onSuccess: (res) => {
       const newUserList = res.data;
@@ -68,13 +74,30 @@ const UserManagePage = () => {
     },
   });
 
+  // 新增用户
+  const createUserReq = useRequest(createUserApi, {
+    manual: true,
+    throwOnError: true,
+    onSuccess: () => {
+      getUserListReq.run();
+      setCreateUserOpen(false);
+    },
+    onError: (error) => {
+      message.error(error.message);
+    },
+  });
+
   // 删除用户
   const deleteUserByIdReq = useRequest(deleteUserById, {
     manual: true,
-    onSuccess: (res) => {
+    onSuccess: () => {
       getUserListReq.run();
     },
   });
+
+  const handleCreateUser = (data: any) => {
+    createUserReq.run(data);
+  };
 
   // 搜索事件
   const handleSearch = (searchValues: any) => {
@@ -122,7 +145,7 @@ const UserManagePage = () => {
           </Button>
         </div>
         <PageTable
-          rowKey="part"
+          rowKey="id"
           columns={columns}
           dataSource={tableData}
           pagination={pagination}
@@ -134,11 +157,11 @@ const UserManagePage = () => {
       <CreateUserModal
         open={createUserOpen}
         data={currentRecord}
-        onOk={(data) => {
-          console.log(data);
-          setCreateUserOpen(false);
-        }}
+        onOk={handleCreateUser}
         onCancel={setCreateUserOpen}
+        okButtonProps={{
+          loading: createUserReq.loading,
+        }}
       />
     </div>
   );

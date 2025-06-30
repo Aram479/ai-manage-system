@@ -43,7 +43,7 @@ export function getColumns(props: TGetColumns): ColumnsType {
       width: 200,
       render: (_v, record) => (
         <>
-          <Flex gap="small" wrap>
+          <Flex gap="small">
             <Button
               color="primary"
               variant="solid"

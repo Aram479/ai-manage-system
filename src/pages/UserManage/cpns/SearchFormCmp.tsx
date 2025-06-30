@@ -23,13 +23,18 @@ interface ISearchForm extends FormProps {
 
 const { RangePicker } = DatePicker;
 
+export type TUserFormData = {
+  userName: string;
+  role: string;
+  createTime: string;
+};
+
 const SearchForm = (props: Partial<ISearchForm>) => {
   const { onSearch, onReset } = props;
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<TUserFormData>();
 
   const handleSearch = () => {
     const values = form.getFieldsValue();
-    console.log(values)
     onSearch?.(values);
   };
 
@@ -43,7 +48,9 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       const chatData = event.data;
       form.setFieldsValue({
         ...chatData,
-        createTime: chatData?.createTime ? dayjs(chatData?.createTime) : undefined
+        createTime: chatData?.createTime
+          ? dayjs(chatData?.createTime)
+          : undefined,
       });
     }
   });
@@ -53,7 +60,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       <Form name="form_in_modal" layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={6}>
-            <Form.Item name="user" label="用户">
+            <Form.Item name="userName" label="用户">
               <Input placeholder="请输入" allowClear />
             </Form.Item>
           </Col>
