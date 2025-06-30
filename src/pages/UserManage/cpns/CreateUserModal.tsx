@@ -23,8 +23,10 @@ const CreateUserModal = (props: ICreateUserModal) => {
   );
 
   const handleConfirm = async () => {
-    const formData = await form.validateFields();
+    await form.validateFields();
+    const formData = form.getFieldsValue(true);
     const newFormData = {
+      ...formData,
       userName: formData.userName,
       phone: formData.phone,
       status: Number(!!formData.status),

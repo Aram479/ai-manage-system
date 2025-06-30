@@ -2,7 +2,7 @@ import { mockRequest } from "@/services/mockRequest";
 import { UserList } from "./mockData";
 import { TUserFormData } from "@/pages/UserManage/cpns/SearchFormCmp";
 import dayjs from "dayjs";
-import { uniqueId } from "lodash";
+import { v4 as uuidv4 } from "uuid";
 
 export const fetchUserList = (searchData?: TUserFormData) => {
   const newUserList = UserList.filter((item) => {
@@ -15,7 +15,9 @@ export const fetchUserList = (searchData?: TUserFormData) => {
       );
     }
     return true;
-  });
+  }).sort(
+    (a, b) => dayjs(b.updateTime).valueOf() - dayjs(a.updateTime).valueOf()
+  );
   return mockRequest<IUserList[]>(newUserList);
 };
 
@@ -34,13 +36,43 @@ export const createUserApi = (data: IUserList) => {
     });
   }
   const nowTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
-  const uuid = uniqueId();
-  const newData: IUserList = {
+  const uuid = uuidv4();
+  const newData: typeof data = {
     ...data,
     id: uuid,
     createTime: nowTime,
     updateTime: nowTime,
   };
   UserList.push(newData);
+  return mockRequest<any>({});
+};
+
+export const editUserApi = (data: IUserList) => {
+  const editUserData = UserList.find((item) => item.id == data.id);
+  if (!editUserData) {
+    return mockRequest<any>(null, {
+      code: 400,
+      data: null,
+      message: "用户不存在",
+    });
+  }
+  const isUserNameInclude = UserList.filter(
+    (item) => item.id !== editUserData.id
+  ).find((item) => item.userName === editUserData.userName);
+  if (isUserNameInclude) {
+    return mockRequest<any>(null, {
+      code: 400,
+      data: null,
+      message: "用户名已存在",
+    });
+  }
+  const editIndex = UserList.findIndex((item) => item.id == editUserData.id);
+  const nowTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
+  const newData: typeof editUserData = {
+    ...data,
+    id: editUserData.id,
+    updateTime: nowTime,
+  };
+  UserList.splice(editIndex, 1, newData);
   return mockRequest<any>({});
 };

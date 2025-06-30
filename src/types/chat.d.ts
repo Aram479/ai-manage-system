@@ -59,4 +59,5 @@ type TResultStream = {
 type TToolsProps = {
   menuList?: any[];
   userMenus?: Extract<typeof import("../../config/routes")["default"], any[]>;
+  userList?: IUserList[]
 };

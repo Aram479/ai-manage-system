@@ -48,7 +48,7 @@ interface IChatCmpProps {
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const { content: contentProp, isSender = true, onSuccess } = props;
-  const { menuList, userMenus } = useModel("user");
+  const { menuList, userMenus, userList } = useModel("user");
   const { chatUploadFiles } = useModel("chat");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
   const defaultModelInfo = Ai_Options[0];
@@ -78,6 +78,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     const toolsProps = {
       menuList,
       userMenus,
+      userList,
     };
     return {
       defaultMessage:
@@ -94,7 +95,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
     };
-  }, [currentTag?.id, model]);
+  }, [currentTag?.id, model, menuList, userMenus, userList]);
 
   // 通义千问
   const Ai_Qwen = useQwenXChat(defaultRequestConfig);

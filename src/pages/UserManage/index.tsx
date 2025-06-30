@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import { useRequest } from "@umijs/max";
+import { useModel, useRequest } from "@umijs/max";
 import { Button, Card, message, PaginationProps } from "antd";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
@@ -11,17 +11,23 @@ import PageTable from "@/components/PageTable";
 import {
   createUserApi,
   deleteUserById,
+  editUserApi,
   fetchUserList,
 } from "@/services/api/userApi";
 import CreateUserModal from "./cpns/CreateUserModal";
 import dayjs from "dayjs";
+import { useChatEvent } from "@/hooks/useChatEvent";
+import {
+  TUserManageTools,
+  UserManageToolsEvents,
+} from "@/tools/userManageTools";
 
 type IDataType = any;
 
 // MBOMPage页面
 const UserManagePage = () => {
+  const { userList, setUserList } = useModel("user");
   const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
-
   const [tableData, setTableData] = useState<IUserList[]>([]);
   const [searchData, setSearchData] = useState({});
   const [currentRecord, setCurrentRecord] = useState<IUserList>();
@@ -70,6 +76,7 @@ const UserManagePage = () => {
     manual: true,
     onSuccess: (res) => {
       const newUserList = res.data;
+      setUserList([...newUserList]);
       setTableData(newUserList);
     },
   });
@@ -79,11 +86,13 @@ const UserManagePage = () => {
     manual: true,
     throwOnError: true,
     onSuccess: () => {
-      getUserListReq.run();
       setCreateUserOpen(false);
+      getUserListReq.run();
+      message.destroy("createUser");
     },
     onError: (error) => {
       message.error(error.message);
+      message.destroy("createUser");
     },
   });
 
@@ -95,8 +104,26 @@ const UserManagePage = () => {
     },
   });
 
-  const handleCreateUser = (data: any) => {
-    createUserReq.run(data);
+  // 修改用户
+  const editUserByIdReq = useRequest(editUserApi, {
+    manual: true,
+    onSuccess: () => {
+      setCreateUserOpen(false);
+      getUserListReq.run();
+      message.destroy("editUser");
+    },
+    onError: (error) => {
+      message.error(error.message);
+      message.destroy("editUser");
+    },
+  });
+
+  const handleCreateOrEditUser = (data: any) => {
+    if (!data.id) {
+      createUserReq.run(data);
+    } else {
+      editUserByIdReq.run(data);
+    }
   };
 
   // 搜索事件
@@ -129,6 +156,30 @@ const UserManagePage = () => {
     getUserListReq.run();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
+  useChatEvent<TUserManageTools>((event) => {
+    if (event.name === UserManageToolsEvents.Create_User) {
+      const chatData = event.data as any;
+      if (chatData) {
+        message.loading({
+          key: "createUser",
+          content: "新增用户中...",
+          duration: 0,
+        });
+        createUserReq.run(chatData);
+      }
+    } else if (event.name === UserManageToolsEvents.Edit_User) {
+      const chatData = event.data as any;
+      if (chatData) {
+        message.loading({
+          key: "editUser",
+          content: "修改用户中...",
+          duration: 0,
+        });
+        editUserByIdReq.run(chatData);
+      }
+    }
+  });
+
   return (
     <div className={`${styles.userManagePage} dap-main-content`}>
       <Card>
@@ -157,10 +208,10 @@ const UserManagePage = () => {
       <CreateUserModal
         open={createUserOpen}
         data={currentRecord}
-        onOk={handleCreateUser}
+        onOk={handleCreateOrEditUser}
         onCancel={setCreateUserOpen}
         okButtonProps={{
-          loading: createUserReq.loading,
+          loading: createUserReq.loading || editUserByIdReq.loading,
         }}
       />
     </div>
