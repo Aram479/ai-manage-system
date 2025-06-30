@@ -101,6 +101,11 @@ const UserManagePage = () => {
     manual: true,
     onSuccess: () => {
       getUserListReq.run();
+      message.destroy("deleteUser");
+    },
+    onError: (error) => {
+      message.error(error.message);
+      message.destroy("deleteUser");
     },
   });
 
@@ -176,6 +181,18 @@ const UserManagePage = () => {
           duration: 0,
         });
         editUserByIdReq.run(chatData);
+      }
+    } else if (event.name === UserManageToolsEvents.Delete_User) {
+      const chatData = event.data;
+      if (chatData) {
+        message.loading({
+          key: "deleteUser",
+          content: "删除用户中...",
+          duration: 0,
+        });
+        if (chatData?.id) {
+          deleteUserByIdReq.run(chatData.id as number | string);
+        }
       }
     }
   });

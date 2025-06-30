@@ -5,6 +5,7 @@ export enum UserManageToolsEvents {
   Search_User = "Search_User",
   Create_User = "Create_User",
   Edit_User = "Edit_User",
+  Delete_User = "Delete_User",
   Export_UserList = "Export_UserList",
 }
 
@@ -43,7 +44,7 @@ const searchProperties = (props: TToolsProps) => {
     },
   } as const;
 };
-// 创建/修改用户所需字段
+// 创建/修改/删除用户所需字段
 const userDataProperties = (props: TToolsProps) => {
   const { userList } = props;
 
@@ -51,7 +52,7 @@ const userDataProperties = (props: TToolsProps) => {
     id: {
       type: "string",
       description:
-        "用户唯一标识(ID)，创建用户不需要id字段，修改用户时根据用户名称获取对应id字段值",
+        "用户唯一标识(ID): 数字或字符串类型，创建用户不需要id字段，修改用户时根据用户名称获取对应字段值",
       enum: userList,
     },
     userName: {
@@ -184,7 +185,7 @@ const edit_user = (props?: any) => {
     type: "function",
     function: {
       name: UserManageToolsEvents.Edit_User,
-      description: "修改户数据",
+      description: "修改用户数据",
       parameters: {
         type: "object",
         properties: {
@@ -214,9 +215,39 @@ const edit_user = (props?: any) => {
   } as const;
 };
 
+const delete_user = (props?: any) => {
+  return {
+    type: "function",
+    function: {
+      name: UserManageToolsEvents.Delete_User,
+      description: "删除用户数据",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
+            enum: [UserManageToolsEvents.Delete_User],
+          },
+          data: {
+            type: "object",
+            description: "需要用到的数据",
+            properties: {
+              ...userDataProperties(props),
+            },
+          },
+        },
+        required: ["name", "data"],
+      },
+    },
+  } as const;
+};
+
 export const UserManageToolsFunctions = {
   create_user,
   search_user,
   edit_user,
+  delete_user,
   export_userList,
 } as const;

@@ -22,6 +22,14 @@ export const fetchUserList = (searchData?: TUserFormData) => {
 };
 
 export const deleteUserById = (id: number | string) => {
+  const delUserData = UserList.find((item) => item.id == id);
+  if (!delUserData) {
+    return mockRequest<any>(null, {
+      code: 400,
+      data: null,
+      message: "用户不存在",
+    });
+  }
   const deleteIndex = UserList.findIndex((item) => item.id == id);
   UserList.splice(deleteIndex, 1);
   return mockRequest<any>({});
