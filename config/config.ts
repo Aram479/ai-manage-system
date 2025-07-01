@@ -10,11 +10,12 @@ export default defineConfig({
   model: {}, // 开启 useModel
   layout: false,
   routes, // 开始配置式路由
-  title: "AI-Project",
+  title: "Veloce",
   base: "/", //路由前缀
   request: {
     dataField: '',
   },
+  favicons: ['/favicon.ico'],
   initialState: {},
   esbuildMinifyIIFE: true,
   define: env,

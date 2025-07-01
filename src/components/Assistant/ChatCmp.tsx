@@ -82,7 +82,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     };
     return {
       defaultMessage:
-        "欢迎访问智能管理系统，你可以尝试输入“当前有哪些系统功能”",
+        "欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”",
       requestBody: {
         stream: true,
         // max_tokens: 2048,
