@@ -81,8 +81,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       userList,
     };
     return {
-      defaultMessage:
-        "欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”",
+      defaultMessage: "欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”",
       requestBody: {
         stream: true,
         // max_tokens: 2048,
@@ -203,7 +202,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       setModel("qwen-long");
     } else {
       messageTags[deepTagIndex].disabled = false;
-      setModel(defaultModelInfo.model?.default!);
+      // setModel(defaultModelInfo.model?.default!);
     }
     setMessageTags(messageTags);
   }, [chatUploadFiles.current]);

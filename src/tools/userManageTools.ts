@@ -89,7 +89,7 @@ const search_user = (props?: any) => {
     type: "function",
     function: {
       name: UserManageToolsEvents.Search_User,
-      description: "搜索用户数据",
+      description: "查询用户列表",
       parameters: {
         type: "object",
         properties: {
