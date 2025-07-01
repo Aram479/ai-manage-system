@@ -24,9 +24,9 @@ interface ISearchForm extends FormProps {
 const { RangePicker } = DatePicker;
 
 export type TUserFormData = {
-  userName: string;
-  role: string;
-  createTime: string;
+  userName?: string;
+  role?: string;
+  createTime?: string;
 };
 
 const SearchForm = (props: Partial<ISearchForm>) => {
@@ -49,9 +49,10 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       form.setFieldsValue({
         ...chatData,
         createTime: chatData?.createTime
-          ? dayjs(chatData?.createTime)
+          ? dayjs(chatData?.createTime).toString()
           : undefined,
       });
+      handleSearch();
     }
   });
 

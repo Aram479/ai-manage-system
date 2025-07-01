@@ -6,15 +6,33 @@ import { v4 as uuidv4 } from "uuid";
 
 export const fetchUserList = (searchData?: TUserFormData) => {
   const newUserList = UserList.filter((item) => {
-    if (searchData) {
-      const { userName, role, createTime } = searchData;
-      return (
-        item.userName === userName &&
-        item.role === role &&
-        item.createTime === createTime
-      );
-    }
-    return true;
+    if (!searchData) return true;
+
+    const { userName, role, createTime } = searchData;
+    const conditions = [
+      { key: "userName", value: userName, isExact: false }, // 设置isExact来区分精确匹配还是模糊匹配
+      { key: "role", value: role, isExact: true },
+      {
+        key: "createTime",
+        value: createTime ? dayjs(createTime).format("YYYY-MM-DD") : undefined,
+        isExact: true,
+      },
+    ];
+    const validConditions = conditions.filter(
+      (condition) => condition.value != null
+    );
+
+    return validConditions.every((condition) => {
+      let itemValue = item[condition.key];
+      if (condition.isExact) {
+        if (condition.key === "createTime") {
+          itemValue = dayjs(itemValue).format("YYYY-MM-DD");
+        }
+        return itemValue === condition.value;
+      } else {
+        return itemValue.toLowerCase().includes(condition.value?.toLowerCase());
+      }
+    });
   }).sort(
     (a, b) => dayjs(b.updateTime).valueOf() - dayjs(a.updateTime).valueOf()
   );

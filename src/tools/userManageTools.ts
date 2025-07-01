@@ -40,7 +40,8 @@ const searchProperties = (props: TToolsProps) => {
     createTime: {
       type: "string",
       format: "date",
-      description: "创建时间 或者 构建时间 或者 Build date",
+      description:
+        "创建时间 或者 构建时间 或者 Build date: 格式为YYYY-MM-DD hh:mm:ss",
     },
   } as const;
 };
@@ -76,7 +77,8 @@ const userDataProperties = (props: TToolsProps) => {
     createTime: {
       type: "string",
       format: "date",
-      description: "用户创建时间，根据用户名称获取对应此字段值",
+      description:
+        "用户创建时间，根据用户名称获取对应此字段值: 格式为YYYY-MM-DD hh:mm:ss",
       enum: userList,
     },
   } as const;

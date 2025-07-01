@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-const useTableColFilter = () => {
-  const [filterData, setFilterData] = useState({});
+const useTableColFilter = <T,>() => {
+  const [filterData, setFilterData] = useState<T>();
 
   // table自定义列筛选事件
   const colFilterFunc = (record: any) => {

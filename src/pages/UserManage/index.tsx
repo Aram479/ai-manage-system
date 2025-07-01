@@ -4,7 +4,7 @@ import { useModel, useRequest } from "@umijs/max";
 import { Button, Card, message, PaginationProps } from "antd";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
-import SearchFormCmp from "./cpns/SearchFormCmp";
+import SearchFormCmp, { TUserFormData } from "./cpns/SearchFormCmp";
 import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
 import PageTable from "@/components/PageTable";
@@ -27,13 +27,14 @@ type IDataType = any;
 // MBOMPage页面
 const UserManagePage = () => {
   const { userList, setUserList } = useModel("user");
-  const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
+  const { filterData, setFilterData, colFilterFunc } =
+    useTableColFilter<IUserList>();
   const [tableData, setTableData] = useState<IUserList[]>([]);
-  const [searchData, setSearchData] = useState({});
+  const [searchData, setSearchData] = useState<TUserFormData>();
   const [currentRecord, setCurrentRecord] = useState<IUserList>();
   const [createUserOpen, setCreateUserOpen] = useState(false);
   // 整合搜索条件
-  const tableSearchData = useMemo(
+  const tableSearchData = useMemo<Partial<IUserList>>(
     () => ({ ...searchData, ...filterData }),
     [searchData, filterData]
   );
@@ -72,14 +73,19 @@ const UserManagePage = () => {
   );
 
   // 获取用户表格数据
-  const getUserListReq = useRequest(fetchUserList, {
-    manual: true,
-    onSuccess: (res) => {
-      const newUserList = res.data;
-      setUserList([...newUserList]);
-      setTableData(newUserList);
+  const getUserListReq = useRequest(
+    () => {
+      return fetchUserList(tableSearchData);
     },
-  });
+    {
+      manual: true,
+      onSuccess: (res) => {
+        const newUserList = res.data;
+        setUserList([...newUserList]);
+        setTableData(newUserList);
+      },
+    }
+  );
 
   // 新增用户
   const createUserReq = useRequest(createUserApi, {

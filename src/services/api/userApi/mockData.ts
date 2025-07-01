@@ -68,8 +68,8 @@ export const UserList: IUserList[] = [
     phone: "15522345685",
     status: 1,
     role: "user",
-    createTime: "2025-6-25",
-    updateTime: "2025-6-25",
+    createTime: "2025-6-26",
+    updateTime: "2025-6-26",
   },
   {
     id: 9,
@@ -77,8 +77,8 @@ export const UserList: IUserList[] = [
     phone: "15522345686",
     status: 1,
     role: "user",
-    createTime: "2025-6-25",
-    updateTime: "2025-6-25",
+    createTime: "2025-6-27",
+    updateTime: "2025-6-27",
   },
   {
     id: 10,
@@ -86,7 +86,7 @@ export const UserList: IUserList[] = [
     phone: "15522345687",
     status: 0,
     role: "user",
-    createTime: "2025-6-25",
-    updateTime: "2025-6-25",
+    createTime: "2025-6-28",
+    updateTime: "2025-6-28",
   },
 ];
