@@ -7,12 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  ChromeOutlined,
-  PaperClipOutlined,
-  SlackOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { PaperClipOutlined } from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { useModel } from "@umijs/max";
@@ -34,6 +29,7 @@ import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
 import SenderHeader from "@/pages/Chat/cpns/SenderHeader";
 import styles from "./index.less";
+import LogoWhite from "@/asset/png/logoWhite.png";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -110,7 +106,16 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const roles: GetProp<typeof Bubble.List, "roles"> = {
     assistant: {
       placement: "start",
-      avatar: { icon: <ChromeOutlined />, style: { background: "#8985f6" } },
+      avatar: {
+        className: styles.agentChatIcon,
+        icon: (
+          <img src={LogoWhite} />
+        ),
+        style: {
+          background: "#8985f6",
+          padding: 8
+        },
+      },
       typing: { step: 5, interval: 20 },
       styles: {
         content: {
