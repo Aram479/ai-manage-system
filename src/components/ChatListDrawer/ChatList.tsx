@@ -4,6 +4,7 @@ import { CopyOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { Empty, message, Tooltip } from "antd";
 import _ from "lodash";
 import ClipboardUtil from "@/utils/clipboardUtil";
+import { ToolsNameMap } from "@/constant/common";
 
 const ChatList = () => {
   const { eventList, setCommandExecutor } = useModel("chat");
@@ -13,12 +14,13 @@ const ChatList = () => {
       {eventList.current.length ? (
         eventList.current?.map((item, index) => (
           <div key={index} className={styles.chatItemBox}>
+            <div className={styles.cmdName}>{ToolsNameMap.get(item.name)}：</div>
             <div className={styles.cmdText}>{item.jsonString}</div>
-            <div className={`${styles.cmdOperBox} messageFooterBox`}>
+            <div className={styles.cmdOperBox}>
               <div className={styles.leftBox}>
                 <div>执行次数: {item.exNumber}</div>
               </div>
-              <div className={styles.rightBox}>
+              <div className={`${styles.rightBox} messageFooterBox`}>
                 <Tooltip title="重新执行命令">
                   <PlayCircleOutlined
                     onClick={_.throttle(() => {

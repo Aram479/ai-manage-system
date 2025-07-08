@@ -13,7 +13,9 @@ const ChatListDrawer = () => {
 
   return (
     <div className={styles.chatListDrawer}>
-      <InsertRowRightOutlined onClick={() => setIsCMDList(true)} />
+      <div className={styles.drawIcon}>
+        <InsertRowRightOutlined onClick={() => setIsCMDList(true)} />
+      </div>
       <Drawer
         title="命令列表"
         open={isCMDList}

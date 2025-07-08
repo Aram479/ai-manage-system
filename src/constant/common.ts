@@ -1,0 +1,19 @@
+/* 映射工具名称 */
+export const ToolsNameMap = new Map([
+  ["Navigate_Page", "页面跳转"],
+  ["Update_System_Title", "修改系统名称"],
+  ["Create_BarCharts", "创建柱状图"],
+  ["Create_PieCharts", "创建饼图"],
+  ["Create_Component", "创建组件"],
+  ["Create_Menu", "创建菜单"],
+  ["Search_Order", "搜索订单"],
+  ["Create_Order", "创建用户"],
+  ["Export_OrderList", "导出订单"],
+  ["Search_Role", "搜索角色"],
+  ["Export_RoleList", "导出角色"],
+  ["Search_User", "搜索用户"],
+  ["Create_User", "创建用户"],
+  ["Edit_User", "修改用户"],
+  ["Delete_User", "删除用户"],
+  ["Export_UserList", "导出用户"],
+]);
