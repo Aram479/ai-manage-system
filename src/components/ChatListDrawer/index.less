@@ -1,0 +1,40 @@
+.chatListDrawer {
+
+}
+
+.chatList {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  gap: 15px;
+
+  .chatItemBox {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: #fff;
+
+    .cmdText {
+      font-size: 13px;
+      line-height: 20px;
+    }
+
+    .cmdOperBox {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .leftBox,
+      .rightBox {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .leftBox {
+        font-size: 14px;
+      }
+    }
+  }
+}

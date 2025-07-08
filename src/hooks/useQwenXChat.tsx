@@ -138,6 +138,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       model: requestProps.current.model,
       messages: chatList,
     };
+    
     await qwenXRequest.create(
       requestData,
       {

@@ -4,11 +4,11 @@ import { useChatEvent } from "@/hooks/useChatEvent";
 import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
 import { history } from "@umijs/max";
 import Logo from "@/asset/png/logo.png";
-import { GithubOutlined, SisternodeOutlined } from "@ant-design/icons";
+import { GithubOutlined } from "@ant-design/icons";
+import ChatListDrawer from "@/components/ChatListDrawer";
 
 const HeaderCmp = () => {
   const [title, setTile] = useState("Veloce智能管理系统");
-
   const handleTitle = () => {
     history.push("/Main");
   };
@@ -25,7 +25,7 @@ const HeaderCmp = () => {
       if (event.title) setTile(event.title);
     }
   });
-  
+
   return (
     <div className={styles.headerCmp}>
       <div className={styles.title} onClick={handleTitle}>
@@ -33,6 +33,7 @@ const HeaderCmp = () => {
         <div dangerouslySetInnerHTML={{ __html: title }}></div>
       </div>
       <div className={styles.operation}>
+        <ChatListDrawer />
         <GithubOutlined onClick={handleGitHunb} />
       </div>
     </div>

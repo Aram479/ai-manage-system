@@ -1,20 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { CopyOutlined, CopyrightOutlined, DislikeOutlined, LikeOutlined } from '@ant-design/icons';
-import { SenderProps, useXAgent, useXChat } from '@ant-design/x';
-import { BubbleDataType } from '@ant-design/x/es/bubble/BubbleList';
-import { XAgentConfigCustom } from '@ant-design/x/es/use-x-agent';
-import { history } from '@umijs/max';
-import { message as AMessage } from 'antd';
-import dayjs, { Dayjs } from 'dayjs';
-import _ from 'lodash';
-import { deepSeekXRequest } from '@/services/deepseek.api';
-import MarkDownCmp from '@/components/MarkDownCmp';
-import { chatPrompt } from '@/constant/base';
-import ClipboardUtil from '@/utils/clipboardUtil';
-import { StreamDataProcessor } from '@/utils/deepseek.utils';
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CopyOutlined,
+  CopyrightOutlined,
+  DislikeOutlined,
+  LikeOutlined,
+} from "@ant-design/icons";
+import { SenderProps, useXAgent, useXChat } from "@ant-design/x";
+import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
+import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
+import { history, useModel } from "@umijs/max";
+import { message as AMessage } from "antd";
+import dayjs, { Dayjs } from "dayjs";
+import _ from "lodash";
+import { deepSeekXRequest } from "@/services/deepseek.api";
+import MarkDownCmp from "@/components/MarkDownCmp";
+import { chatPrompt } from "@/constant/base";
+import ClipboardUtil from "@/utils/clipboardUtil";
+import { StreamDataProcessor } from "@/utils/deepseek.utils";
 
 export const useStreamController = () => {
-  const streamController = useRef<TransformStreamDefaultController | null>(null);
+  const streamController = useRef<TransformStreamDefaultController | null>(
+    null
+  );
 
   const streamClass = useRef<TransformStream | null>(null);
 
@@ -47,8 +54,9 @@ interface IUseDeepSeekXChat {
 const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
   const { requestBody } = props;
   const requestProps = useRef(requestBody);
-  const [userRole, setUserRole] = useState('user');
-  const [aiRole, setAiRole] = useState('assistant');
+  const [userRole, setUserRole] = useState("user");
+  const { setCommandExecutor } = useModel("chat");
+  const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<any[]>([]);
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -68,7 +76,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     const allContent = processorRef.current.getAllContent();
     if (!startTime.current) startTime.current = dayjs();
     if (!cmptTime.current && allContent.chatContent) {
-      cmptTime.current = dayjs().diff(startTime.current, 'second');
+      cmptTime.current = dayjs().diff(startTime.current, "second");
     }
 
     return {
@@ -76,19 +84,19 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
       abortedReason: window.abortController.signal.reason,
       ctmpLoadingMessage: allContent.ctmpContent
         ? isStreamLocked.current && !allContent.chatContent
-          ? '思考已中止'
+          ? "思考已中止"
           : allContent.chatContent
           ? `已完成深度思考（用时${cmptTime.current}秒）`
-          : '思考中...'
-        : '',
-      chatLoadngMessage: '等待思考完毕...',
+          : "思考中..."
+        : "",
+      chatLoadngMessage: "等待思考完毕...",
     };
   };
 
   // 发起对话请求: chatrequest内部要用useRef变量，否则依赖值不会更新
-  const chatRequest: XAgentConfigCustom<TResultStream>['request'] = async (
+  const chatRequest: XAgentConfigCustom<TResultStream>["request"] = async (
     messagesData,
-    { onUpdate, onSuccess, onError },
+    { onUpdate, onSuccess, onError }
   ) => {
     // push 用户当前会话
     const userMessage = {
@@ -97,7 +105,11 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
       //   chatList.length ? "" : deepSeekPrompt.concise
       // }`,
       content: `${
-        chatList.length ? '' : props.defaultMessage ? chatPrompt.towntalk(props.defaultMessage) : ''
+        chatList.length
+          ? ""
+          : props.defaultMessage
+          ? chatPrompt.towntalk(props.defaultMessage)
+          : ""
       }${messagesData.message}`,
       // content: messagesData.message,
     };
@@ -134,7 +146,8 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
               props.onSuccess?.(result);
-              handleCommandExecutor(result.toolContent);
+              // 设置指令分发器
+              setCommandExecutor(result.toolContent ?? "");
             }
           }
         },
@@ -150,7 +163,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
           onError(error);
         },
       },
-      transformStream(),
+      transformStream()
     );
   };
   // 调度请求
@@ -162,30 +175,31 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     agent,
     defaultMessages: [
       {
-        id: 'local',
+        id: "local",
         message: {
-          ctmpContent: '',
-          ctmpLoadingMessage: '',
-          chatContent: '欢迎使用DeepSeek',
-          chatLoadngMessage: '',
-          toolContent: '',
-          abortedReason: '',
+          ctmpContent: "",
+          ctmpLoadingMessage: "",
+          chatContent: "欢迎使用DeepSeek",
+          chatLoadngMessage: "",
+          toolContent: "",
+          abortedReason: "",
         },
-        status: 'local',
+        status: "local",
       },
     ],
     requestPlaceholder: () => {
       return {
-        ctmpContent: '',
-        ctmpLoadingMessage: '',
-        chatContent: '',
-        chatLoadngMessage: '',
-        toolContent: '',
-        abortedReason: '',
+        ctmpContent: "",
+        ctmpLoadingMessage: "",
+        chatContent: "",
+        chatLoadngMessage: "",
+        toolContent: "",
+        abortedReason: "",
       };
     },
     requestFallback: () => {
-      const errMsg = window.abortController.signal.reason ?? '服务器繁忙，请稍后再试！';
+      const errMsg =
+        window.abortController.signal.reason ?? "服务器繁忙，请稍后再试！";
       return {
         ctmpContent: errMsg,
         ctmpLoadingMessage: errMsg,
@@ -197,19 +211,19 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     },
   });
 
-  const handleSendChat: SenderProps['onSubmit'] = (message) => {
+  const handleSendChat: SenderProps["onSubmit"] = (message) => {
     isStreamLocked.current = false;
     // 重置上一次对话状态和信息
     processorRef.current.reset();
     onRequest(message as any);
   };
 
-  const handleStopChat: SenderProps['onCancel'] = () => {
+  const handleStopChat: SenderProps["onCancel"] = () => {
     if (isStreaming.current || agent.isRequesting()) {
       isStreamLocked.current = !!streamClass?.writable.locked;
       // 1.中断请求：流输出前中断
       if (!isStreaming.current) {
-        window.abortController.abort('用户中止了回答。');
+        window.abortController.abort("用户中止了回答。");
         // 流关闭(仅流输出前可用，输出中调用会报错)
         streamClass?.writable.close();
       } else {
@@ -219,32 +233,14 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     }
   };
 
-  // 指令分发器
-  const handleCommandExecutor = (commandMessage: string) => {
-    try {
-      if (commandMessage) {
-        const command = JSON.parse(commandMessage);
-        if (command.event === 'navigate_to_page') {
-          history.push(command.path);
-        } else if (command.event === 'help_have_conversation') {
-          isAutoChat.current = true;
-          const { message } = command;
-          // setContent(message)
-          handleSendChat(message);
-        }
-      }
-    } catch (error) {
-      AMessage.error('命令错误，请重试！');
-    }
-  };
-
   const items: BubbleDataType[] = useMemo(() => {
     let newItems = [];
     const newMessages = messages.map(({ id, ...item }) => ({
       ...item,
-      role: item.status === 'local' ? item.status : 'assistant',
-      content: (item.message.chatContent || item.message.toolContent) ?? item.message,
-      loading: item.status === 'loading' && !streamClass?.readable.locked,
+      role: item.status === "local" ? item.status : "assistant",
+      content:
+        (item.message.chatContent || item.message.toolContent) ?? item.message,
+      loading: item.status === "loading" && !streamClass?.readable.locked,
     }));
 
     newItems = [...newMessages];
@@ -252,7 +248,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     return newItems.map(({ message, status, ...item }) => ({
       ...item,
       messageRender: (content) =>
-        status !== 'local' ? (
+        status !== "local" ? (
           !message.abortedReason ? (
             <div>
               {message.ctmpContent && (
@@ -269,19 +265,19 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
                 </div>
               )}
 
-              <div style={{ background: 'auto' }}>
+              <div style={{ background: "auto" }}>
                 <MarkDownCmp
                   theme="onDark"
                   content={String(content)}
                   loading={agent.isRequesting()}
                 />
-                {status === 'success' && (
+                {status === "success" && (
                   <div className="messageFooterBox">
                     <LikeOutlined
                       onClick={_.throttle(() => {
                         AMessage.success({
-                          key: 'thanks',
-                          content: '感谢您的支持',
+                          key: "thanks",
+                          content: "感谢您的支持",
                         });
                       }, 300)}
                     />
@@ -290,8 +286,8 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
                       onClick={_.throttle(() => {
                         ClipboardUtil.writeText(content);
                         AMessage.success({
-                          key: 'copy',
-                          content: '复制成功',
+                          key: "copy",
+                          content: "复制成功",
                         });
                       }, 300)}
                     />
