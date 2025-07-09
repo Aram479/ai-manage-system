@@ -1,3 +1,4 @@
+type Dayjs = import("dayjs").Dayjs
 interface IUserList {
   id: number | string;
   userName: string;
@@ -18,6 +19,6 @@ interface IOrderList {
   goodsCount: number;
   payType: string;
   deliveryType: string;
-  deliveryTime: string;
-  createTime: string;
+  deliveryTime: string | Dayjs;
+  createTime: string | Dayjs;
 }
