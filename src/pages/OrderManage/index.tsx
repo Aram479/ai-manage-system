@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import { useRequest } from "@umijs/max";
-import {
-  Button,
-  Card,
-  PaginationProps,
-  Table,
-} from "antd";
+import { useModel, useRequest } from "@umijs/max";
+import { Button, Card, message, PaginationProps, Table } from "antd";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
 import SearchFormCmp from "./cpns/SearchFormCmp";
@@ -18,16 +13,20 @@ import {
   OrderManageToolsEvents,
   TOrderManageTools,
 } from "@/tools/orderManageTools";
-
-type IDataType = any;
+import {
+  createOrderApi,
+  deleteOrderById,
+  editOrderApi,
+  fetchOrderList,
+} from "@/services/api/orderApi";
 
 // MBOMPage页面
 const OrderManagePage = () => {
-  const { filterData, setFilterData, colFilterFunc } = useTableColFilter();
+  const { setOrderList } = useModel("order");
+  const { filterData, colFilterFunc } = useTableColFilter<IOrderList>();
   const [createOrderOpen, setCreateOrderOpen] = useState(false);
-  const [createOrderLoading, setCreateOrderLoading] = useState(false);
 
-  const [tableData, setTableData] = useState<IDataType[]>([]);
+  const [tableData, setTableData] = useState<IOrderList[]>([]);
   const [searchData, setSearchData] = useState({});
   // 整合搜索条件
   const tableSearchData = useMemo(
@@ -37,12 +36,12 @@ const OrderManagePage = () => {
   // 分页
   const [pagination, setPatination] = useState<PaginationProps>({
     total: tableData.length,
-    pageSize: 10,
+    pageSize: 5,
     current: 1,
     showSizeChanger: true,
     pageSizeOptions: [5, 10, 20, 50],
   });
-  const tableCallback = async (record: IDataType, type: string) => {
+  const tableCallback = async (record: IOrderList, type: string) => {
     if (type === "edit") {
       // ...做点什么
     } else if (type === "delete") {
@@ -64,39 +63,72 @@ const OrderManagePage = () => {
       }),
     [tableData]
   );
-  // 获取表格数据
-  const { loading: tableLoading, run: getEntityListReq } = useRequest(
+
+  // 获取订单表格数据
+  const getOrderListReq = useRequest(
     () => {
-      const { current, pageSize } = pagination;
-      return new Promise((resolve) =>
-        resolve({
-          status: 0,
-          data: {
-            count: 30,
-            rows: [],
-          },
-        })
-      );
-      // return getEntityListApi({ page: current, perPage: pageSize, ...tableSearchData });
+      return fetchOrderList(tableSearchData);
     },
     {
-      debounceInterval: 500,
       manual: true,
-      onSuccess: (res) => {},
+      onSuccess: (res) => {
+        const newOrderList = res.data;
+        setOrderList([...newOrderList]);
+        setTableData(newOrderList);
+      },
     }
   );
 
-  const handleCreatOrderSubmit = () => {
-    if (!createOrderLoading) {
-      setCreateOrderLoading(true);
+  // 新增用户
+  const createOrderReq = useRequest(createOrderApi, {
+    manual: true,
+    throwOnError: true,
+    onSuccess: () => {
+      setCreateOrderOpen(false);
+      getOrderListReq.run();
+      message.destroy("createOrder");
+    },
+    onError: (error) => {
+      message.error(error.message);
+      message.destroy("createOrder");
+    },
+  });
 
-      // 模拟提交成功
-      setTimeout(() => {
-        setCreateOrderLoading(false);
-        setCreateOrderOpen(false);
-      }, 1500);
+  // 修改用户
+  const editOrderByIdReq = useRequest(editOrderApi, {
+    manual: true,
+    onSuccess: () => {
+      setCreateOrderOpen(false);
+      getOrderListReq.run();
+      message.destroy("editOrder");
+    },
+    onError: (error) => {
+      message.error(error.message);
+      message.destroy("editOrder");
+    },
+  });
+
+  // 删除用户
+  const deleteOrderByIdReq = useRequest(deleteOrderById, {
+    manual: true,
+    onSuccess: () => {
+      getOrderListReq.run();
+      message.destroy("deleteOrder");
+    },
+    onError: (error) => {
+      message.error(error.message);
+      message.destroy("deleteOrder");
+    },
+  });
+
+  const handleCreateOrEditOrder = (data: any) => {
+    if (!data.id) {
+      createOrderReq.run(data);
+    } else {
+      editOrderByIdReq.run(data);
     }
   };
+
   // 搜索事件
   const handleSearch = (searchValues: any) => {
     setSearchData({ ...searchValues });
@@ -124,12 +156,42 @@ const OrderManagePage = () => {
   };
 
   useEffect(() => {
-    getEntityListReq();
+    getOrderListReq.run();
   }, [pagination.current, pagination.pageSize, tableSearchData]);
 
   useChatEvent<TOrderManageTools>((event) => {
     if (event.name === OrderManageToolsEvents.Create_Order) {
-      setCreateOrderOpen(true);
+      const chatData = event.data as any;
+      if (chatData) {
+        message.loading({
+          key: "createOrder",
+          content: "新增订单中...",
+          duration: 0,
+        });
+        createOrderReq.run(chatData);
+      }
+    } else if (event.name === OrderManageToolsEvents.Edit_Order) {
+      const chatData = event.data as any;
+      if (chatData) {
+        message.loading({
+          key: "editOrder",
+          content: "修改订单中...",
+          duration: 0,
+        });
+        editOrderByIdReq.run(chatData);
+      }
+    } else if (event.name === OrderManageToolsEvents.Delete_Order) {
+      const chatData = event.data;
+      if (chatData) {
+        message.loading({
+          key: "deleteOrder",
+          content: "删除用户中...",
+          duration: 0,
+        });
+        if (chatData?.id) {
+          deleteOrderByIdReq.run(chatData.id as number | string);
+        }
+      }
     }
   });
 
@@ -149,21 +211,21 @@ const OrderManagePage = () => {
           </Button>
         </div>
         <Table
-          rowKey="part"
+          rowKey="id"
           columns={columns}
           dataSource={tableData}
           pagination={pagination}
           bordered
-          loading={false}
+          loading={getOrderListReq.loading}
           onChange={handleTableChange}
         />
       </Card>
       <CreateOrderModalCmp
         open={createOrderOpen}
-        onOk={handleCreatOrderSubmit}
+        onOk={handleCreateOrEditOrder}
         onCancel={setCreateOrderOpen}
         okButtonProps={{
-          loading: createOrderLoading,
+          loading: createOrderReq.loading || editOrderByIdReq.loading,
         }}
       />
     </div>

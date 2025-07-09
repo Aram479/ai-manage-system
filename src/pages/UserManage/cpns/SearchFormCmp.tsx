@@ -14,19 +14,17 @@ import {
   Row,
   Select,
 } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
   onReset: (data?: any) => void;
 }
 
-const { RangePicker } = DatePicker;
-
 export type TUserFormData = {
   userName?: string;
   role?: string;
-  createTime?: string;
+  createTime?: Dayjs;
 };
 
 const SearchForm = (props: Partial<ISearchForm>) => {
@@ -49,7 +47,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       form.setFieldsValue({
         ...chatData,
         createTime: chatData?.createTime
-          ? dayjs(chatData?.createTime).toString()
+          ? dayjs(chatData?.createTime)
           : undefined,
       });
       handleSearch();

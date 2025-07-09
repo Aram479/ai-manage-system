@@ -45,6 +45,7 @@ interface IChatCmpProps {
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const { content: contentProp, isSender = true, onSuccess } = props;
   const { menuList, userMenus, userList } = useModel("user");
+  const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
   const defaultModelInfo = Ai_Options[0];
@@ -75,6 +76,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       menuList,
       userMenus,
       userList,
+      orderList,
     };
     return {
       defaultMessage: "欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”",
@@ -108,12 +110,10 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       placement: "start",
       avatar: {
         className: styles.agentChatIcon,
-        icon: (
-          <img src={LogoWhite} />
-        ),
+        icon: <img src={LogoWhite} />,
         style: {
           background: "#8985f6",
-          padding: 8
+          padding: 8,
         },
       },
       typing: { step: 5, interval: 20 },

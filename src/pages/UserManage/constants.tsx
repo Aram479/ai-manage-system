@@ -1,3 +1,4 @@
+import { RoleOptions } from "@/constant/options";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Flex, Popconfirm } from "antd";
 import { ColumnsType } from "antd/es/table";
@@ -12,6 +13,14 @@ export function getColumns(props: TGetColumns): ColumnsType {
       dataIndex: "userName",
       align: "center",
       width: 300,
+    },
+    {
+      title: "角色",
+      dataIndex: "role",
+      align: "center",
+      width: 300,
+      render: (value) =>
+        RoleOptions.find((item) => item.value === value)?.label,
     },
     {
       title: "手机号",

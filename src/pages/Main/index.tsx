@@ -15,7 +15,7 @@ const MainPage = () => {
   });
 
   return (
-    <div className={styles.mainPage}>
+    <div className={`${styles.mainPage} dap-main-content`}>
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: 8 }}>
         请输入：根据系统菜单，生成一个表格，并可以跳转到对应菜单页面，并以新窗口展示
       </div>

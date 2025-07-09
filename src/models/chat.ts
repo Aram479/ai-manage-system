@@ -3,7 +3,6 @@ import { history } from "@umijs/max";
 import { message } from "antd";
 import { UploadFile } from "antd/lib";
 import { FileObject } from "openai/resource.mjs";
-import { v4 as uuidv4 } from "uuid";
 
 const chat = () => {
   // 存储指令事件数据

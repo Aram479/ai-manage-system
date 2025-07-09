@@ -1,13 +1,11 @@
-import {
-  DeliveryTypeOptions,
-  GoodsOptions,
-  PayTypeOptions,
-} from "@/constant/options";
+import { DeliveryTypeOptions, PayTypeOptions } from "@/constant/options";
 
 /* 事件集合 */
 export enum OrderManageToolsEvents {
   Search_Order = "Search_Order",
   Create_Order = "Create_Order",
+  Edit_Order = "Edit_Order",
+  Delete_Order = "Delete_Order",
   Export_OrderList = "Export_OrderList",
 }
 
@@ -30,53 +28,81 @@ const eventProperties = (props: TToolsProps) => {
 // 搜索字段
 const searchProperties = (props: TToolsProps) => {
   return {
-    orderNo: {
+    userName: {
       type: "string",
-      description: "订单号：必填项，命名规则：O[订单日期][订单排号]",
+      description: "用户名称",
     },
-    orderName: {
+    goodsName: {
       type: "string",
-      description: "订单名称",
+      description: "商品名称",
     },
-    startTime: {
+    goodsPrice: {
+      type: "number",
+      description: "商品价格",
+    },
+    createTime: {
       type: "string",
       format: "date",
-      description: "订单开始时间",
-    },
-    endTime: {
-      type: "string",
-      format: "date",
-      description: "订单结束时间",
+      description:
+        "创建时间 或者 构建时间 或者 Build date: 格式为YYYY-MM-DD hh:mm:ss",
     },
   } as const;
 };
 
-// 创建订单字段
-const createOrderProperties = (props: TToolsProps) => {
+// 创建/修改/删除订单所需字段
+const orderDataProperties = (props: TToolsProps) => {
+  const { orderList } = props;
+
   return {
-    username: {
+    id: {
       type: "string",
-      description: "用户名",
+      description:
+        "用户唯一标识(ID): 数字或字符串类型，创建用户不需要id字段，修改用户时根据用户名称获取对应字段值",
+      enum: orderList,
+    },
+    orderNo: {
+      type: "string",
+      description: "订单号，必填项，命名规则：[订单日期][订单排号]",
+    },
+    userName: {
+      type: "string",
+      description: "用户名称",
     },
     goodsName: {
       type: "string",
-      description: "商品的名称：必填项，值为value字段",
-      enum: GoodsOptions,
+      description: "商品名称",
+    },
+    goodsPrice: {
+      type: "number",
+      description: "商品价格",
+    },
+    goodsDesc: {
+      type: "string",
+      description: "商品描述",
+    },
+    goodsCount: {
+      type: "number",
+      description: "数量、商品数量",
     },
     payType: {
-      type: "string",
-      description: "用户支付方式：必填项，值为value字段",
+      type: "number",
+      escription: "用户支付方式：必填项，值为value字段",
       enum: PayTypeOptions,
     },
     deliveryType: {
-      type: "string",
+      type: "number",
       description: "配送方式：必填项，值为value字段",
       enum: DeliveryTypeOptions,
     },
     deliveryTime: {
+      type: "number",
+      format: "date",
+      description: "配送时间: 格式为YYYY-MM-DD hh:mm:ss",
+    },
+    createTime: {
       type: "string",
       format: "date",
-      description: "配送时间",
+      description: "创建时间: 格式为YYYY-MM-DD hh:mm:ss",
     },
   } as const;
 };
@@ -108,7 +134,7 @@ const search_order = (props?: any) => {
             properties: {
               ...searchProperties(props),
             },
-            required: ["name"],
+            required: ["userName", "goodsName", "goodsPrice", "createTime"],
           },
         },
         required: ["name", "toolType", "data"],
@@ -136,15 +162,84 @@ const create_order = (props?: any) => {
             type: "object",
             description: "需要用到的数据",
             properties: {
-              ...createOrderProperties(props),
+              ...orderDataProperties(props),
             },
             required: [
-              "username",
+              "orderNo",
+              "userName",
               "goodsName",
+              "goodsPrice",
+              "goodsDesc",
+              "goodsCount",
               "payType",
               "deliveryType",
               "deliveryTime",
+              "createTime",
             ],
+          },
+        },
+        required: ["name", "data"],
+      },
+    },
+  } as const;
+};
+
+const edit_order = (props?: any) => {
+  return {
+    type: "function",
+    function: {
+      name: OrderManageToolsEvents.Edit_Order,
+      description: "修改订单数据",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
+            enum: [OrderManageToolsEvents.Edit_Order],
+          },
+          // 定义此项时，将不支持页面跳转
+          // toolType: {
+          //   type: "string",
+          //   description: "工具类型，api：调用接口",
+          //   enum: ["api"],
+          // },
+          data: {
+            type: "object",
+            description: "需要用到的数据",
+            properties: {
+              ...orderDataProperties(props),
+            },
+          },
+        },
+        required: ["name", "data"],
+      },
+    },
+  } as const;
+};
+
+const delete_order = (props?: any) => {
+  return {
+    type: "function",
+    function: {
+      name: OrderManageToolsEvents.Delete_Order,
+      description: "删除订单数据",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称(必填)", // 设置 "必填" 二字，AI才会保证输出此字段
+            enum: [OrderManageToolsEvents.Delete_Order],
+          },
+          data: {
+            type: "object",
+            description: "需要用到的数据",
+            properties: {
+              ...orderDataProperties(props),
+            },
           },
         },
         required: ["name", "data"],
@@ -184,5 +279,7 @@ const export_orderList = (props?: any) => {
 export const OrderManageToolsFunctions = {
   search_order,
   create_order,
+  edit_order,
+  delete_order,
   export_orderList,
 } as const;

@@ -1,8 +1,15 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
-import { Button, Col, DatePicker, Form, FormProps, Input, Row } from "antd";
-import dayjs from "dayjs";
-import CreateOrderModalCmp from "./CreateOrderModalCmp";
-import { useState } from "react";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  FormProps,
+  Input,
+  InputNumber,
+  Row,
+} from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import {
   OrderManageToolsEvents,
   TOrderManageTools,
@@ -12,12 +19,16 @@ interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
   onReset: (data?: any) => void;
 }
-
-const { RangePicker } = DatePicker;
+export type TOrderFormData = {
+  userName?: string;
+  goodsName?: string;
+  goodsPrice?: number;
+  createTime?: Dayjs;
+};
 
 const SearchForm = (props: Partial<ISearchForm>) => {
   const { onSearch, onReset } = props;
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<TOrderFormData>();
 
   const handleSearch = () => {
     const values = form.getFieldsValue();
@@ -32,12 +43,13 @@ const SearchForm = (props: Partial<ISearchForm>) => {
   useChatEvent<TOrderManageTools>((event) => {
     if (event.name === OrderManageToolsEvents.Search_Order) {
       const chatData = event.data;
-      if (chatData) {
-        form.setFieldsValue({
-          ...chatData,
-          createTime: [dayjs(chatData.startTime), dayjs(chatData.endTime)],
-        });
-      }
+      form.setFieldsValue({
+        ...chatData,
+        createTime: chatData?.createTime
+          ? dayjs(chatData?.createTime)
+          : undefined,
+      });
+      handleSearch();
     }
   });
 
@@ -46,18 +58,27 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       <Form layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={6}>
-            <Form.Item name="orderNo" label="订单号">
+            <Form.Item name="userName" label="用户名称">
               <Input placeholder="请输入" allowClear />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="orderName" label="订单名称">
+            <Form.Item name="goodsName" label="商品名称">
               <Input placeholder="请输入" allowClear />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="createTime" label="创建时间-结束时间">
-              <RangePicker style={{ width: "100%" }} />
+            <Form.Item name="goodsPrice" label="商品价格">
+              <InputNumber
+                placeholder="请输入"
+                controls={false}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item name="createTime" label="创建时间">
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col flex="auto" className="form-btn-box">
