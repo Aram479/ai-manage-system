@@ -185,7 +185,7 @@ const OrderManagePage = () => {
       if (chatData) {
         message.loading({
           key: "deleteOrder",
-          content: "删除用户中...",
+          content: "删除订单中...",
           duration: 0,
         });
         if (chatData?.id) {

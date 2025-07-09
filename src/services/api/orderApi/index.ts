@@ -12,7 +12,7 @@ export const fetchOrderList = (searchData?: TOrderFormData) => {
     const conditions = [
       { key: "userName", value: userName, isExact: false },
       { key: "goodsName", value: goodsName, isExact: false }, // 设置isExact来区分精确匹配还是模糊匹配
-      { key: "goodsPrice", value: String(goodsPrice), isExact: false },
+      { key: "goodsPrice", value: goodsPrice, isExact: false },
       {
         key: "createTime",
         value: createTime ? dayjs(createTime).format("YYYY-MM-DD") : undefined,
@@ -31,7 +31,6 @@ export const fetchOrderList = (searchData?: TOrderFormData) => {
         }
         return itemValue == condition.value;
       } else {
-        console.log(condition.value);
         return itemValue.toLowerCase().includes(condition.value?.toLowerCase());
       }
     });
@@ -47,7 +46,7 @@ export const deleteOrderById = (id: number | string) => {
     return mockRequest<any>(null, {
       code: 400,
       data: null,
-      message: "用户不存在",
+      message: "用户订单不存在",
     });
   }
   const deleteIndex = OrderList.findIndex((item) => item.id == id);
