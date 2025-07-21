@@ -72,6 +72,10 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 ![alt text](public/image-order-1.png)
 ![alt text](public/image-order-2.png)
 
+**执行列表：记录执行过的命令，可再次重复执行**
+![alt text](public/image-cmd-1.png)
+![alt text](public/image-cmd-2.png)
+
 ### 扩展
 
 **本系统还支持两个 AI 之间的对话，让对话不再局限于人与 AI，而是 AI 与 AI**

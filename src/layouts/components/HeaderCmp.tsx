@@ -13,6 +13,13 @@ const HeaderCmp = () => {
     history.push("/Main");
   };
 
+  const handleGitee = () => {
+    window.open(
+      "https://gitee.com/clzhloafl/my-ai-project/tree/ai-main/",
+      "_blank"
+    );
+  };
+
   const handleGitHunb = () => {
     window.open(
       "https://github.com/Aram479/ai-manage-system/tree/ai-main",
@@ -34,6 +41,12 @@ const HeaderCmp = () => {
       </div>
       <div className={styles.operation}>
         <ChatListDrawer />
+        <div
+          style={{ cursor: "pointer", fontWeight: "bold", fontSize: 17 }}
+          onClick={handleGitee}
+        >
+          Gitee
+        </div>
         <GithubOutlined onClick={handleGitHunb} />
       </div>
     </div>

@@ -21,7 +21,6 @@ const ChatListDrawer = () => {
         open={isCMDList}
         width={480}
         destroyOnClose={true}
-        maskClosable={false}
         styles={{
           body: {
             background: "#f5f5f5",
