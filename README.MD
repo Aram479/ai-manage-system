@@ -1,18 +1,16 @@
-### 项目介绍 (master为测试分支，建议切换到ai-main分支运行项目)
+### 项目介绍 (master 为测试分支，建议切换到 ai-main 分支运行项目)
 
-因为本人在网上找不到AI智能化项目的相关Web代码和解决方案，所以本项目采用UmiMax+Ant Design+Ant Design X 实现承载AI智能化管理系统解决方案，功能简单，无后端支持，仅仅是一个能根据AI Tools处理系统功能的基础解决方案，此系统代码仅供参考！
+因为本人在网上找不到 AI 智能化项目的相关 Web 代码和解决方案，所以本项目采用 UmiMax+Ant Design+Ant Design X 实现承载 AI 智能化管理系统解决方案，功能简单，无后端支持，仅仅是一个能根据 AI Tools 处理系统功能的基础解决方案，此系统代码仅供参考！
 
 ### 主要功能
 
-本系统主要基于Ant Design X组件库编写一套Chat对话功能，大部分代码用于实现并搭建AI对话功能和利用AI Tools实现AI**半自动**命令执行功能。
+本系统主要基于 Ant Design X 组件库编写一套 Chat 对话功能，大部分代码用于实现并搭建 AI 对话功能和利用 AI Tools 实现 AI**半自动**命令执行功能。
 
-**功能主要实现**：系统操作者可通过和AI对话后，触发开发者在Tools中定义的AI关键词(description)，自动执行开发者定义的工作流程(局部/全局)，详情展示见截图。
+**功能主要实现**：系统操作者可通过和 AI 对话后，触发开发者在 Tools 中定义的 AI 关键词(description)，自动执行开发者定义的工作流程(局部/全局)，详情展示见截图。
 
-**系统如何执行AI对话中的命令**：代码中主要分为局部执行AI命令`(useChatEvent)`和全局执行AI命令`(useGlobalChatEvent)`，开发者可参考代码示例使用
+**系统如何执行 AI 对话中的命令**：代码中主要分为局部执行 AI 命令`(useChatEvent)`和全局执行 AI 命令`(useGlobalChatEvent)`，开发者可参考代码示例使用
 
-**待优化项**：当前系统还不支持执行一连串的工作命令执行，并且所有指令的执行均需代码中手动配置，AI解读后方可准确执行，后续可能会优化再度代码。
-
-目前项目仅支持Qwen通义千问`(代码较为完善，系统推荐使用)`和DeepSeek`(代码完善中,不推荐使用)`的Api调用
+目前项目仅支持 Qwen 通义千问`(代码较为完善，系统推荐使用)`和 DeepSeek`(代码完善中,不推荐使用)`的 Api 调用
 
 框架环境
 
@@ -40,7 +38,7 @@ yarn start
 
 ### 提示
 
-1、初次使用项目请先在`.env.ts`代码中填入自己的ApiKey
+1、初次使用项目请先在`.env.ts`代码中填入自己的 ApiKey
 
 ```js
 export default {
@@ -50,23 +48,36 @@ export default {
 };
 ```
 
-2、如果没有Apikey，请搜索教程注册并申请。如已申请ApiKey请点击如下地址跳转
+2、如果没有 Apikey，请搜索教程注册并申请。如已申请 ApiKey 请点击如下地址跳转
 
-DeepSeek ApiKey查询：https://platform.deepseek.com/api_keys
+DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 
-通义千问 ApiKey查询：https://bailian.console.aliyun.com/?tab=model#/api-key
+通义千问 ApiKey 查询：https://bailian.console.aliyun.com/?tab=model#/api-key
 
-**页面首次进入白屏解决方案**：地址栏手动加上/main，作者很懒，没加重定向
+3、在系统中看到的接口请求全部为前端模拟的请求，并非真实的后端请求
 
 ### 部分功能展示截图：
-![alt text](public/image.png)
-![alt text](public/image-1.png)
-![alt text](public/image-2.png)
-![alt text](public/image-3.png)
-![alt text](public/image-4.png)
 
+**创建组件**
+![alt text](public/image-cpn.png)
+
+**生成图表：目前仅支持饼图**
+![alt text](public/image-charts.png)
+
+**用户管理：支持增删改查**
+![alt text](public/image-user-1.png)
+![alt text](public/image-user-2.png)
+
+**订单管理：支持增删改查**
+![alt text](public/image-order-1.png)
+![alt text](public/image-order-2.png)
+
+**执行列表：记录执行过的命令，可再次重复执行**
+![alt text](public/image-cmd-1.png)
+![alt text](public/image-cmd-2.png)
 
 ### 扩展
-**本系统还支持两个AI之间的对话，让对话不再局限于人与AI，而是AI与AI**
+
+**本系统还支持两个 AI 之间的对话，让对话不再局限于人与 AI，而是 AI 与 AI**
 ![alt text](public/image-auto-1.png)
 ![alt text](public/image-auto-2.png)
