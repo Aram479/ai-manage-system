@@ -32,7 +32,7 @@ const Create_BarCharts = (props: TToolsProps) => {
           ...eventProperties(props),
           name: {
             type: "string",
-            description: "事件名称", // 设置 "必填" 二字，AI才会保证输出此字段
+            description: "事件名称",
             enum: [ChartToolsEvents.Create_BarCharts],
           },
           datas: {
@@ -41,13 +41,13 @@ const Create_BarCharts = (props: TToolsProps) => {
             items: {
               type: "object",
               properties: {
-                count: {
+                sales: {
                   type: "number",
-                  description: "数量，必填项",
+                  description: "销售额",
                 },
                 type: {
                   type: "string",
-                  description: "类型，必填项",
+                  description: "类型/类别，必填项",
                 },
               },
               required: ["count", "type"],
@@ -72,7 +72,7 @@ const Create_PieCharts = (props: TToolsProps) => {
           ...eventProperties(props),
           name: {
             type: "string",
-            description: "事件名称", // 设置 "必填" 二字，AI才会保证输出此字段
+            description: "事件名称",
             enum: [ChartToolsEvents.Create_PieCharts],
           },
           datas: {

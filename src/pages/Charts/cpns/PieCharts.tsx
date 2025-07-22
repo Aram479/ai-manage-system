@@ -1,6 +1,6 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
-import { Pie } from "@ant-design/charts";
+import { Pie, PieConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
 const PieCharts = () => {
@@ -20,7 +20,7 @@ const PieCharts = () => {
   // ]
   const [datas, setDatas] = useState<any[]>([]);
 
-  const pieConfig = useMemo(() => {
+  const pieConfig = useMemo<PieConfig>(() => {
     return {
       data: [],
       angleField: "count", // 扇形弧度(对应值)
