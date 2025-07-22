@@ -35,8 +35,10 @@ pnpm run start
 或
 yarn start
 ```
+
 ### JSON Schema
-如果你不太了解Tools中JSON书写规范，你可以去查阅[JSON Schema](https://json-schema.apifox.cn/)文档并结合[Tools](https://api-docs.deepseek.com/zh-cn/api/create-chat-completion)使用方式实践到项目中，这不会花费你太多的时间去了解
+
+如果你不太了解 Tools 中 JSON 书写规范，你可以去查阅[JSON Schema](https://json-schema.apifox.cn/)文档并结合[Tools](https://api-docs.deepseek.com/zh-cn/api/create-chat-completion)使用方式实践到项目中，这不会花费你太多的时间去了解
 
 ### 提示
 
@@ -57,6 +59,18 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 通义千问 ApiKey 查询：https://bailian.console.aliyun.com/?tab=model#/api-key
 
 3、在系统中看到的接口请求全部为前端模拟的请求，并非真实的后端请求
+
+### 目前已有功能列表
+
+- 跳转页面
+- 修改系统名称
+- 创建组件
+- 生成饼图
+- 用户管理：增删改查、导出用户数据
+- 订单管理：增删改查、导出订单数据
+- 角色管理：查询、导出角色数据
+- 解析文件并将文件数据应用到系统中
+- 命令列表、重复执行命令
 
 ### 部分功能展示截图：
 
