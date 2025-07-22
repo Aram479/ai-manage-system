@@ -27,7 +27,7 @@ import { Ai_Options } from "@/constant/base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
-import SenderHeader from "@/pages/Chat/cpns/SenderHeader";
+import SenderHeader, { TSenderHeaderRef } from "@/pages/Chat/cpns/SenderHeader";
 import styles from "./index.less";
 import LogoWhite from "@/asset/png/logoWhite.png";
 
@@ -45,6 +45,7 @@ interface IChatCmpProps {
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const { content: contentProp, isSender = true, onSuccess } = props;
   const { menuList, userMenus, userList } = useModel("user");
+  const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
@@ -194,7 +195,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   useEffect(() => {
     const deepTagIndex = messageTags.findIndex((item) => item.id == "deep")!;
-
     if (chatUploadFiles.current.length) {
       // 文档解析不能用深度思考
       messageTags[deepTagIndex].disabled = true;
@@ -209,7 +209,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       messageTags[deepTagIndex].disabled = false;
       // setModel(defaultModelInfo.model?.default!);
     }
-    setMessageTags(messageTags);
+    setMessageTags([...messageTags]);
   }, [chatUploadFiles.current]);
 
   // 暴露给父组件的属性
@@ -275,6 +275,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
               value={content}
               header={
                 <SenderHeader
+                  ref={senderHeaderRef}
                   files={uploadFiles}
                   open={senderHeaderOpen}
                   onUpload={handleUploadFile}
@@ -290,6 +291,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
               onChange={setContent}
               onSubmit={handleSendChat}
               onCancel={handleStopChat}
+              onPasteFile={(file) =>
+                senderHeaderRef.current?.uploadAction?.(file)
+              }
             />
           </>
         )}
