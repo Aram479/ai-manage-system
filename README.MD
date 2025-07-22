@@ -35,6 +35,8 @@ pnpm run start
 或
 yarn start
 ```
+### JSON Schema
+如果你不太了解Tools中JSON书写规范，你可以去查阅[JSON Schema](https://json-schema.apifox.cn/)文档并结合[Tools](https://api-docs.deepseek.com/zh-cn/api/create-chat-completion)使用方式实践到项目中，这不会花费你太多的时间去了解
 
 ### 提示
 
