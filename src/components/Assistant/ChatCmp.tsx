@@ -117,7 +117,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           padding: 8,
         },
       },
-      typing: { step: 5, interval: 20 },
+      typing: false,
       styles: {
         content: {
           minWidth: "calc(100% - 50px)",
@@ -129,6 +129,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       placement: "end",
       // avatar: { icon: <UserOutlined />, style: { background: "#87d068" } },
       // typing: { step: 5, interval: 20 },
+      typing: false,
       styles: {
         content: {
           padding: "12px 8px",
