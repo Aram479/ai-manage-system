@@ -33,6 +33,7 @@ export function getColumns(props: TGetColumns): ColumnsType {
       dataIndex: "status",
       align: "center",
       width: 300,
+      render: (value) => (value ? "启用" : "禁用"),
     },
     {
       title: "创建时间",
