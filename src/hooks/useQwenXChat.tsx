@@ -1,13 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CaretRightOutlined,
+  CheckCircleOutlined,
   CopyOutlined,
   CopyrightOutlined,
   DislikeOutlined,
+  ExclamationCircleOutlined,
   LikeOutlined,
+  LoadingOutlined,
   PlayCircleOutlined,
 } from "@ant-design/icons";
-import { Attachments, SenderProps, useXAgent, useXChat } from "@ant-design/x";
+import {
+  Attachments,
+  SenderProps,
+  ThoughtChain,
+  ThoughtChainProps,
+  useXAgent,
+  useXChat,
+} from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { useLocation, useModel } from "@umijs/max";
@@ -76,6 +86,15 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   // 是否开启自动对话
   const isAutoChat = useRef(false);
 
+  const [expandedKeys, setExpandedKeys] = useState(["deepChat"]);
+
+  const collapsible: ThoughtChainProps["collapsible"] = {
+    expandedKeys,
+    onExpand: (keys: string[]) => {
+      setExpandedKeys(keys);
+    },
+  };
+
   // 格式化返回数据
   const formartMessage = (): TResultStream => {
     const allContent = processorRef.current.getAllContent();
@@ -138,7 +157,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       model: requestProps.current.model,
       messages: chatList,
     };
-    
+
     await qwenXRequest.create(
       requestData,
       {
@@ -277,99 +296,130 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     newItems = [...newMessages];
     return newItems.map(({ message, status, ...item }) => ({
       ...item,
-      messageRender: (content) =>
-        status !== "local" ? (
-          !message.abortedReason ? (
-            <div>
-              {message.ctmpContent && (
-                <div className="ctmpMessageBox">
-                  {/* 思考状态 */}
-                  <div className="ctmpTimeBox">
-                    <div>
-                      <CopyrightOutlined />
-                    </div>
-                    <div>{message.ctmpLoadingMessage}</div>
-                  </div>
-                  {/* 思考内容 */}
-                  <div className="ctmpContentBox">{message.ctmpContent}</div>
-                </div>
-              )}
+      messageRender: (content) => {
+        const newCtmpLoadingMessage = message.ctmpLoadingMessage || "";
+        const chainStatus = ~newCtmpLoadingMessage?.indexOf("已中止")
+          ? "error"
+          : ~newCtmpLoadingMessage!.indexOf("思考中")
+          ? "pending"
+          : "success";
+        const chainIcon =
+          chainStatus === "error" ? (
+            <ExclamationCircleOutlined />
+          ) : chainStatus === "pending" ? (
+            <LoadingOutlined />
+          ) : (
+            <CheckCircleOutlined />
+          );
 
-              <div style={{ background: "auto" }}>
-                <MarkDownCmp
-                  theme="onDark"
-                  content={String(content)}
-                  loading={agent.isRequesting()}
-                />
-                {status === "success" && (
-                  <div className="messageFooterBox">
-                    {message.toolContent && (
-                      <Tooltip title="重新执行命令">
-                        <PlayCircleOutlined
+        return (
+          <>
+            {status !== "local" ? (
+              !message.abortedReason ? (
+                <div>
+                  {message.ctmpContent && (
+                    <div className="ctmpMessageBox">
+                      <ThoughtChain
+                        items={[
+                          {
+                            key: "deepChat",
+                            title: message.ctmpLoadingMessage,
+                            content: (
+                              <div
+                                style={{
+                                  color: "#333",
+                                }}
+                              >
+                                {message.ctmpContent}
+                              </div>
+                            ),
+                            status: chainStatus,
+                            icon: chainIcon,
+                          },
+                        ]}
+                        collapsible={collapsible}
+                      />
+                    </div>
+                  )}
+
+                  <div style={{ background: "auto" }}>
+                    <MarkDownCmp
+                      theme="onDark"
+                      content={String(content)}
+                      loading={agent.isRequesting()}
+                    />
+                    {status === "success" && (
+                      <div className="messageFooterBox">
+                        {message.toolContent && (
+                          <Tooltip title="重新执行命令">
+                            <PlayCircleOutlined
+                              onClick={_.throttle(() => {
+                                setCommandExecutor(message.toolContent);
+                              }, 300)}
+                            />
+                          </Tooltip>
+                        )}
+
+                        <LikeOutlined
                           onClick={_.throttle(() => {
-                            setCommandExecutor(message.toolContent);
+                            AMessage.success({
+                              key: "thanks",
+                              content: "感谢您的支持",
+                            });
                           }, 300)}
                         />
-                      </Tooltip>
+                        <DislikeOutlined />
+                        <CopyOutlined
+                          onClick={_.throttle(() => {
+                            ClipboardUtil.writeText(content);
+                            AMessage.success({
+                              key: "copy",
+                              content: "复制成功",
+                            });
+                          }, 300)}
+                        />
+                      </div>
                     )}
-
-                    <LikeOutlined
-                      onClick={_.throttle(() => {
-                        AMessage.success({
-                          key: "thanks",
-                          content: "感谢您的支持",
-                        });
-                      }, 300)}
-                    />
-                    <DislikeOutlined />
-                    <CopyOutlined
-                      onClick={_.throttle(() => {
-                        ClipboardUtil.writeText(content);
-                        AMessage.success({
-                          key: "copy",
-                          content: "复制成功",
-                        });
-                      }, 300)}
-                    />
                   </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>{message.abortedReason}</>
-          )
-        ) : (
-          <div>
-            {isAutoChat.current ? (
-              <MarkDownCmp
-                theme="onDark"
-                content={String(content)}
-                loading={agent.isRequesting()}
-              />
+                </div>
+              ) : (
+                <>{message.abortedReason}</>
+              )
             ) : (
-              <div style={{ display: "inline-block", margin: "0 8px" }}>
-                <div>{content}</div>
+              <div>
+                {isAutoChat.current ? (
+                  <MarkDownCmp
+                    theme="onDark"
+                    content={String(content)}
+                    loading={agent.isRequesting()}
+                  />
+                ) : (
+                  <div style={{ display: "inline-block", margin: "0 8px" }}>
+                    <div>{content}</div>
 
-                {/* 文件列表 */}
-                {!!message.chatFiles?.length && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      flexDirection: "column",
-                      gap: 5,
-                      marginTop: "8px",
-                    }}
-                  >
-                    {message.chatFiles?.map((file, index) => (
-                      <Attachments.FileCard key={index} item={file} />
-                    ))}
+                    {/* 文件列表 */}
+                    {!!message.chatFiles?.length && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          flexDirection: "column",
+                          gap: 5,
+                          marginTop: "8px",
+                        }}
+                      >
+                        {message.chatFiles?.map((file, index) => (
+                          <Attachments.FileCard key={index} item={file} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )}
-          </div>
-        ),
+          </>
+        );
+      },
     }));
   };
 
