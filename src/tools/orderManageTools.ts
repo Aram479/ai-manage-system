@@ -62,7 +62,9 @@ const orderDataProperties = (props: TToolsProps) => {
     },
     orderNo: {
       type: "string",
-      description: "订单号，必填项，命名规则：[订单日期][订单排号]",
+      description:
+        "订单号， 必填项，创建订单时需要命名规则：[订单日期][订单排号]，修改订单需要根据用户名称获取对应此字段值",
+      enum: orderList,
     },
     userName: {
       type: "string",

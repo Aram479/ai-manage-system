@@ -62,10 +62,7 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
 
   const handleConfirm = async () => {
     await form.validateFields();
-    const formData = {
-      ...form.getFieldsValue(true),
-      orderNo: dayjs().format("YYYYMMDDss"),
-    };
+    const formData = form.getFieldsValue(true);
     const newData = {
       ...formData,
       orderNo: formData.orderNo || dayjs().format("YYYYMMDDhhmmss"),
