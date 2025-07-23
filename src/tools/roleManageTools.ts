@@ -27,8 +27,8 @@ const searchProperties = (props: TToolsProps) => {
   return {
     role: {
       type: "string",
-      description: "用户角色：值为value字段",
-      enum: RoleOptions,
+      description: "用户角色：必填项",
+      enum: RoleOptions.map(item=> item.value),
     },
     createTime: {
       type: "string",

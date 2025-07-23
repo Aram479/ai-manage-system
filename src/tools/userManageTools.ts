@@ -34,8 +34,8 @@ const searchProperties = (props: TToolsProps) => {
     },
     role: {
       type: "string",
-      description: "用户角色，值为某项的value",
-      enum: RoleOptions,
+      description: "用户角色，必填项",
+      enum: RoleOptions.map((item) => item.value),
     },
     createTime: {
       type: "string",
@@ -62,12 +62,12 @@ const userDataProperties = (props: TToolsProps) => {
     },
     role: {
       type: "string",
-      description: "用户角色，值为某项的value, 根据用户名称获取对应此字段值",
-      enum: RoleOptions,
+      description: "用户角色，必填项",
+      enum: RoleOptions.map((item) => item.value),
     },
     phone: {
       type: "number",
-      description: "用户手机号, 根据用户名称获取对应此字段值",
+      description: "用户手机号, 必填项，根据用户名称获取对应此字段值",
     },
     status: {
       type: "number",
@@ -79,7 +79,6 @@ const userDataProperties = (props: TToolsProps) => {
       format: "date",
       description:
         "用户创建时间，根据用户名称获取对应此字段值: 格式为YYYY-MM-DD hh:mm:ss",
-      enum: userList,
     },
   } as const;
 };

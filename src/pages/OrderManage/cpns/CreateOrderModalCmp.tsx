@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { useRequest } from "@umijs/max";
+import { useEffect } from "react";
 import {
   Col,
   DatePicker,
@@ -57,14 +56,21 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
         goodsDesc: item.desc,
       });
     } else {
-      resetAction();
+      form.resetFields(["goodsPrice", "goodsCount", "goodsDesc"]);
     }
   };
 
   const handleConfirm = async () => {
     await form.validateFields();
-    const formData = form.getFieldsValue(true);
-    onOk?.(formData);
+    const formData = {
+      ...form.getFieldsValue(true),
+      orderNo: dayjs().format("YYYYMMDDss"),
+    };
+    const newData = {
+      ...formData,
+      orderNo: formData.orderNo || dayjs().format("YYYYMMDDhhmmss"),
+    };
+    onOk?.(newData);
   };
 
   const handleCencel = () => {
@@ -77,6 +83,18 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
       resetAction();
     }
   }, [open]);
+
+  useChatEvent<TOrderManageTools>((event) => {
+    if (event.name === OrderManageToolsEvents.Create_Order) {
+      const chatData = event.data;
+      form.setFieldsValue({
+        ...chatData,
+        deliveryTime: chatData?.deliveryTime
+          ? dayjs(chatData?.deliveryTime)
+          : undefined,
+      });
+    }
+  });
 
   return (
     <div>

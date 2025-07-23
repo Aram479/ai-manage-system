@@ -169,25 +169,16 @@ const UserManagePage = () => {
 
   useChatEvent<TUserManageTools>((event) => {
     if (event.name === UserManageToolsEvents.Create_User) {
-      const chatData = event.data as any;
-      if (chatData) {
-        message.loading({
-          key: "createUser",
-          content: "新增用户中...",
-          duration: 0,
-        });
-        createUserReq.run(chatData);
-      }
+      setCreateUserOpen(true);
     } else if (event.name === UserManageToolsEvents.Edit_User) {
-      const chatData = event.data as any;
-      if (chatData) {
-        message.loading({
-          key: "editUser",
-          content: "修改用户中...",
-          duration: 0,
-        });
-        editUserByIdReq.run(chatData);
-      }
+      const chatData = event.data;
+      const record = tableData.find((item) => item.id === chatData?.id);
+      const editRecord: IUserList = {
+        ...record,
+        ...chatData,
+      };
+      tableCallback(editRecord, "edit");
+      setCreateUserOpen(true);
     } else if (event.name === UserManageToolsEvents.Delete_User) {
       const chatData = event.data;
       if (chatData) {

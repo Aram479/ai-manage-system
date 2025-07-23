@@ -161,15 +161,7 @@ const OrderManagePage = () => {
 
   useChatEvent<TOrderManageTools>((event) => {
     if (event.name === OrderManageToolsEvents.Create_Order) {
-      const chatData = event.data as any;
-      if (chatData) {
-        message.loading({
-          key: "createOrder",
-          content: "新增订单中...",
-          duration: 0,
-        });
-        createOrderReq.run(chatData);
-      }
+      setCreateOrderOpen(true);
     } else if (event.name === OrderManageToolsEvents.Edit_Order) {
       const chatData = event.data as any;
       if (chatData) {
