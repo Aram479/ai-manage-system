@@ -7,7 +7,6 @@ import { getColumns } from "./constants";
 import SearchFormCmp from "./cpns/SearchFormCmp";
 import styles from "./index.less";
 import useTableColFilter from "@/hooks/useTableColFilter";
-import { useChatEvent } from "@/hooks/useChatEvent";
 import { exportRoleListApi } from "@/request/exportRequestApi";
 
 type IDataType = any;

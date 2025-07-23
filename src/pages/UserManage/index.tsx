@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
+import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { useModel, useRequest } from "@umijs/max";
 import { Button, Card, message, PaginationProps } from "antd";
 import { TableProps } from "antd/lib";
@@ -15,12 +15,12 @@ import {
   fetchUserList,
 } from "@/services/api/userApi";
 import CreateUserModal from "./cpns/CreateUserModal";
-import dayjs from "dayjs";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import {
   TUserManageTools,
   UserManageToolsEvents,
 } from "@/tools/userManageTools";
+import { exportUserListApi } from "@/request/exportRequestApi";
 
 type IDataType = any;
 
@@ -47,6 +47,7 @@ const UserManagePage = () => {
     pageSizeOptions: [5, 10, 20, 50],
   });
 
+  const exportUserListReq = exportUserListApi();
   const tableCallback = async (record: IUserList, type: string) => {
     setCurrentRecord(record);
     if (type === "edit") {
@@ -216,6 +217,13 @@ const UserManagePage = () => {
             onClick={() => setCreateUserOpen(true)}
           >
             创建用户
+          </Button>
+          <Button
+            type="primary"
+            icon={<ExportOutlined />}
+            onClick={exportUserListReq.run}
+          >
+            导出
           </Button>
         </div>
         <PageTable

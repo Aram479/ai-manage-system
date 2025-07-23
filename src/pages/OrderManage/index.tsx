@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
+import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { useModel, useRequest } from "@umijs/max";
 import { Button, Card, message, PaginationProps, Table } from "antd";
 import { TableProps } from "antd/lib";
@@ -19,6 +19,7 @@ import {
   editOrderApi,
   fetchOrderList,
 } from "@/services/api/orderApi";
+import { exportOrderListApi } from "@/request/exportRequestApi";
 
 // MBOMPage页面
 const OrderManagePage = () => {
@@ -41,6 +42,9 @@ const OrderManagePage = () => {
     showSizeChanger: true,
     pageSizeOptions: [5, 10, 20, 50],
   });
+
+  const exportOrderListReq = exportOrderListApi();
+
   const tableCallback = async (record: IOrderList, type: string) => {
     if (type === "edit") {
       // ...做点什么
@@ -208,6 +212,13 @@ const OrderManagePage = () => {
             onClick={() => setCreateOrderOpen(true)}
           >
             新增订单
+          </Button>
+          <Button
+            type="primary"
+            icon={<ExportOutlined />}
+            onClick={exportOrderListReq.run}
+          >
+            导出
           </Button>
         </div>
         <Table
