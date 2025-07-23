@@ -77,7 +77,7 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 **创建组件**
 ![alt text](public/image-cpn.png)
 
-**生成图表：目前仅支持饼图**
+**生成图表**
 ![alt text](public/image-charts.png)
 
 **用户管理：支持增删改查**
