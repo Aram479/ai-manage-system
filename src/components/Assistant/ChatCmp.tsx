@@ -53,6 +53,8 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const [model, setModel] = useState<TAllModel>(
     defaultModelInfo.model?.default!
   );
+  // 是否联网搜索
+  const [isOnlineSearch, setIsOnlineSearch] = useState(false);
   const [currentAi, setCurrentAi] = useState(defaultModelInfo);
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
@@ -64,7 +66,12 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     {
       id: "deep",
       children: "深度思考",
-      desc: "先思考后回答，解决推理问题",
+      desc: "先思考后回答，支持自动联网搜索",
+    },
+    {
+      id: "online",
+      children: "联网搜索",
+      desc: "联网搜索",
     },
   ]);
 
@@ -89,6 +96,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
         model,
         // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
         tools: currentTag?.id === "deep" ? undefined : allTools(toolsProps), // 深度思考不支持tools
+        enable_search: isOnlineSearch,
         // tool_choice: 'auto',
       },
       onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
@@ -163,6 +171,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     if (item.id == currentTag?.id) {
       isDeep.current = false;
       setModel(currentAi.model?.default!);
+      setIsOnlineSearch(false);
       setCurrentTag(undefined);
       setPlaceholder(defaultPlaceholder);
       return;
@@ -173,6 +182,14 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       setPlaceholder(
         "深度思考已启动...大概吧，谁在乎呢？反正我也挺擅长假装在思考的。"
       );
+    }
+    if (["online", "deep"].includes(item.id!)) {
+      setIsOnlineSearch(true);
+      if (item.id === "online") {
+        setPlaceholder(
+          "数据流已加载99%，剩下那1%靠演技撑着——谁还没个假装全知的时刻呢？"
+        );
+      }
     }
 
     setCurrentTag(item);
@@ -196,10 +213,14 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   useEffect(() => {
     const deepTagIndex = messageTags.findIndex((item) => item.id == "deep")!;
+    const onlineTagIndex = messageTags.findIndex(
+      (item) => item.id == "online"
+    )!;
     if (chatUploadFiles.current.length) {
-      // 文档解析不能用深度思考
+      // 深度思考、联网搜索不能进行文档解析
       messageTags[deepTagIndex].disabled = true;
-      if (currentTag?.id === "deep") {
+      messageTags[onlineTagIndex].disabled = true;
+      if (["deep", "online"].includes(currentTag?.id!)) {
         isDeep.current = false;
         setCurrentTag(undefined);
         setPlaceholder(defaultPlaceholder);
@@ -208,6 +229,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       setModel("qwen-long");
     } else {
       messageTags[deepTagIndex].disabled = false;
+      messageTags[onlineTagIndex].disabled = false;
       // setModel(defaultModelInfo.model?.default!);
     }
     setMessageTags([...messageTags]);
@@ -236,7 +258,11 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           <>
             <Flex gap="8px">
               {messageTags.map((item) => (
-                <Tooltip key={item.id} title={item.desc} placement="top">
+                <Tooltip
+                  key={item.id}
+                  title={<div style={{ fontSize: 12 }}>{item.desc}</div>}
+                  placement="top"
+                >
                   <Button
                     {...item}
                     disabled={

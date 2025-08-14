@@ -1,29 +1,26 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
-import { Column, ColumnConfig } from "@ant-design/charts";
+import { Line, LineConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
-const BarCharts = () => {
+const LineCharts = () => {
   const [datas, setDatas] = useState<any[]>([]);
-  const [config, setConfig] = useState<ColumnConfig | unknown>({});
+  const [config, setConfig] = useState<LineConfig | unknown>({});
 
-  const barConfig = useMemo<ColumnConfig>(() => {
+  const lineConfig = useMemo<LineConfig>(() => {
     return {
       data: [],
-      xField: "",
-      yField: "",
       ...(config || {}),
     };
   }, [datas, config]);
 
   useChatEvent<TChartTools>((event) => {
-    if (event.name === ChartToolsEvents.Create_BarCharts) {
+    if (event.name === ChartToolsEvents.Create_LineCharts) {
       setDatas(event.datas ?? []);
       setConfig(event.config);
     }
   });
-
-  return <div>{!!datas.length && <Column {...barConfig} data={datas} />}</div>;
+  return <div>{!!datas.length && <Line {...lineConfig} data={datas} />}</div>;
 };
 
-export default BarCharts;
+export default LineCharts;

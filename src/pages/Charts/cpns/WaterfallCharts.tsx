@@ -1,13 +1,13 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
-import { Column, ColumnConfig } from "@ant-design/charts";
+import { Waterfall, WaterfallConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
-const BarCharts = () => {
+const WaterfallCharts = () => {
   const [datas, setDatas] = useState<any[]>([]);
-  const [config, setConfig] = useState<ColumnConfig | unknown>({});
+  const [config, setConfig] = useState<WaterfallConfig | unknown>({});
 
-  const barConfig = useMemo<ColumnConfig>(() => {
+  const waterfallConfig = useMemo<WaterfallConfig>(() => {
     return {
       data: [],
       xField: "",
@@ -17,13 +17,14 @@ const BarCharts = () => {
   }, [datas, config]);
 
   useChatEvent<TChartTools>((event) => {
-    if (event.name === ChartToolsEvents.Create_BarCharts) {
+    if (event.name === ChartToolsEvents.Create_WaterfallCharts) {
       setDatas(event.datas ?? []);
       setConfig(event.config);
     }
   });
-
-  return <div>{!!datas.length && <Column {...barConfig} data={datas} />}</div>;
+  return (
+    <div>{!!datas.length && <Waterfall {...waterfallConfig} data={datas} />}</div>
+  );
 };
 
-export default BarCharts;
+export default WaterfallCharts;

@@ -1,29 +1,28 @@
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
-import { Column, ColumnConfig } from "@ant-design/charts";
+import { Stock, StockConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
-const BarCharts = () => {
+const StockCharts = () => {
   const [datas, setDatas] = useState<any[]>([]);
-  const [config, setConfig] = useState<ColumnConfig | unknown>({});
+  const [config, setConfig] = useState<StockConfig | unknown>({});
 
-  const barConfig = useMemo<ColumnConfig>(() => {
+  const stockConfig = useMemo<StockConfig>(() => {
     return {
       data: [],
       xField: "",
-      yField: "",
+      yField: ["", "", "", ""] as const,
       ...(config || {}),
     };
   }, [datas, config]);
 
   useChatEvent<TChartTools>((event) => {
-    if (event.name === ChartToolsEvents.Create_BarCharts) {
+    if (event.name === ChartToolsEvents.Create_StockCharts) {
       setDatas(event.datas ?? []);
       setConfig(event.config);
     }
   });
-
-  return <div>{!!datas.length && <Column {...barConfig} data={datas} />}</div>;
+  return <div>{!!datas.length && <Stock {...stockConfig} data={datas} />}</div>;
 };
 
-export default BarCharts;
+export default StockCharts;
