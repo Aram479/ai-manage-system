@@ -73,6 +73,13 @@ const routes: IRouteTypes[] = [
       },
     ],
   },
+  // 全屏的 AI页面
+  {
+    name: "ScreenChat",
+    path: "/ScreenChat",
+    component: "@/pages/ScreenChat",
+    layout: false,
+  },
   /* 聊天相关页面 */
   {
     path: "/Chats",

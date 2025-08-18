@@ -27,6 +27,7 @@ import { Ai_Options } from "@/constant/base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
+import { useParentMessage } from "@/hooks/useIframe";
 import SenderHeader, { TSenderHeaderRef } from "@/pages/Chat/cpns/SenderHeader";
 import styles from "./index.less";
 import LogoWhite from "@/asset/png/logoWhite.png";
@@ -99,10 +100,20 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
         enable_search: isOnlineSearch,
         // tool_choice: 'auto',
       },
-      onSuccess: (messageData: TResultStream) => Ai_SuccessAction(messageData),
+      onSuccess: (messageData: TResultStream, chatList?: any[]): any =>
+        Ai_SuccessAction(messageData, chatList),
     };
   }, [currentTag?.id, model, menuList, userMenus, userList]);
 
+  // 向主页面发送消息
+  const handleSendMessage: typeof defaultRequestConfig.onSuccess = (
+    messageData,
+    chatList
+  ) => {
+    sendMessageToParent({ type: "chat", payload: chatList });
+  };
+
+  const { sendMessageToParent } = useParentMessage("http://localhost:8081");
   // 通义千问
   const Ai_Qwen = useQwenXChat(defaultRequestConfig);
   // deepseek
@@ -147,8 +158,12 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     },
   };
 
-  const Ai_SuccessAction = (messageData: TResultStream) => {
+  const Ai_SuccessAction: typeof defaultRequestConfig.onSuccess = (
+    messageData,
+    chatList
+  ) => {
     onSuccess?.(messageData);
+    handleSendMessage(messageData, chatList);
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {

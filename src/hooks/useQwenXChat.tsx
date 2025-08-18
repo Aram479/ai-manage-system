@@ -61,7 +61,7 @@ interface IUseQwenXChat {
   aiName?: string;
   defaultMessage?: string;
   requestBody?: any;
-  onSuccess?: (messageData: TResultStream) => void;
+  onSuccess?: (messageData: TResultStream, chatList?: any[]) => void;
 }
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
@@ -172,7 +172,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
               content: processorRef.current.getChatContent(),
             };
             chatList.push(aiMessage);
-            setChatList([...chatList]);
+            const newChatList = [...chatList];
+            setChatList(newChatList);
 
             isStreaming.current = false;
             const result = formartMessage();
@@ -183,7 +184,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
             cmptTime.current = 0;
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              props.onSuccess?.(result);
+              props.onSuccess?.(result, newChatList);
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器

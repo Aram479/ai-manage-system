@@ -1,8 +1,7 @@
 import { useState } from "react";
-import styles from "./index.less";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { MainToolsEvents, TMainTools } from "@/tools/mainTools";
-import { Table } from "antd";
+import styles from "./index.less";
 
 const MainPage = () => {
   const [style, setStyle] = useState("");
@@ -20,8 +19,9 @@ const MainPage = () => {
         请输入：根据系统菜单，生成一个表格，并可以跳转到对应菜单页面，并以新窗口展示
       </div>
       <div
+        className={styles.contentBox}
         dangerouslySetInnerHTML={{
-          __html: `<style>${style}</style><div>${html}</div>`,
+          __html: `<style>${style}</style><div class="${styles.codeBox}">${html}</div>`,
         }}
       ></div>
     </div>
