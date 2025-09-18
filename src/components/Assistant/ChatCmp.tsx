@@ -92,7 +92,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       orderList,
     };
     return {
-      defaultMessage: "欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”",
+      defaultMessage: agentConfig.current?.basic.defaultMessage,
       requestBody: {
         stream: true,
         // max_tokens: 2048,

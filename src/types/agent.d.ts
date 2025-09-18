@@ -11,6 +11,7 @@ interface IAgentBasicTabRef extends IAgentTabItemRef {}
 
 interface IAgentBasicTabFormData {
   qwenApiKey?: string;
+  defaultMessage?: string
 }
 
 interface IAgentIframeTabRef extends IAgentTabItemRef {}
