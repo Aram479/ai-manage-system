@@ -5,7 +5,7 @@ const default_agent_config = localCache.getItem("agentConfig");
 
 const agent = () => {
   // agent配置数据
-  const agentConfig = useRef<IAgentConfig>(default_agent_config || {});
+  const agentConfig = useRef<IAgentConfig>(default_agent_config);
 
   const setAgentConfigAction = (config: any) => {
     localCache.setItem("agentConfig", config);
