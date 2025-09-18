@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { PaperClipOutlined } from "@ant-design/icons";
+import { PaperClipOutlined, SettingOutlined } from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { useModel } from "@umijs/max";
@@ -19,6 +19,7 @@ import {
   Flex,
   GetProp,
   GetRef,
+  message,
   Tooltip,
   UploadFile,
 } from "antd";
@@ -31,6 +32,7 @@ import { useParentMessage } from "@/hooks/useIframe";
 import SenderHeader, { TSenderHeaderRef } from "@/pages/Chat/cpns/SenderHeader";
 import styles from "./index.less";
 import LogoWhite from "@/asset/png/logoWhite.png";
+import AgentConfigModal from "../AgentConfigModal";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -49,6 +51,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
+  const { agentConfig, setAgentConfigAction } = useModel("agent");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
   const defaultModelInfo = Ai_Options[0];
   const [model, setModel] = useState<TAllModel>(
@@ -60,6 +63,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
+  const [agentConfigOpen, setAgentConfigOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
@@ -113,7 +117,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     sendMessageToParent({ type: "chat", payload: chatList });
   };
 
-  const { sendMessageToParent } = useParentMessage("http://localhost:8081");
+  const { sendMessageToParent } = useParentMessage(
+    agentConfig.current?.iframe.projectDomain || "http://localhost:3000"
+  );
   // 通义千问
   const Ai_Qwen = useQwenXChat(defaultRequestConfig);
   // deepseek
@@ -163,7 +169,10 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     chatList
   ) => {
     onSuccess?.(messageData);
-    handleSendMessage(messageData, chatList);
+    // 设置中开启数据交互时生效
+    if (agentConfig.current?.iframe.isDataTransfer) {
+      handleSendMessage(messageData, chatList);
+    }
   };
 
   const newItems = useMemo<BubbleDataType[]>(() => {
@@ -213,6 +222,16 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   const handleUploadFile = async (files: UploadFile[]) => {
     setUploadFiles(files);
+  };
+
+  const handleAgentConfig = () => {
+    setAgentConfigOpen(true);
+  };
+
+  const handleAgentConfigConfirm = (configData: any) => {
+    setAgentConfigAction(configData);
+    setAgentConfigOpen(false);
+    message.success("保存成功");
   };
 
   // 输入框左侧图标
@@ -312,6 +331,16 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
                 </Button>
               </Dropdown>
+              <Tooltip
+                title={<div style={{ fontSize: 12 }}>设置</div>}
+                placement="top"
+              >
+                <Button
+                  variant="outlined"
+                  icon={<SettingOutlined />}
+                  onClick={handleAgentConfig}
+                />
+              </Tooltip>
             </Flex>
             <Sender
               value={content}
@@ -340,6 +369,11 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           </>
         )}
       </div>
+      <AgentConfigModal
+        open={agentConfigOpen}
+        onOk={handleAgentConfigConfirm}
+        onCancel={setAgentConfigOpen}
+      />
     </div>
   );
 };

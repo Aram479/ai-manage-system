@@ -66,6 +66,7 @@ interface IUseQwenXChat {
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
   const { chatUploadFiles, setCommandExecutor } = useModel("chat");
+  const { agentConfig } = useModel("agent");
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
@@ -122,6 +123,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     messagesData,
     { onUpdate, onSuccess, onError }
   ) => {
+    const newApiKey = agentConfig.current?.basic.qwenApiKey;
     if (chatUploadFiles.current.length) {
       chatUploadFiles.current.forEach((item) => {
         // 文档理解(qwen-long) role必须为system
@@ -158,7 +160,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       messages: chatList,
     };
 
-    await qwenXRequest.create(
+    await qwenXRequest({ apiKey: newApiKey }).create(
       requestData,
       {
         // 请求结束后调用

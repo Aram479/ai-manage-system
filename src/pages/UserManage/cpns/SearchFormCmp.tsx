@@ -24,7 +24,7 @@ interface ISearchForm extends FormProps {
 export type TUserFormData = {
   userName?: string;
   role?: string;
-  createTime?: Dayjs;
+  createTime?: Dayjs | string;
 };
 
 const SearchForm = (props: Partial<ISearchForm>) => {

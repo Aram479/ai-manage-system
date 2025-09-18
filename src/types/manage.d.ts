@@ -5,8 +5,8 @@ interface IUserList {
   role: string;
   phone: string | number;
   status: number;
-  createTime: string;
-  updateTime: string;
+  createTime: Dayjs | string;
+  updateTime: Dayjs | string;
 }
 
 interface IOrderList {
