@@ -27,7 +27,7 @@ const AgentBasicTab = (props: IAgentBasicTab, ref: Ref<IAgentBasicTabRef>) => {
           <Col span={24}>
             <Form.Item
               name="qwenApiKey"
-              label="通义千问Apikey"
+              label="通义千问ApiKey"
               rules={formRules.qwenApiKey}
             >
               <Input placeholder="示例: sk-9q123q4e4r2..." allowClear />

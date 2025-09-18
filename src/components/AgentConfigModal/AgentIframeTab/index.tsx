@@ -22,10 +22,8 @@ const AgentIframeTab = (
           validator: (_rule, value) => {
             const regex = /^https?:\/\/.+/i;
             const isDomain = regex.test(value);
-            if (!value?.trim()) {
-              return Promise.reject("请输入");
-            }
-            if (!isDomain) {
+            const inputValue = value?.trim();
+            if (inputValue && !isDomain) {
               return Promise.reject("请输入正确的地址");
             }
             return Promise.resolve();

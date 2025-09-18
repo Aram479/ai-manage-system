@@ -81,7 +81,7 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
         onOk={handleConfirm}
         onCancel={handleCencel}
       >
-        <Tabs tabPosition="left" items={AgentTabs} style={{ height: "100%" }} />
+        <Tabs tabPosition="left" defaultActiveKey="BasicTab" items={AgentTabs} style={{ height: "100%" }} />
       </Modal>
     </div>
   );

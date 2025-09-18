@@ -17,15 +17,15 @@ export const Ai_Options: (MenuItemType & {
       deep: "qwq-plus", // deepseek-r1(deepseek) qwq-plus(通义 深度思考)
     },
   },
-  {
-    key: "deepseek",
-    label: "DeepSeek",
-    model: {
-      default: "deepseek-chat",
-      autoChat: "deepseek-chat",
-      deep: "deepseek-reasoner",
-    },
-  },
+  // {
+  //   key: "deepseek",
+  //   label: "DeepSeek",
+  //   model: {
+  //     default: "deepseek-chat",
+  //     autoChat: "deepseek-chat",
+  //     deep: "deepseek-reasoner",
+  //   },
+  // },
 ];
 
 export const chatPrompt = {
