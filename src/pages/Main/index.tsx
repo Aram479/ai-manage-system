@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { MainToolsEvents, TMainTools } from "@/tools/mainTools";
 import styles from "./index.less";
-import AgentCategory from "@/components/AgentCategory";
 
 const MainPage = () => {
   const [style, setStyle] = useState("");
@@ -25,7 +24,6 @@ const MainPage = () => {
           __html: `<style>${style}</style><div class="${styles.codeBox}">${html}</div>`,
         }}
       />
-      <AgentCategory />
     </div>
   );
 };

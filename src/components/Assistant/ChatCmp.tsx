@@ -52,8 +52,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
-  const { agentConfig, agentRole, setAgentConfigAction } = useModel("agent");
+  const { agentConfig, setAgentConfigAction } = useModel("agent");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
+  const [selectAgents, setSelectAgents] = useState<IAgentCategoryRole[]>([]);
   const defaultModelInfo = Ai_Options[0];
   const [model, setModel] = useState<TAllModel>(
     defaultModelInfo.model?.default!
@@ -86,12 +87,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   // 是否开启深度思考
   const isDeep = useRef(false);
 
-  const greetMessage = useMemo(() => {
-    const basicMessage = agentConfig.current?.basic?.defaultMessage;
-    const roleMessage = agentRole?.greet;
-    return roleMessage || basicMessage;
-  }, [agentRole, agentConfig.current]);
-
   const defaultRequestConfig = useMemo(() => {
     const toolsProps = {
       menuList,
@@ -100,7 +95,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       orderList,
     };
     return {
-      defaultMessage: greetMessage,
+      defaultMessage: agentConfig.current?.basic?.defaultMessage,
       requestBody: {
         stream: true,
         // max_tokens: 2048,
@@ -246,6 +241,10 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     message.success("保存成功");
   };
 
+  const handleSelectAgent = (agentRecord: (typeof selectAgents)[number]) => {
+    const newSelectAgents = _.uniqBy(selectAgents.concat(agentRecord), "title");
+    setSelectAgents(newSelectAgents);
+  };
   // 输入框左侧图标
   const attachmentsNode = (
     <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
@@ -344,16 +343,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                 </Button>
               </Dropdown>
               <Tooltip
-                title={<div style={{ fontSize: 12 }}>设置</div>}
-                placement="top"
-              >
-                <Button
-                  variant="outlined"
-                  icon={<SettingOutlined />}
-                  onClick={handleAgentConfig}
-                />
-              </Tooltip>
-              <Tooltip
                 title={<div style={{ fontSize: 12 }}>AI分类</div>}
                 placement="top"
               >
@@ -361,6 +350,16 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   variant="outlined"
                   icon={<>AI</>}
                   onClick={handleAgentCategory}
+                />
+              </Tooltip>
+              <Tooltip
+                title={<div style={{ fontSize: 12 }}>设置</div>}
+                placement="top"
+              >
+                <Button
+                  variant="outlined"
+                  icon={<SettingOutlined />}
+                  onClick={handleAgentConfig}
                 />
               </Tooltip>
             </Flex>
@@ -398,7 +397,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       />
       <AgentCategoryModal
         open={agentCategoryOpen}
-        onOk={setAgentCategoryOpen}
+        onOk={handleSelectAgent}
         onCancel={setAgentCategoryOpen}
       />
     </div>

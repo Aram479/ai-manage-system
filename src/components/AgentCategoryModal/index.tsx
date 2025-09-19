@@ -20,7 +20,7 @@ const AgentCategoryModal = (props: IAgentConfigModal) => {
 
   const handleConfirm = () => {
     setAgentRoleAction(currentAgentRole || {});
-    onOk?.(false);
+    onOk?.(currentAgentRole);
   };
 
   const handleCencel = () => {

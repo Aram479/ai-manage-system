@@ -11,6 +11,7 @@ const Assistant = () => {
         placement="leftTop"
         trigger={["click"]}
         content={<ChatCmp />}
+        arrow={false}
         classNames={{
           body: styles.popoverContent,
         }}

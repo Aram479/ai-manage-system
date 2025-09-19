@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Col, Flex, Row, Tooltip } from "antd";
-import { useModel } from "@umijs/max";
 import { FireOutlined, HeartOutlined } from "@ant-design/icons";
 import styles from "./index.less";
 
@@ -12,9 +11,8 @@ interface ICategoryCard {
 
 const CategoryCard = (props: ICategoryCard) => {
   const { items, onChange } = props;
-  const { agentRole } = useModel("agent");
   const [currentAgentRole, setCurrentAgentRole] =
-    useState<IAgentCategoryRole>(agentRole);
+    useState<IAgentCategoryRole>();
 
   const handleAgentRole = (roleRecord: IAgentCategoryRole) => {
     setCurrentAgentRole(roleRecord);
