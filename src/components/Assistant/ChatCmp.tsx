@@ -92,7 +92,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       orderList,
     };
     return {
-      defaultMessage: agentConfig.current?.basic.defaultMessage,
+      defaultMessage: agentConfig.current?.basic?.defaultMessage,
       requestBody: {
         stream: true,
         // max_tokens: 2048,

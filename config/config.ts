@@ -15,6 +15,9 @@ export default defineConfig({
   request: {
     dataField: '',
   },
+  locale: {
+    default: 'zh-CN',
+  },
   favicons: ['/favicon.ico'],
   initialState: {},
   esbuildMinifyIIFE: true,

@@ -123,7 +123,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     messagesData,
     { onUpdate, onSuccess, onError }
   ) => {
-    const newApiKey = agentConfig.current?.basic.qwenApiKey;
+    const newApiKey = agentConfig.current?.basic?.qwenApiKey;
     if (chatUploadFiles.current.length) {
       chatUploadFiles.current.forEach((item) => {
         // 文档理解(qwen-long) role必须为system

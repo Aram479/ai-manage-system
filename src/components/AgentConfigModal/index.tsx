@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Modal, ModalProps, Tabs } from "antd";
+import { useEffect, useRef, useState } from "react";
+import { Modal, ModalProps, Tabs, TabsProps } from "antd";
 import AgentBasicTab from "./AgentBasicTab";
 import AgentIframeTab from "./AgentIframeTab";
 import { useModel } from "@umijs/max";
@@ -9,9 +9,11 @@ interface IAgentConfigModal extends ModalProps {
   onCancel?: (data?: any) => void;
 }
 
+const Default_Active_Tab = "BasicTab";
 const AgentConfigModal = (props: IAgentConfigModal) => {
   const { open, onOk, onCancel } = props;
   const { agentConfig } = useModel("agent");
+  const [activeTab, setActiveTab] = useState(Default_Active_Tab);
   const basicTabRef = useRef<IAgentBasicTabRef>(null);
   const iframeTabRef = useRef<IAgentIframeTabRef>(null);
   const AgentTabs = [
@@ -34,10 +36,25 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
       children: <>暂无</>,
     },
   ];
+
+  // 初始化Tab表单数据
+  const initTabFormDataAction = () => {
+    basicTabRef.current?.form?.setFieldsValue(agentConfig.current?.basic);
+    iframeTabRef.current?.form?.setFieldsValue(agentConfig.current?.iframe);
+  };
+
+  const handleTabChange: TabsProps["onChange"] = (activeKey) => {
+    setActiveTab(activeKey);
+    initTabFormDataAction();
+  };
+
   const handleConfirm = async () => {
-    const basicTabFormData = await basicTabRef.current?.form?.validateFields();
-    const iframeTabFormData =
-      await iframeTabRef.current?.form?.validateFields();
+    const basicTabFormValid = basicTabRef.current?.form?.validateFields();
+    const iframeTabFormValid = iframeTabRef.current?.form?.validateFields();
+    const [basicTabFormData, iframeTabFormData] = await Promise.all([
+      basicTabFormValid,
+      iframeTabFormValid,
+    ]);
     const configData = {
       basic: basicTabFormData,
       iframe: iframeTabFormData,
@@ -59,8 +76,8 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
     // 打开/关闭清空数据
     resetAction();
     if (open) {
-      basicTabRef.current?.form?.setFieldsValue(agentConfig.current?.basic);
-      iframeTabRef.current?.form?.setFieldsValue(agentConfig.current?.iframe);
+      initTabFormDataAction();
+      setActiveTab(Default_Active_Tab);
     }
   }, [open]);
 
@@ -69,7 +86,7 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
       <Modal
         {...props}
         title="Agent设置"
-        okText="保存"
+        okText="确定"
         open={open}
         maskClosable={false}
         width={800}
@@ -81,7 +98,13 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
         onOk={handleConfirm}
         onCancel={handleCencel}
       >
-        <Tabs tabPosition="left" defaultActiveKey="BasicTab" items={AgentTabs} style={{ height: "100%" }} />
+        <Tabs
+          tabPosition="left"
+          activeKey={activeTab}
+          items={AgentTabs}
+          onChange={handleTabChange}
+          style={{ height: "100%" }}
+        />
       </Modal>
     </div>
   );
