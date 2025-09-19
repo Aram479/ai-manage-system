@@ -1,5 +1,8 @@
 import { UploadFile } from "antd";
+import CryptoJS from "crypto-js";
 import _ from "lodash";
+
+const SECRET_KEY = "0123456789abcdef";
 
 // 图片转Base64  并压缩
 export const compressImageToBase64 = (
@@ -78,4 +81,15 @@ export const getAllPaths: any = (routes: any[]) => {
     // 合并当前 path 和子路由 paths
     return _.compact([currentPath, ...childPaths]);
   });
+};
+
+// 加密
+export const encryptPassword = (key: string) => {
+  return CryptoJS.AES.encrypt(key, SECRET_KEY).toString();
+};
+
+// 解密
+export const decryptPassword = (code: string) => {
+  const bytes = CryptoJS.AES.decrypt(code, SECRET_KEY);
+  return bytes.toString(CryptoJS.enc.Utf8);
 };
