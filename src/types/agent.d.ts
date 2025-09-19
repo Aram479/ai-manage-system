@@ -11,7 +11,7 @@ interface IAgentBasicTabRef extends IAgentTabItemRef {}
 
 interface IAgentBasicTabFormData {
   qwenApiKey?: string;
-  defaultMessage?: string
+  defaultMessage?: string;
 }
 
 interface IAgentIframeTabRef extends IAgentTabItemRef {}
@@ -19,4 +19,13 @@ interface IAgentIframeTabRef extends IAgentTabItemRef {}
 interface IAgentIframeTabFormData {
   projectDomain?: string;
   isDataTransfer?: boolean;
+}
+
+interface IAgentCategoryRole {
+  title?: string;
+  desc?: string;
+  greet?: string;
+  prompt?: string;
+  collect?: number;
+  hot?: number;
 }
