@@ -52,7 +52,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
-  const { agentConfig, setAgentConfigAction } = useModel("agent");
+  const { agentConfig, agentRole, setAgentConfigAction } = useModel("agent");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
   const defaultModelInfo = Ai_Options[0];
   const [model, setModel] = useState<TAllModel>(
@@ -86,6 +86,12 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   // 是否开启深度思考
   const isDeep = useRef(false);
 
+  const greetMessage = useMemo(() => {
+    const basicMessage = agentConfig.current?.basic?.defaultMessage;
+    const roleMessage = agentRole?.greet;
+    return roleMessage || basicMessage;
+  }, [agentRole, agentConfig.current]);
+
   const defaultRequestConfig = useMemo(() => {
     const toolsProps = {
       menuList,
@@ -94,7 +100,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       orderList,
     };
     return {
-      defaultMessage: agentConfig.current?.basic?.defaultMessage,
+      defaultMessage: greetMessage,
       requestBody: {
         stream: true,
         // max_tokens: 2048,
@@ -390,7 +396,11 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
         onOk={handleAgentConfigConfirm}
         onCancel={setAgentConfigOpen}
       />
-      <AgentCategoryModal open={agentCategoryOpen} onCancel={setAgentCategoryOpen} />
+      <AgentCategoryModal
+        open={agentCategoryOpen}
+        onOk={setAgentCategoryOpen}
+        onCancel={setAgentCategoryOpen}
+      />
     </div>
   );
 };

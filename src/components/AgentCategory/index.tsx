@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Empty, Input, ModalProps, Tabs, TabsProps } from "antd";
+import { Empty, ModalProps, Tabs, TabsProps } from "antd";
 import {
   AllAgentCategory,
   StudyAgentCategory,
@@ -8,15 +8,15 @@ import {
 import CategoryCard from "./CategoryCard";
 import SearchRole from "./SearchRole";
 
-interface IAgentCategory extends ModalProps {}
+interface IAgentCategory extends ModalProps {
+  open?: boolean;
+  onChange?: (data?: IAgentCategoryRole) => void;
+}
 
 const Default_Active_Tab = "AllCategory";
 
-const SearchCmp = () => {
-  return <Input placeholder="Basic usage" style={{ width: "100%" }} />;
-};
-
 const AgentCategory = (props: IAgentCategory) => {
+  const { open, onChange } = props;
   const [searchValue, setSearchValue] = useState("");
   const [searchCategorys, setSearchCategorys] = useState<IAgentCategoryRole[]>(
     []
@@ -28,17 +28,17 @@ const AgentCategory = (props: IAgentCategory) => {
     {
       key: "AllCategory",
       label: "全部分类",
-      children: <CategoryCard items={AllAgentCategory} />,
+      children: <CategoryCard items={AllAgentCategory} onChange={onChange} />,
     },
     {
       key: "StudyCategory",
       label: "学习",
-      children: <CategoryCard items={StudyAgentCategory} />,
+      children: <CategoryCard items={StudyAgentCategory} onChange={onChange} />,
     },
     {
       key: "WorkCategory",
       label: "工作",
-      children: <CategoryCard items={WorkAgentCategory} />,
+      children: <CategoryCard items={WorkAgentCategory} onChange={onChange} />,
     },
   ];
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal, ModalProps } from "antd";
 import { useModel } from "@umijs/max";
 import AgentCategory from "../AgentCategory";
@@ -10,15 +10,22 @@ interface IAgentConfigModal extends ModalProps {
 
 const AgentCategoryModal = (props: IAgentConfigModal) => {
   const { open, onOk, onCancel } = props;
+  const { setAgentRoleAction } = useModel("agent");
+  const [currentAgentRole, setCurrentAgentRole] =
+    useState<IAgentCategoryRole>();
+
+  const handleAgentRole = (agentRoleRecord: typeof currentAgentRole) => {
+    setCurrentAgentRole(agentRoleRecord);
+  };
+
+  const handleConfirm = () => {
+    setAgentRoleAction(currentAgentRole || {});
+    onOk?.(false);
+  };
 
   const handleCencel = () => {
     onCancel?.(false);
   };
-
-  useEffect(() => {
-    if (open) {
-    }
-  }, [open]);
 
   return (
     <div>
@@ -27,18 +34,19 @@ const AgentCategoryModal = (props: IAgentConfigModal) => {
         title="Agent分类"
         okText="确定"
         open={open}
-        footer={false}
-        maskClosable={false}
         width={800}
+        maskClosable={false}
+        destroyOnClose
         styles={{
           body: {
             height: 500,
-            overflowY: 'auto'
+            overflowY: "auto",
           },
         }}
+        onOk={handleConfirm}
         onCancel={handleCencel}
       >
-        <AgentCategory />
+        <AgentCategory open={open} onChange={handleAgentRole} />
       </Modal>
     </div>
   );
