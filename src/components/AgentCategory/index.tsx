@@ -1,18 +1,29 @@
-import { useEffect, useState } from "react";
-import { ModalProps, Tabs, TabsProps } from "antd";
-import CategoryCard from "./CategoryCard";
+import { useMemo, useState } from "react";
+import { Empty, Input, ModalProps, Tabs, TabsProps } from "antd";
 import {
   AllAgentCategory,
   StudyAgentCategory,
   WorkAgentCategory,
 } from "@/constant/agentCategory";
+import CategoryCard from "./CategoryCard";
+import SearchRole from "./SearchRole";
 
-interface IAgentCategoryRole extends ModalProps {}
+interface IAgentCategory extends ModalProps {}
 
 const Default_Active_Tab = "AllCategory";
-const AgentCategory = (props: IAgentCategoryRole) => {
+
+const SearchCmp = () => {
+  return <Input placeholder="Basic usage" style={{ width: "100%" }} />;
+};
+
+const AgentCategory = (props: IAgentCategory) => {
+  const [searchValue, setSearchValue] = useState("");
+  const [searchCategorys, setSearchCategorys] = useState<IAgentCategoryRole[]>(
+    []
+  );
   const [activeTab, setActiveTab] = useState(Default_Active_Tab);
 
+  // 分类
   const AgentTabs: TabsProps["items"] = [
     {
       key: "AllCategory",
@@ -30,20 +41,52 @@ const AgentCategory = (props: IAgentCategoryRole) => {
       children: <CategoryCard items={WorkAgentCategory} />,
     },
   ];
+
+  // 搜索结果
+  const AgentSearchTabs = useMemo<TabsProps["items"]>(
+    () => [
+      {
+        key: "SearchResult",
+        label: "搜索结果",
+        disabled: true,
+        children: !!searchCategorys.length ? (
+          <CategoryCard items={searchCategorys} />
+        ) : (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        ),
+      },
+    ],
+    [searchCategorys]
+  );
+
   const handleTabChange: TabsProps["onChange"] = (activeKey) => {
     setActiveTab(activeKey);
   };
 
-  useEffect(() => {}, []);
+  const handleSearchRole = (value: string) => {
+    const newItems = value
+      ? AllAgentCategory?.filter((item) => ~item.title?.indexOf(value)!)
+      : [];
+    setSearchValue(value);
+    setSearchCategorys(newItems);
+  };
 
   return (
     <div>
-      <Tabs
-        activeKey={activeTab}
-        items={AgentTabs}
-        onChange={handleTabChange}
-        style={{ height: "100%" }}
-      />
+      {searchValue ? (
+        <Tabs
+          defaultActiveKey="SearchResult"
+          items={AgentSearchTabs}
+          tabBarExtraContent={<SearchRole onChange={handleSearchRole} />}
+        />
+      ) : (
+        <Tabs
+          activeKey={activeTab}
+          items={AgentTabs}
+          tabBarExtraContent={<SearchRole onChange={handleSearchRole} />}
+          onChange={handleTabChange}
+        />
+      )}
     </div>
   );
 };

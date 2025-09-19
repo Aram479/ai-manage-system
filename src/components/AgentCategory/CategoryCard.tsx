@@ -1,7 +1,8 @@
-import { Col, Flex, Row, Tag } from "antd";
-import styles from "./index.less";
-import { FireOutlined, HeartOutlined } from "@ant-design/icons";
+import { Col, Flex, Popover, Row, Tag, Tooltip } from "antd";
 import { useModel } from "@umijs/max";
+import { FireOutlined, HeartOutlined } from "@ant-design/icons";
+import useForceUpdate from "@/hooks/useForceUpdate";
+import styles from "./index.less";
 
 interface ICategoryCard {
   items?: IAgentCategoryRole[];
@@ -10,18 +11,21 @@ interface ICategoryCard {
 const CategoryCard = (props: ICategoryCard) => {
   const { items } = props;
   const { agentRole, setAgentRoleAction } = useModel("agent");
-
+  const forceUpdate = useForceUpdate();
   const handleAgentRole = (roleRecord: IAgentCategoryRole) => {
     setAgentRoleAction(roleRecord);
+    forceUpdate();
   };
-  
+
   return (
     <div className={styles.categoryCard}>
       <Row className={styles.cardsBox}>
         {items?.map((item) => (
-          <Col key={item.title} span={6} onClick={() => handleAgentRole(item)}>
+          <Col key={item.key} span={6} onClick={() => handleAgentRole(item)}>
             <Flex
-              className={styles.cardItemBox}
+              className={`${styles.cardItemBox} ${
+                agentRole.current?.key === item.key ? styles.activeItemBox : ""
+              }`}
               justify="space-between"
               vertical
             >
@@ -29,22 +33,26 @@ const CategoryCard = (props: ICategoryCard) => {
                 {/* 标题 */}
                 <div className={styles.titleText}>{item.title}</div>
                 {/* 描述 */}
-                <div className={`${styles.descText} doubleLine`}>
-                  {item.desc}
+                <Tooltip title={item.desc} arrow={false}>
+                  <div className={`${styles.descText} doubleLine`}>
+                    {item.desc}
+                  </div>
+                </Tooltip>
+              </div>
+              {!item.hideFooter && (
+                <div className={styles.footerBox}>
+                  <Flex gap={20}>
+                    <Flex gap={5}>
+                      <HeartOutlined />
+                      <span>{item.collect}</span>
+                    </Flex>
+                    <Flex gap={5}>
+                      <FireOutlined />
+                      <span>{item.hot}</span>
+                    </Flex>
+                  </Flex>
                 </div>
-              </div>
-              <div className={styles.footerBox}>
-                <Flex gap={20}>
-                  <Flex gap={5}>
-                    <HeartOutlined />
-                    <span>{item.collect}</span>
-                  </Flex>
-                  <Flex gap={5}>
-                    <FireOutlined />
-                    <span>{item.hot}</span>
-                  </Flex>
-                </Flex>
-              </div>
+              )}
             </Flex>
           </Col>
         ))}

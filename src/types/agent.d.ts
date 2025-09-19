@@ -22,10 +22,12 @@ interface IAgentIframeTabFormData {
 }
 
 interface IAgentCategoryRole {
+  key?: string;
   title?: string;
   desc?: string;
   greet?: string;
   prompt?: string;
   collect?: number;
   hot?: number;
+  hideFooter?: boolean
 }

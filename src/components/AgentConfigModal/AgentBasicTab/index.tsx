@@ -60,7 +60,7 @@ const AgentBasicTab = (props: IAgentBasicTab, ref: Ref<IAgentBasicTabRef>) => {
             </Form.Item>
             <Form.Item
               name="defaultMessage"
-              label="默认展示信息"
+              label="打招呼语"
               rules={formRules.defaultMessage}
             >
               <Input
