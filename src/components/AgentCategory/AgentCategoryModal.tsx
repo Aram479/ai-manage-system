@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, ModalProps } from "antd";
 import { useModel } from "@umijs/max";
-import AgentCategory from "../AgentCategory";
+import AgentCategory from ".";
 
 interface IAgentConfigModal extends ModalProps {
   onOk?: (data?: any) => void;

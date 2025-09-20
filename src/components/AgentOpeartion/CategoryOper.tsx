@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Tooltip } from "antd";
-import AgentCategoryModal from "../AgentCategoryModal";
+import AgentCategoryModal from "../AgentCategory/AgentCategoryModal";
 import _ from "lodash";
 
 interface ICategoryOper {

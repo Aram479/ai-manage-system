@@ -31,11 +31,9 @@ import { allTools } from "@/tools";
 import { useParentMessage } from "@/hooks/useIframe";
 import SenderHeader, { TSenderHeaderRef } from "@/pages/Chat/cpns/SenderHeader";
 import LogoWhite from "@/asset/png/logoWhite.png";
-import AgentConfigModal from "../AgentConfigModal";
-import AgentCategoryModal from "../AgentCategoryModal";
-import styles from "./index.less";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
+import styles from "./index.less";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
