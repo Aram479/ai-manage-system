@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Empty, ModalProps, Tabs, TabsProps } from "antd";
 import {
   AllAgentCategory,
+  SocialAgentCategory,
   StudyAgentCategory,
   WorkAgentCategory,
 } from "@/constant/agentCategory";
@@ -39,6 +40,13 @@ const AgentCategory = (props: IAgentCategory) => {
       key: "WorkCategory",
       label: "工作",
       children: <CategoryCard items={WorkAgentCategory} onChange={onChange} />,
+    },
+    {
+      key: "SocialCategory",
+      label: "社交",
+      children: (
+        <CategoryCard items={SocialAgentCategory} onChange={onChange} />
+      ),
     },
   ];
 

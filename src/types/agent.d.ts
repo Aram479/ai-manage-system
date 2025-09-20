@@ -23,6 +23,7 @@ interface IAgentIframeTabFormData {
 
 interface IAgentCategoryRole {
   key?: string;
+  icon?: any
   title?: string;
   desc?: string;
   greet?: string;

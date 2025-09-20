@@ -16,7 +16,6 @@ const AgentBasicTab = (props: IAgentBasicTab, ref: Ref<IAgentBasicTabRef>) => {
   const formRules = useMemo<Record<string, Rule[]>>(
     () => ({
       qwenApiKey: [{ message: "请输入", required: true, whitespace: true }],
-      defaultMessage: [{ required: false }],
     }),
     [basicTabData]
   );
@@ -56,15 +55,8 @@ const AgentBasicTab = (props: IAgentBasicTab, ref: Ref<IAgentBasicTabRef>) => {
               label="通义千问ApiKey"
               rules={formRules.qwenApiKey}
             >
-              <Input.Password placeholder="示例: sk-9q123q4e4r2..." allowClear />
-            </Form.Item>
-            <Form.Item
-              name="defaultMessage"
-              label="打招呼语"
-              rules={formRules.defaultMessage}
-            >
-              <Input
-                placeholder="欢迎进入Veloce系统，你可以尝试输入“当前系统有哪些功能”"
+              <Input.Password
+                placeholder="示例: sk-9q123q4e4r2..."
                 allowClear
               />
             </Form.Item>

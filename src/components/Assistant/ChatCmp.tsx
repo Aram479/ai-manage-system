@@ -51,7 +51,10 @@ interface IChatCmpProps {
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const {
-    agentRole,
+    agentRole = {
+      title: '欢迎进入Veloce',
+      desc: '您的专属超级智能体',
+    },
     content: contentProp,
     isSender = true,
     isGlobalConfig = true,
