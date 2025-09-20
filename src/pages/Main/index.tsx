@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { MainToolsEvents, TMainTools } from "@/tools/mainTools";
 import styles from "./index.less";
+import ChatCmp from "@/components/Assistant/ChatCmp";
+import { Col, Row } from "antd";
+import AgentByRoleTabs from "@/components/AgentByRoleTabs";
 
 const MainPage = () => {
   const [style, setStyle] = useState("");
@@ -24,6 +27,7 @@ const MainPage = () => {
           __html: `<style>${style}</style><div class="${styles.codeBox}">${html}</div>`,
         }}
       />
+      <AgentByRoleTabs />
     </div>
   );
 };

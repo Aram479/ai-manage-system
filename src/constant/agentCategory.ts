@@ -155,7 +155,7 @@ export const WorkAgentCategory: IAgentCategoryRole[] = [
 
 export const AllAgentCategory: IAgentCategoryRole[] = [
   {
-    key: "default",
+    key: "defaultAgent",
     title: "默认智能体",
     desc: "默认智能体",
     hideFooter: true,

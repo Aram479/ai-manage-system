@@ -34,6 +34,8 @@ import LogoWhite from "@/asset/png/logoWhite.png";
 import AgentConfigModal from "../AgentConfigModal";
 import AgentCategoryModal from "../AgentCategoryModal";
 import styles from "./index.less";
+import SettingOper from "../AgentOpeartion/SettingOper";
+import CategoryOper from "../AgentOpeartion/CategoryOper";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -41,20 +43,25 @@ export type TChatRef = {
   sendChat: (message: string) => void;
 };
 interface IChatCmpProps {
+  isGlobalConfig?: boolean;
   isSender?: boolean;
   content?: string;
   onSuccess?: (messageData: TResultStream) => void;
 }
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
-  const { content: contentProp, isSender = true, onSuccess } = props;
+  const {
+    content: contentProp,
+    isSender = true,
+    isGlobalConfig = true,
+    onSuccess,
+  } = props;
   const { menuList, userMenus, userList } = useModel("user");
   const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
   const { chatUploadFiles } = useModel("chat");
-  const { agentConfig, setAgentConfigAction } = useModel("agent");
+  const { agentConfig } = useModel("agent");
   const [currentTag, setCurrentTag] = useState<(typeof messageTags)[number]>();
-  const [selectAgents, setSelectAgents] = useState<IAgentCategoryRole[]>([]);
   const defaultModelInfo = Ai_Options[0];
   const [model, setModel] = useState<TAllModel>(
     defaultModelInfo.model?.default!
@@ -65,8 +72,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
-  const [agentConfigOpen, setAgentConfigOpen] = useState(false);
-  const [agentCategoryOpen, setAgentCategoryOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
@@ -227,24 +232,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     setUploadFiles(files);
   };
 
-  const handleAgentConfig = () => {
-    setAgentConfigOpen(true);
-  };
-
-  const handleAgentCategory = () => {
-    setAgentCategoryOpen(true);
-  };
-
-  const handleAgentConfigConfirm = (configData: any) => {
-    setAgentConfigAction(configData);
-    setAgentConfigOpen(false);
-    message.success("保存成功");
-  };
-
-  const handleSelectAgent = (agentRecord: (typeof selectAgents)[number]) => {
-    const newSelectAgents = _.uniqBy(selectAgents.concat(agentRecord), "title");
-    setSelectAgents(newSelectAgents);
-  };
   // 输入框左侧图标
   const attachmentsNode = (
     <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
@@ -342,26 +329,12 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
                 </Button>
               </Dropdown>
-              <Tooltip
-                title={<div style={{ fontSize: 12 }}>AI分类</div>}
-                placement="top"
-              >
-                <Button
-                  variant="outlined"
-                  icon={<>AI</>}
-                  onClick={handleAgentCategory}
-                />
-              </Tooltip>
-              <Tooltip
-                title={<div style={{ fontSize: 12 }}>设置</div>}
-                placement="top"
-              >
-                <Button
-                  variant="outlined"
-                  icon={<SettingOutlined />}
-                  onClick={handleAgentConfig}
-                />
-              </Tooltip>
+              {isGlobalConfig && (
+                <>
+                  <CategoryOper />
+                  <SettingOper />
+                </>
+              )}
             </Flex>
             <Sender
               value={content}
@@ -390,16 +363,6 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           </>
         )}
       </div>
-      <AgentConfigModal
-        open={agentConfigOpen}
-        onOk={handleAgentConfigConfirm}
-        onCancel={setAgentConfigOpen}
-      />
-      <AgentCategoryModal
-        open={agentCategoryOpen}
-        onOk={handleSelectAgent}
-        onCancel={setAgentCategoryOpen}
-      />
     </div>
   );
 };

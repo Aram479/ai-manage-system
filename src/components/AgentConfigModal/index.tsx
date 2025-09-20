@@ -45,6 +45,7 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
 
   const handleTabChange: TabsProps["onChange"] = (activeKey) => {
     setActiveTab(activeKey);
+    // TODO 应用后，切换时，又重置之前的值了
     initTabFormDataAction();
   };
 
