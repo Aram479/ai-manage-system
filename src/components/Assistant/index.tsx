@@ -1,8 +1,8 @@
 import { Popover } from "antd";
 import _ from "lodash";
-import ChatCmp from "./ChatCmp";
-import styles from "./index.less";
 import LogoWhite from "@/asset/png/logoWhite.png";
+import AgentByRoleTabs from "../AgentByRoleTabs";
+import styles from "./index.less";
 
 const Assistant = () => {
   return (
@@ -10,7 +10,7 @@ const Assistant = () => {
       <Popover
         placement="leftTop"
         trigger={["click"]}
-        content={<ChatCmp />}
+        content={<AgentByRoleTabs />}
         arrow={false}
         classNames={{
           body: styles.popoverContent,

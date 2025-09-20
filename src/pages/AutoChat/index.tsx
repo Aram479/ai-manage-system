@@ -97,7 +97,7 @@ const AutoChatPage = () => {
   const Ai_Two = Ai_XChatHook({
     /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
         deepSeekPrompt.concise, */
-    defaultMessage: `${defaultTwoMessage}:`,
+    userDefaultMessage: `${defaultTwoMessage}:`,
     requestBody: {
       ...requestConfig,
       model,

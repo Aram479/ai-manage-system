@@ -1,11 +1,25 @@
 .layouts {
   min-width: 800px;
   height: 100vh;
+
   .ant-layout {
     height: 100%;
   }
+
   .layout-header {
     padding: 0;
     background: #fff;
+  }
+
+  .content {
+    :global {
+      .ka-wrapper {
+        height: 100%;
+
+        .ka-content {
+          height: 100%;
+        }
+      }
+    }
   }
 }

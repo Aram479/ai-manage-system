@@ -7,7 +7,7 @@ import SettingOper from "../AgentOpeartion/SettingOper";
 import _ from "lodash";
 import styles from "./index.less";
 
-interface IAgentByRoleTabs {}
+interface IAgentByRoleTabs extends TabsProps {}
 
 const Default_Active_Tab = "defaultAgent";
 
@@ -69,6 +69,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
       }
       onEdit={handleTabAddOrDel}
       onChange={handleTabChange}
+      {...props}
     />
   );
 };

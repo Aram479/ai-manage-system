@@ -1,11 +1,11 @@
 import _ from "lodash";
-import ChatCmp from "@/components/Assistant/ChatCmp";
+import AgentByRoleTabs from "@/components/AgentByRoleTabs";
 import styles from "./index.less";
 
 const Assistant = () => {
   return (
     <div className={styles.assistant}>
-      <ChatCmp />
+      <AgentByRoleTabs />
     </div>
   );
 };

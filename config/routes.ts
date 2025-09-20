@@ -62,15 +62,15 @@ const routes: IRouteTypes[] = [
           icon: TeamOutlined,
         },
       },
-      {
-        name: "WorkFlow",
-        path: "/WorkFlow",
-        component: "@/pages/WorkFlow",
-        meta: {
-          title: "工作流(未完善)",
-          icon: MergeOutlined
-        },
-      },
+      // {
+      //   name: "WorkFlow",
+      //   path: "/WorkFlow",
+      //   component: "@/pages/WorkFlow",
+      //   meta: {
+      //     title: "工作流(未完善)",
+      //     icon: MergeOutlined
+      //   },
+      // },
     ],
   },
   // 全屏的 AI页面
