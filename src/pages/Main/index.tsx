@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { MainToolsEvents, TMainTools } from "@/tools/mainTools";
+import { useKeepAlive } from "@/hooks/useKeepAlive";
 import AgentByRoleTabs from "@/components/AgentByRoleTabs";
 import styles from "./index.less";
 
@@ -21,4 +22,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default useKeepAlive(MainPage, MainPage.name);

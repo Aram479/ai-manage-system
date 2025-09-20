@@ -34,6 +34,7 @@
     "lodash": "^4.17.21",
     "openai": "^4.89.0",
     "query-string": "^9.1.1",
+    "react-activation": "^0.13.0",
     "react-dom": "^18.1.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.1",
