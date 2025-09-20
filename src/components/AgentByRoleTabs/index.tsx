@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Flex, Tabs, TabsProps } from "antd";
-import _ from "lodash";
 import { AllAgentCategory } from "@/constant/agentCategory";
 import ChatCmp from "../Assistant/ChatCmp";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
 import SettingOper from "../AgentOpeartion/SettingOper";
+import _ from "lodash";
+import styles from "./index.less";
 
 interface IAgentByRoleTabs {}
 
@@ -13,12 +14,12 @@ const Default_Active_Tab = "defaultAgent";
 const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
   const defaultAgent = AllAgentCategory.find(
     (item) => item.key === "defaultAgent"
-  );
+  )!;
   const defaultAgentTab = {
     key: defaultAgent?.key || "",
     label: defaultAgent?.title,
     closable: false,
-    children: <ChatCmp isGlobalConfig={false} />,
+    children: <ChatCmp agentRole={defaultAgent} isGlobalConfig={false} />,
   };
   const [roleAgentTabs, setRoleAgentTabs] = useState([defaultAgentTab]);
   const [activeTab, setActiveTab] = useState(Default_Active_Tab);
@@ -44,7 +45,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
         key: agentRecord.key as string,
         label: agentRecord.title,
         closable: true,
-        children: <ChatCmp isGlobalConfig={false} />,
+        children: <ChatCmp agentRole={agentRecord} isGlobalConfig={false} />,
       };
       setRoleAgentTabs([...roleAgentTabs, newRoleAgentTab]);
       setActiveTab(agentRecord.key as string);
@@ -54,22 +55,21 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
   };
 
   return (
-    <div>
-      <Tabs
-        type="editable-card"
-        activeKey={activeTab}
-        items={roleAgentTabs}
-        hideAdd
-        tabBarExtraContent={
-          <Flex gap={8}>
-            <CategoryOper onOk={handlAegentChange} />
-            <SettingOper />
-          </Flex>
-        }
-        onEdit={handleTabAddOrDel}
-        onChange={handleTabChange}
-      />
-    </div>
+    <Tabs
+      className={styles.agentByRoleTabs}
+      type="editable-card"
+      activeKey={activeTab}
+      items={roleAgentTabs}
+      hideAdd
+      tabBarExtraContent={
+        <Flex gap={8}>
+          <CategoryOper onOk={handlAegentChange} />
+          <SettingOper />
+        </Flex>
+      }
+      onEdit={handleTabAddOrDel}
+      onChange={handleTabChange}
+    />
   );
 };
 

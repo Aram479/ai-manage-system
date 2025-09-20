@@ -25,6 +25,24 @@
     flex-grow: 1;
     overflow-y: auto;
   }
+
+  .agentRoleBox {
+    position: relative;
+    height: 100%;
+    flex-basis: 50vh;
+    flex-grow: 1;
+    top: 70px;
+
+    .title {
+      color: #000;
+      font-size: 17px;
+    }
+
+    .desc {
+      font-size: 14px;
+      color: #111133b3;
+    }
+  }
 }
 
 .popoverContent {
@@ -45,7 +63,7 @@
   border-radius: 50%;
   background-color: #000;
 
-  & > img {
+  &>img {
     width: 100%;
     object-fit: cover;
   }

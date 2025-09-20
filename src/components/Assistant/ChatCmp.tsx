@@ -41,14 +41,17 @@ export type TChatRef = {
   sendChat: (message: string) => void;
 };
 interface IChatCmpProps {
+  title?: string;
+  agentRole?: IAgentCategoryRole;
   isGlobalConfig?: boolean;
   isSender?: boolean;
-  content?: string;
+  content?: string; // 输入框内容
   onSuccess?: (messageData: TResultStream) => void;
 }
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const {
+    agentRole,
     content: contentProp,
     isSender = true,
     isGlobalConfig = true,
@@ -98,7 +101,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       orderList,
     };
     return {
-      defaultMessage: agentConfig.current?.basic?.defaultMessage,
+      agentRole,
       requestBody: {
         stream: true,
         // max_tokens: 2048,
@@ -278,12 +281,23 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   return (
     <div className={styles.chatBox}>
       <div className={styles.chatListBox}>
-        <Bubble.List
-          ref={listRef}
-          className={styles.bubbleListBox}
-          items={newItems}
-          roles={roles}
-        />
+        {newItems.length ? (
+          <Bubble.List
+            ref={listRef}
+            className={styles.bubbleListBox}
+            items={newItems}
+            roles={roles}
+          />
+        ) : (
+          // 智能体介绍
+          <div className={styles.agentRoleBox}>
+            <Flex gap={8} vertical align="center" justify="center">
+              <div className={styles.title}>{agentRole?.title}</div>
+              <div className={styles.desc}>{agentRole?.desc}</div>
+            </Flex>
+          </div>
+        )}
+
         {isSender && (
           <>
             <Flex gap="8px">

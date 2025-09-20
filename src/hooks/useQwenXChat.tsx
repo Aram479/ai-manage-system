@@ -59,7 +59,8 @@ export const useStreamController = () => {
 interface IUseQwenXChat {
   userName?: string;
   aiName?: string;
-  defaultMessage?: string;
+  userDefaultMessage?: string;
+  agentRole?: IAgentCategoryRole;
   requestBody?: any;
   onSuccess?: (messageData: TResultStream, chatList?: any[]) => void;
 }
@@ -146,12 +147,20 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       content: `${
         chatList.length
           ? ""
-          : props.defaultMessage && isAutoRoute
-          ? chatPrompt.towntalk(props.defaultMessage)
+          : props.userDefaultMessage && isAutoRoute
+          ? chatPrompt.towntalk(props.userDefaultMessage)
           : ""
       }${messagesData.message?.chatContent}`,
       // content: messagesData.message?.chatContent,
     };
+
+    if (!chatList.length && props.agentRole?.prompt) {
+      const agentMessage = {
+        role: aiRole,
+        content: props.agentRole?.prompt,
+      };
+      chatList.push(agentMessage);
+    }
     chatList.push(userMessage);
 
     const requestData = {
@@ -219,14 +228,14 @@ const useQwenXChat = (props: IUseQwenXChat) => {
 
   const { onRequest, messages } = useXChat({
     agent,
-    defaultMessages: props.defaultMessage
+    defaultMessages: props.userDefaultMessage
       ? [
           {
             id: "local",
             message: {
               ctmpContent: "",
               ctmpLoadingMessage: "",
-              chatContent: props.defaultMessage,
+              chatContent: props.userDefaultMessage,
               chatLoadngMessage: "",
               toolContent: "",
               abortedReason: "",
