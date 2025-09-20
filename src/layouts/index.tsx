@@ -1,10 +1,11 @@
 import { Layout } from "antd";
-import MenuCmp from "./components/MenuCmp";
 import { Outlet } from "@umijs/max";
-import HeaderCmp from "./components/HeaderCmp";
-import styles from "./index.less";
-import Assistant from "@/components/Assistant";
+import { AliveScope } from "react-activation";
 import { useGlobalChatEvent } from "@/hooks/useGlobalChatEvent";
+import MenuCmp from "./components/MenuCmp";
+import HeaderCmp from "./components/HeaderCmp";
+import Assistant from "@/components/Assistant";
+import styles from "./index.less";
 const { Header, Sider, Content } = Layout;
 
 const Layouts = () => {
@@ -21,7 +22,9 @@ const Layouts = () => {
             <MenuCmp />
           </Sider>
           <Content>
-            <Outlet />
+            <AliveScope>
+              <Outlet />
+            </AliveScope>
           </Content>
         </Layout>
       </Layout>

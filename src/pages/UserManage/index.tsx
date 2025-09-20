@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { useModel, useRequest } from "@umijs/max";
 import { Button, Card, message, PaginationProps } from "antd";
+import { ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { TableProps } from "antd/lib";
 import { getColumns } from "./constants";
-import SearchFormCmp, { TUserFormData } from "./cpns/SearchFormCmp";
-import styles from "./index.less";
-import useTableColFilter from "@/hooks/useTableColFilter";
-import PageTable from "@/components/PageTable";
 import {
   createUserApi,
   deleteUserById,
@@ -21,6 +17,11 @@ import {
   UserManageToolsEvents,
 } from "@/tools/userManageTools";
 import { exportUserListApi } from "@/request/exportRequestApi";
+import { useKeepAlive } from "@/hooks/useKeepAlive";
+import SearchFormCmp, { TUserFormData } from "./cpns/SearchFormCmp";
+import useTableColFilter from "@/hooks/useTableColFilter";
+import PageTable from "@/components/PageTable";
+import styles from "./index.less";
 
 type IDataType = any;
 
