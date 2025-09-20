@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Empty, ModalProps, Tabs, TabsProps } from "antd";
 import {
   AllAgentCategory,
+  RolePlayAgentCategory,
   SocialAgentCategory,
   StudyAgentCategory,
   WorkAgentCategory,
@@ -42,10 +43,10 @@ const AgentCategory = (props: IAgentCategory) => {
       children: <CategoryCard items={WorkAgentCategory} onChange={onChange} />,
     },
     {
-      key: "SocialCategory",
-      label: "社交",
+      key: "RolePlay",
+      label: "角色扮演",
       children: (
-        <CategoryCard items={SocialAgentCategory} onChange={onChange} />
+        <CategoryCard items={RolePlayAgentCategory} onChange={onChange} />
       ),
     },
   ];
