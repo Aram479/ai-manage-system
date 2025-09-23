@@ -7,6 +7,7 @@ type TCallbackEvent = {
 };
 type TUseChatEvent<T = TCallbackEvent> = (eventInfo: T) => void;
 
+// AI对话完毕时触发
 export const useChatEvent = <T = any,>(callback: TUseChatEvent<T>) => {
   const { events, setEvents } = useModel("chat");
 

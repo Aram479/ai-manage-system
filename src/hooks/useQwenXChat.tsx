@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  CaretRightOutlined,
   CheckCircleOutlined,
   CopyOutlined,
-  CopyrightOutlined,
   DislikeOutlined,
   ExclamationCircleOutlined,
   LikeOutlined,
@@ -21,7 +19,7 @@ import {
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { XAgentConfigCustom } from "@ant-design/x/es/use-x-agent";
 import { useLocation, useModel } from "@umijs/max";
-import { message as AMessage, Tooltip, Upload } from "antd";
+import { message as AMessage, Tooltip } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import _ from "lodash";
 import { qwenXRequest } from "@/services/qwen.api";
@@ -29,6 +27,7 @@ import MarkDownCmp from "@/components/MarkDownCmp";
 import { chatPrompt } from "@/constant/base";
 import ClipboardUtil from "@/utils/clipboardUtil";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
+import { fixJSONSyntax } from "@/utils";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -65,11 +64,12 @@ interface IUseQwenXChat {
   onSuccess?: (messageData: TResultStream, chatList?: any[]) => void;
 }
 interface IUseQwenXChatRef {
-  reset: () => void
+  reset: () => void;
 }
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
-  const { chatUploadFiles, setCommandExecutor } = useModel("chat");
+  const { chatUploadFiles, setCommandExecutor, setFieldCommandExecutor } =
+    useModel("chat");
   const { agentConfig } = useModel("agent");
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
@@ -128,7 +128,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     { onUpdate, onSuccess, onError }
   ) => {
     const newApiKey = agentConfig.current?.basic?.qwenApiKey;
-    const newChatList = messagesData.message?.chatList || []
+    const newChatList = messagesData.message?.chatList || [];
     if (chatUploadFiles.current.length) {
       chatUploadFiles.current.forEach((item) => {
         // 文档理解(qwen-long) role必须为system
@@ -211,6 +211,10 @@ const useQwenXChat = (props: IUseQwenXChat) => {
           isStreaming.current = true;
           // 如果是流数据 则处理String流数据块 并保存
           processorRef.current.processStream(data as unknown as string);
+          // const toolChunks = processorRef.current.getToolContentChunks();
+          const toolContent = processorRef.current.getToolContent();
+          const formartToolContent = fixJSONSyntax(toolContent);
+          setFieldCommandExecutor(formartToolContent);
           onUpdate(formartMessage());
         },
         onError: (error) => {
@@ -300,9 +304,9 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   };
 
   const handleResetChat = () => {
-    setChatList([])
-    setMessages([])
-  }
+    setChatList([]);
+    setMessages([]);
+  };
 
   const items = (): BubbleDataType[] => {
     let newItems = [];

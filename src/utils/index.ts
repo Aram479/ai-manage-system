@@ -93,3 +93,25 @@ export const decryptPassword = (code: string) => {
   const bytes = CryptoJS.AES.decrypt(code, SECRET_KEY);
   return bytes.toString(CryptoJS.enc.Utf8);
 };
+
+// 将不完整的JSON 格式化为正常的
+export const fixJSONSyntax = (str: string): string => {
+  let result = str.trim();
+
+  // 补全字符串引号（简单判断：如果最后是字母数字或空格，前面有未闭合的"
+  if ((result.match(/"/g) || []).length % 2 === 1) {
+    result += '"';
+  }
+
+  // 补全花括号
+  const openBraces = (result.match(/{/g) || []).length;
+  const closeBraces = (result.match(/}/g) || []).length;
+  result += "}".repeat(Math.max(0, openBraces - closeBraces));
+
+  // 补全方括号（数组）
+  const openBrackets = (result.match(/\[/g) || []).length;
+  const closeBrackets = (result.match(/\]/g) || []).length;
+  result += "]".repeat(Math.max(0, openBrackets - closeBrackets));
+
+  return result;
+};

@@ -7,6 +7,7 @@ import { FileObject } from "openai/resource.mjs";
 const chat = () => {
   // 存储指令事件数据
   const [events, setEvents] = useState<any[]>([]);
+  const [fieldEvent, setFieldEvent] = useState<any>({});
   const chatUploadFiles = useRef<UploadFile<FileObject>[]>([]);
   /* stream流中使用ref */
   const eventList = useRef<any[]>([]);
@@ -44,6 +45,15 @@ const chat = () => {
     }
   };
 
+  const setFieldCommandExecutor = (chatJson?: string) => {
+    try {
+      if (chatJson) {
+        const newData = JSON.parse(chatJson);
+        setFieldEvent(newData);
+      }
+    } catch (error) {}
+  };
+
   // 执行命令操作
   const exCMDAction = (command: any) => {
     if (command.path && command.toolType !== "api") {
@@ -55,9 +65,12 @@ const chat = () => {
   return {
     events,
     eventList,
+    fieldEvent,
     chatUploadFiles,
     setCommandExecutor,
+    setFieldCommandExecutor,
     setEvents,
+    setFieldEvent,
   };
 };
 
