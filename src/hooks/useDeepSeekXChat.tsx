@@ -171,7 +171,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     // chatRequest
     request: chatRequest,
   });
-  const { onRequest, messages } = useXChat({
+  const { messages, onRequest, setMessages } = useXChat({
     agent,
     defaultMessages: [
       {
@@ -231,6 +231,11 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
         controller?.terminate();
       }
     }
+  };
+
+  const handleResetChat = () => {
+    setChatList([])
+    setMessages([])
   };
 
   const items: BubbleDataType[] = useMemo(() => {
@@ -326,6 +331,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
     isStreamLocked,
     isStreaming,
     loading: agent.isRequesting(),
+    onReset: handleResetChat,
     onRequest: handleSendChat,
     onCancel: handleStopChat,
   };

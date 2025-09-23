@@ -7,7 +7,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { PaperClipOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  PaperClipOutlined,
+  SettingOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { useModel } from "@umijs/max";
@@ -52,8 +56,8 @@ interface IChatCmpProps {
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const {
     agentRole = {
-      title: '欢迎进入Veloce',
-      desc: '您的专属超级智能体',
+      title: "欢迎进入Veloce",
+      desc: "您的专属超级智能体",
     },
     content: contentProp,
     isSender = true,
@@ -232,6 +236,10 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     setModel(currentAi.model?.deep!);
   };
 
+  const handleResetChat = () => {
+    Ai_Primary.onReset();
+  };
+
   const handleUploadFile = async (files: UploadFile[]) => {
     setUploadFiles(files);
   };
@@ -340,8 +348,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   },
                 }}
               >
-                <Button>
-                  当前模型：{_.find(Ai_Options, ["key", currentAi.key])?.label}
+                <Button >
+                  当前模型：
+                  {_.find(Ai_Options, ["key", currentAi.key])?.label}
                 </Button>
               </Dropdown>
               {isGlobalConfig && (
@@ -350,6 +359,15 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   <SettingOper />
                 </>
               )}
+              <Tooltip title="重置对话">
+                <Button
+                icon={<SyncOutlined />}
+                  // loading={Ai_Primary.loading}
+                  disabled={Ai_Primary.loading}
+                  onClick={handleResetChat}
+                />
+              </Tooltip>
+              {/* 重置 */}
             </Flex>
             <Sender
               value={content}

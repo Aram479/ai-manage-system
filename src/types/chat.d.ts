@@ -51,6 +51,7 @@ type TResultStream = {
   ctmpLoadingMessage?: string; // 思考loading
   chatLoadngMessage?: string; // 对话loading
   abortedReason?: string; // 中断内容
+  chatList?: any[], // 对话列表
   chatFiles?: import("antd").UploadFile<
     import("openai/resources.mjs").FileObject
   >[];

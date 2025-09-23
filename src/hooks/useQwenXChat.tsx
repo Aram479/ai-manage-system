@@ -64,6 +64,9 @@ interface IUseQwenXChat {
   requestBody?: any;
   onSuccess?: (messageData: TResultStream, chatList?: any[]) => void;
 }
+interface IUseQwenXChatRef {
+  reset: () => void
+}
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
   const { chatUploadFiles, setCommandExecutor } = useModel("chat");
@@ -125,6 +128,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     { onUpdate, onSuccess, onError }
   ) => {
     const newApiKey = agentConfig.current?.basic?.qwenApiKey;
+    const newChatList = messagesData.message?.chatList || []
     if (chatUploadFiles.current.length) {
       chatUploadFiles.current.forEach((item) => {
         // 文档理解(qwen-long) role必须为system
@@ -132,7 +136,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
           role: "system",
           content: `fileid://${item.response?.id}`,
         };
-        chatList.push(fileMessage);
+        newChatList.push(fileMessage);
       });
     }
 
@@ -142,10 +146,10 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     const userMessage = {
       role: userRole,
       // content: `${messagesData.message?.chatContent}${
-      //   chatList.length ? "" : deepSeekPrompt.concise
+      //   newChatList.length ? "" : deepSeekPrompt.concise
       // }`,
       content: `${
-        chatList.length
+        newChatList.length
           ? ""
           : props.userDefaultMessage && isAutoRoute
           ? chatPrompt.towntalk(props.userDefaultMessage)
@@ -154,19 +158,19 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       // content: messagesData.message?.chatContent,
     };
 
-    if (!chatList.length && props.agentRole?.prompt) {
+    if (!newChatList.length && props.agentRole?.prompt) {
       const agentMessage = {
         role: aiRole,
         content: props.agentRole?.prompt,
       };
-      chatList.push(agentMessage);
+      newChatList.push(agentMessage);
     }
-    chatList.push(userMessage);
+    newChatList.push(userMessage);
 
     const requestData = {
       ...requestProps.current,
       model: requestProps.current.model,
-      messages: chatList,
+      messages: newChatList,
     };
 
     await qwenXRequest({ apiKey: newApiKey }).create(
@@ -182,9 +186,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
               role: aiRole,
               content: processorRef.current.getChatContent(),
             };
-            chatList.push(aiMessage);
-            const newChatList = [...chatList];
-            setChatList(newChatList);
+            newChatList.push(aiMessage);
+            setChatList([...newChatList]);
 
             isStreaming.current = false;
             const result = formartMessage();
@@ -226,7 +229,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     request: chatRequest,
   });
 
-  const { onRequest, messages } = useXChat({
+  const { messages, onRequest, setMessages } = useXChat({
     agent,
     defaultMessages: props.userDefaultMessage
       ? [
@@ -277,6 +280,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     onRequest({
       chatContent: message,
       chatFiles: chatUploadFiles.current,
+      chatList,
     });
   };
 
@@ -294,6 +298,11 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       }
     }
   };
+
+  const handleResetChat = () => {
+    setChatList([])
+    setMessages([])
+  }
 
   const items = (): BubbleDataType[] => {
     let newItems = [];
@@ -447,6 +456,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
     isStreamLocked,
     isStreaming,
     loading: agent.isRequesting(),
+    onReset: handleResetChat,
     onRequest: handleSendChat,
     onCancel: handleStopChat,
   };
