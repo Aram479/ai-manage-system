@@ -1,6 +1,5 @@
 import {
   HomeOutlined,
-  MergeOutlined,
   PieChartOutlined,
   ProfileOutlined,
   TeamOutlined,
@@ -60,6 +59,15 @@ const routes: IRouteTypes[] = [
         meta: {
           title: "角色管理",
           icon: TeamOutlined,
+        },
+      },
+      {
+        name: "FormAssignPage",
+        path: "/FormAssignPage",
+        component: "@/pages/FormAssignPage",
+        meta: {
+          title: "表单赋值",
+          icon: ProfileOutlined,
         },
       },
       // {

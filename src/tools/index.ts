@@ -1,5 +1,6 @@
 import { BaseToolsFunctions, TBaseTools } from "./baseTools";
 import { ChartToolsFunctions, TChartTools } from "./chartsTools";
+import { FormAssignPageToolsFunctions } from "./formAssignPageTools";
 import { MainToolsFunctions, TMainTools } from "./mainTools";
 import {
   OrderManageToolsFunctions,
@@ -24,6 +25,7 @@ const allToolsFunctions = {
   ...RoleManageToolsFunctions,
   ...MainToolsFunctions,
   ...ChartToolsFunctions,
+  ...FormAssignPageToolsFunctions,
 };
 
 // 动态调用所有工具函数

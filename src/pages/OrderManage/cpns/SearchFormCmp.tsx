@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from "dayjs";
+import { useChatEvent } from "@/hooks/useChatEvent";
 import {
   Button,
   Col,
@@ -9,8 +9,7 @@ import {
   InputNumber,
   Row,
 } from "antd";
-import { useChatEvent } from "@/hooks/useChatEvent";
-import { useFieldEvent } from "@/hooks/useFieldEvent";
+import dayjs, { Dayjs } from "dayjs";
 import {
   OrderManageToolsEvents,
   TOrderManageTools,
@@ -43,20 +42,14 @@ const SearchForm = (props: Partial<ISearchForm>) => {
 
   useChatEvent<TOrderManageTools>((event) => {
     if (event.name === OrderManageToolsEvents.Search_Order) {
-      handleSearch();
-    }
-  });
-
-  useFieldEvent<TOrderManageTools>((event) => {
-    if (event.name === OrderManageToolsEvents.Search_Order) {
       const chatData = event.data;
-      form.setFieldValue("userName", chatData?.userName);
-      form.setFieldValue("goodsName", chatData?.goodsName);
-      form.setFieldValue("goodsPrice", chatData?.goodsPrice);
-      form.setFieldValue(
-        "createTime",
-        chatData?.createTime ? dayjs(chatData?.createTime) : undefined
-      );
+      form.setFieldsValue({
+        ...chatData,
+        createTime: chatData?.createTime
+          ? dayjs(chatData?.createTime)
+          : undefined,
+      });
+      handleSearch();
     }
   });
 

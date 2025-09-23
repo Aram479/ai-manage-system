@@ -22,6 +22,8 @@ export const useFieldEvent = <T = any,>(callback: TUseFieldEvent<T>) => {
   };
 
   useEffect(() => {
-    handleCommandExecutor();
+    if (Object.keys(fieldEvent || {}).length) {
+      handleCommandExecutor();
+    }
   }, [fieldEvent]);
 };
