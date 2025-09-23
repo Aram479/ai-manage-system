@@ -21,4 +21,5 @@ export const ToolsNameMap = new Map([
   ["Edit_User", "修改用户"],
   ["Delete_User", "删除用户"],
   ["Export_UserList", "导出用户"],
+  ["Create_Form", "创建表单赋值"],
 ]);
