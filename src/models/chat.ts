@@ -45,11 +45,14 @@ const chat = () => {
     }
   };
 
-  const setFieldCommandExecutor = (chatJson?: string) => {
+  const setFieldCommandExecutor = (chatJson?: string, isComplete?: boolean) => {
     try {
       if (chatJson) {
         const newData = JSON.parse(chatJson);
-        setFieldEvent(newData);
+        setFieldEvent({
+          ...newData,
+          isComplete,
+        });
       }
     } catch (error) {}
   };

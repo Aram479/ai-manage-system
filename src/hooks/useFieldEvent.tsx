@@ -5,7 +5,10 @@ type TCallbackEvent = {
   [key: string]: any;
   event?: string;
 };
-type TUseFieldEvent<T = TCallbackEvent> = (eventInfo: T) => void;
+type TUseFieldEvent<T = TCallbackEvent> = (
+  eventInfo: T,
+  isComplete: boolean
+) => void;
 
 // Stream流执行时多次触发，该Hook是用于实现AI实时进行字段赋值时
 export const useFieldEvent = <T = any,>(callback: TUseFieldEvent<T>) => {
@@ -15,9 +18,7 @@ export const useFieldEvent = <T = any,>(callback: TUseFieldEvent<T>) => {
   const handleCommandExecutor = () => {
     if (fieldEvent) {
       // 执行指令
-      callback?.(fieldEvent);
-      // 指令执行完毕后清空指令
-      setFieldEvent({});
+      callback?.(fieldEvent, fieldEvent.isComplete);
     }
   };
 

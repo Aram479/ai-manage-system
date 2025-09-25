@@ -9,7 +9,7 @@ type TUseChatEvent<T = TCallbackEvent> = (eventInfo: T) => void;
 
 // AI对话完毕时触发
 export const useChatEvent = <T = any,>(callback: TUseChatEvent<T>) => {
-  const { events, setEvents } = useModel("chat");
+  const { events, setEvents, setFieldEvent, } = useModel("chat");
 
   // 执行分发器
   const handleCommandExecutor = () => {
@@ -20,6 +20,7 @@ export const useChatEvent = <T = any,>(callback: TUseChatEvent<T>) => {
       });
       // 指令执行完毕后清空指令
       setEvents([]);
+      setFieldEvent({})
     }
   };
 

@@ -65,3 +65,81 @@ export const RoleOptions = [
     value: "admin",
   },
 ];
+
+// 表单赋值页面
+export const GenderOptions = [
+  {
+    key: "male",
+    label: "男",
+    value: "male",
+  },
+  {
+    key: "female",
+    label: "女",
+    value: "female",
+  },
+];
+
+export const MaritalStatusOptions = [
+  {
+    label: "未婚",
+    value: "single",
+  },
+  {
+    label: "已婚",
+    value: "married",
+  },
+  {
+    label: "离异",
+    value: "divorced",
+  },
+];
+
+export const DepartmentOptions = [
+  {
+    label: "技术部",
+    value: "engineering",
+  },
+  {
+    label: "设计部",
+    value: "design",
+  },
+  {
+    label: "人力资源部",
+    value: "hr",
+  },
+  {
+    label: "销售部",
+    value: "sales",
+  },
+];
+
+export const EducationOptions = [
+  {
+    label: "高中",
+    value: "high_school",
+  },
+  {
+    label: "大专",
+    value: "associate",
+  },
+  {
+    label: "本科",
+    value: "bachelor",
+  },
+  {
+    label: "硕士",
+    value: "master",
+  },
+  {
+    label: "博士",
+    value: "phd",
+  },
+];
+
+export const JobOptions: Record<string, string[]> = {
+  engineering: ["前端开发", "后端开发", "测试工程师", "DevOps"],
+  design: ["UI设计师", "UX研究员", "平面设计师"],
+  hr: ["招聘专员", "薪酬绩效", "培训主管"],
+  sales: ["销售代表", "客户经理", "大客户总监"],
+};

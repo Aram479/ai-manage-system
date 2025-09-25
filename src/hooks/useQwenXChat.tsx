@@ -214,7 +214,10 @@ const useQwenXChat = (props: IUseQwenXChat) => {
           // const toolChunks = processorRef.current.getToolContentChunks();
           const toolContent = processorRef.current.getToolContent();
           const formartToolContent = fixJSONSyntax(toolContent);
-          setFieldCommandExecutor(formartToolContent);
+          // 流是否执行完毕
+          const isToolComplete = processorRef.current.isStreamCompleted();
+          // 设置字段指令分发器
+          setFieldCommandExecutor(formartToolContent, isToolComplete);
           onUpdate(formartMessage());
         },
         onError: (error) => {
