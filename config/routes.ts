@@ -70,6 +70,15 @@ const routes: IRouteTypes[] = [
           icon: ProfileOutlined,
         },
       },
+      {
+        name: "AutoChat",
+        path: "/AutoChat",
+        component: "@/pages/AutoChat",
+        meta: {
+          title: "自动对话",
+          icon: ProfileOutlined,
+        },
+      },
       // {
       //   name: "WorkFlow",
       //   path: "/WorkFlow",
@@ -93,24 +102,13 @@ const routes: IRouteTypes[] = [
     path: "/Chats",
     component: "@/pages/ChatLayout",
     layout: false,
-    // redirect: "/Chats/Chat",
     routes: [
       {
         path: "/Chats/Chat",
         component: "@/pages/Chat",
         layout: false,
       },
-      {
-        path: "/Chats/AutoChat",
-        component: "@/pages/AutoChat",
-        layout: false,
-      },
     ],
-  },
-  {
-    path: "/demo",
-    component: "@/pages/Demo",
-    layout: false,
   },
   { path: "/404", component: "@/pages/404", layout: false },
   { path: "*", redirect: "/404", layout: false },

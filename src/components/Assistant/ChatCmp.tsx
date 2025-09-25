@@ -33,7 +33,7 @@ import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
 import { useParentMessage } from "@/hooks/useIframe";
-import SenderHeader, { TSenderHeaderRef } from "@/pages/Chat/cpns/SenderHeader";
+import SenderHeader, { TSenderHeaderRef } from "./SenderHeader";
 import LogoWhite from "@/asset/png/logoWhite.png";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
@@ -348,7 +348,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   },
                 }}
               >
-                <Button >
+                <Button>
                   当前模型：
                   {_.find(Ai_Options, ["key", currentAi.key])?.label}
                 </Button>
@@ -361,7 +361,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
               )}
               <Tooltip title="重置对话">
                 <Button
-                icon={<SyncOutlined />}
+                  icon={<SyncOutlined />}
                   // loading={Ai_Primary.loading}
                   disabled={Ai_Primary.loading}
                   onClick={handleResetChat}
