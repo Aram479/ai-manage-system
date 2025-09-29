@@ -62,7 +62,7 @@ interface FormData {
 const initValues = {
   id: "",
   employeeId: "AL100001",
-  createTime: "2030-10-01 12:35:00",
+  createTime: "2030-10-01",
   name: "",
   gender: "",
   birthDate: "",

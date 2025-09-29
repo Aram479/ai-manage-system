@@ -226,7 +226,7 @@ const AutoChatPage = () => {
           <div className={styles.agentRoleBox}>
             <Flex gap={8} vertical align="center" justify="center">
               <div className={styles.title}>当前页面支持自动对话</div>
-              <div className={styles.desc}>当前页面支持自动对话</div>
+              <div className={styles.desc}>支持自动对话（待完善...）</div>
             </Flex>
           </div>
         )}

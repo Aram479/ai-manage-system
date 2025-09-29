@@ -24,7 +24,7 @@ const CategoryOper = (props: ICategoryOper) => {
   return (
     <div>
       <Tooltip
-        title={<div style={{ fontSize: 12 }}>AI分类</div>}
+        title={<div style={{ fontSize: 12 }}>Agent分类</div>}
         placement="top"
       >
         <Button
