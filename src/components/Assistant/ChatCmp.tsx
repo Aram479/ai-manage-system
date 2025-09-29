@@ -136,24 +136,13 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           });
         }
       },
-      onSuccess: (messageData: TResultStream, chatList?: any[]): any =>
-        Ai_SuccessAction(messageData, chatList),
+      onSuccess: (
+        messageData: TResultStream,
+        chatList?: any[],
+        isComplete?: boolean
+      ): any => Ai_SuccessAction(messageData, chatList, isComplete),
     };
   }, [currentTag?.id, model, menuList, userMenus, userList]);
-
-  // 向主页面发送消息
-  const handleSendMessage: typeof defaultRequestConfig.onSuccess = (
-    messageData,
-    chatList
-  ) => {
-    sendMessageToParent({
-      type: "success",
-      payload: {
-        messageData,
-        list: chatList,
-      },
-    });
-  };
 
   const { sendMessageToParent } = useParentMessage(
     agentConfig.current?.iframe.projectDomain || "http://localhost:3000"
@@ -204,12 +193,20 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   const Ai_SuccessAction: typeof defaultRequestConfig.onSuccess = (
     messageData,
-    chatList
+    chatList,
+    isComplete
   ) => {
     onSuccess?.(messageData);
     // 设置中开启数据交互时生效
     if (agentConfig.current?.iframe.isDataTransfer) {
-      handleSendMessage(messageData, chatList);
+      sendMessageToParent({
+        type: "success",
+        payload: {
+          messageData,
+          list: chatList,
+          isComplete,
+        },
+      });
     }
   };
 
