@@ -120,6 +120,22 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
         enable_search: isOnlineSearch,
         // tool_choice: 'auto',
       },
+      onUpdate: (
+        messageData: TResultStream,
+        chatList?: any[],
+        isComplete?: boolean
+      ) => {
+        if (agentConfig.current?.iframe.isDataTransfer) {
+          sendMessageToParent({
+            type: "update",
+            payload: {
+              messageData,
+              list: chatList,
+              isComplete,
+            },
+          });
+        }
+      },
       onSuccess: (messageData: TResultStream, chatList?: any[]): any =>
         Ai_SuccessAction(messageData, chatList),
     };
@@ -130,7 +146,13 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     messageData,
     chatList
   ) => {
-    sendMessageToParent({ type: "chat", payload: chatList });
+    sendMessageToParent({
+      type: "success",
+      payload: {
+        messageData,
+        list: chatList,
+      },
+    });
   };
 
   const { sendMessageToParent } = useParentMessage(

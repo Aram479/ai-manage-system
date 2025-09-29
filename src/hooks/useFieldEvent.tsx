@@ -12,19 +12,19 @@ type TUseFieldEvent<T = TCallbackEvent> = (
 
 // Stream流执行时多次触发，该Hook是用于实现AI实时进行字段赋值时
 export const useFieldEvent = <T = any,>(callback: TUseFieldEvent<T>) => {
-  const { fieldEvent, setFieldEvent } = useModel("chat");
+  const { toolEvent } = useModel("chat");
 
   // 执行分发器
   const handleCommandExecutor = () => {
-    if (fieldEvent) {
+    if (toolEvent) {
       // 执行指令
-      callback?.(fieldEvent, fieldEvent.isComplete);
+      callback?.(toolEvent, toolEvent.isComplete);
     }
   };
 
   useEffect(() => {
-    if (Object.keys(fieldEvent || {}).length) {
+    if (Object.keys(toolEvent || {}).length) {
       handleCommandExecutor();
     }
-  }, [fieldEvent]);
+  }, [toolEvent]);
 };

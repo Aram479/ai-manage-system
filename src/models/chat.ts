@@ -6,11 +6,22 @@ import { FileObject } from "openai/resource.mjs";
 
 const chat = () => {
   // 存储指令事件数据
+  const [contentEvent, setContentEvent] = useState<any>({});
   const [events, setEvents] = useState<any[]>([]);
-  const [fieldEvent, setFieldEvent] = useState<any>({});
+  const [toolEvent, setToolEvent] = useState<any>({});
   const chatUploadFiles = useRef<UploadFile<FileObject>[]>([]);
   /* stream流中使用ref */
   const eventList = useRef<any[]>([]);
+
+  const setContentCommandExecutor = (
+    chatString?: string,
+    isComplete?: boolean
+  ) => {
+    setContentEvent({
+      value: chatString,
+      isComplete,
+    });
+  };
   const setCommandExecutor = (chatCommandJson?: string) => {
     try {
       if (chatCommandJson) {
@@ -45,11 +56,12 @@ const chat = () => {
     }
   };
 
-  const setFieldCommandExecutor = (chatJson?: string, isComplete?: boolean) => {
+  // 实时更新对话中返回的格式化数据
+  const setToolCommandExecutor = (chatJson?: string, isComplete?: boolean) => {
     try {
       if (chatJson) {
         const newData = JSON.parse(chatJson);
-        setFieldEvent({
+        setToolEvent({
           ...newData,
           isComplete,
         });
@@ -68,12 +80,14 @@ const chat = () => {
   return {
     events,
     eventList,
-    fieldEvent,
+    toolEvent,
+    contentEvent,
     chatUploadFiles,
+    setContentCommandExecutor,
     setCommandExecutor,
-    setFieldCommandExecutor,
+    setToolCommandExecutor,
     setEvents,
-    setFieldEvent,
+    setToolEvent,
   };
 };
 

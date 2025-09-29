@@ -61,15 +61,28 @@ interface IUseQwenXChat {
   userDefaultMessage?: string;
   agentRole?: IAgentCategoryRole;
   requestBody?: any;
-  onSuccess?: (messageData: TResultStream, chatList?: any[]) => void;
+  onUpdate?: (
+    messageData: TResultStream,
+    chatList?: any[],
+    isComplete?: boolean
+  ) => void; // 流式输出事件，messageData为格式化后的数据
+  onSuccess?: (
+    messageData: TResultStream,
+    chatList?: any[],
+    isComplete?: boolean
+  ) => void;
 }
 interface IUseQwenXChatRef {
   reset: () => void;
 }
 const useQwenXChat = (props: IUseQwenXChat) => {
   const { requestBody } = props;
-  const { chatUploadFiles, setCommandExecutor, setFieldCommandExecutor } =
-    useModel("chat");
+  const {
+    chatUploadFiles,
+    setContentCommandExecutor,
+    setCommandExecutor,
+    setToolCommandExecutor,
+  } = useModel("chat");
   const { agentConfig } = useModel("agent");
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
@@ -198,7 +211,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
             cmptTime.current = 0;
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              props.onSuccess?.(result, newChatList);
+              props.onSuccess?.(result, newChatList, true);
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器
@@ -210,14 +223,29 @@ const useQwenXChat = (props: IUseQwenXChat) => {
         onUpdate: (data) => {
           isStreaming.current = true;
           // 如果是流数据 则处理String流数据块 并保存
+          const result = formartMessage();
           processorRef.current.processStream(data as unknown as string);
           // const toolChunks = processorRef.current.getToolContentChunks();
+          const chatContent = processorRef.current.getChatContent();
           const toolContent = processorRef.current.getToolContent();
-          const formartToolContent = fixJSONSyntax(toolContent);
           // 流是否执行完毕
-          const isToolComplete = processorRef.current.isStreamCompleted();
-          // 设置字段指令分发器
-          setFieldCommandExecutor(formartToolContent, isToolComplete);
+          const isComplete = processorRef.current.isStreamCompleted();
+          if (result) {
+            props.onUpdate?.(result, chatList, isComplete);
+          }
+
+          // 普通对话
+          if (chatContent) {
+            // 设置对话指令分发器
+            setContentCommandExecutor(chatContent, isComplete);
+          }
+
+          // 数据对话
+          if (toolContent) {
+            const formartToolContent = fixJSONSyntax(toolContent);
+            // 设置Tool指令分发器
+            setToolCommandExecutor(formartToolContent, isComplete);
+          }
           onUpdate(formartMessage());
         },
         onError: (error) => {
