@@ -50,8 +50,10 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
   };
 
   const handleConfirm = async () => {
-    const basicTabFormValid = basicTabRef.current?.form?.validateFields();
-    const iframeTabFormValid = iframeTabRef.current?.form?.validateFields();
+    const basicTabRefCurrent = basicTabRef.current;
+    const iframeTabRefCurrent = iframeTabRef.current;
+    const basicTabFormValid = basicTabRefCurrent?.form?.validateFields();
+    const iframeTabFormValid = iframeTabRefCurrent?.form?.validateFields();
     const [basicTabFormData, iframeTabFormData] = await Promise.all([
       basicTabFormValid,
       iframeTabFormValid,
@@ -60,10 +62,12 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
       basic: basicTabFormData,
       iframe: iframeTabFormData,
     };
+    basicTabRefCurrent?.updateIsApply(false);
+    iframeTabRefCurrent?.updateIsApply(false);
     onOk?.(configData);
   };
 
-  const handleCencel = () => {
+  const handleCancel = () => {
     onCancel?.(false);
   };
 
@@ -97,7 +101,7 @@ const AgentConfigModal = (props: IAgentConfigModal) => {
           },
         }}
         onOk={handleConfirm}
-        onCancel={handleCencel}
+        onCancel={handleCancel}
       >
         <Tabs
           tabPosition="left"

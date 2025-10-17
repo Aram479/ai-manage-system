@@ -53,8 +53,13 @@ const AgentIframeTab = (
     });
   };
 
+  const updateIsApply = (bool: boolean) => {
+    setIsApply(bool);
+  };
+
   useImperativeHandle(ref, () => ({
     form,
+    updateIsApply,
   }));
 
   return (

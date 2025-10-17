@@ -5,6 +5,7 @@ interface IAgentConfig {
 FormInstance;
 interface IAgentTabItemRef {
   form: import("antd").FormProps["form"];
+  updateIsApply: (bool) => void;
 }
 
 interface IAgentBasicTabRef extends IAgentTabItemRef {}
@@ -23,13 +24,13 @@ interface IAgentIframeTabFormData {
 
 interface IAgentCategoryRole {
   key?: string;
-  icon?: any
+  icon?: any;
   title?: string;
   desc?: string;
   greet?: string;
   prompt?: string;
   collect?: number;
   hot?: number;
-  hideFooter?: boolean
-  categoryType?: string
+  hideFooter?: boolean;
+  categoryType?: string;
 }

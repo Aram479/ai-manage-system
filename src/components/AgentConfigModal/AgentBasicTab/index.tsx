@@ -37,8 +37,13 @@ const AgentBasicTab = (props: IAgentBasicTab, ref: Ref<IAgentBasicTabRef>) => {
     });
   };
 
+  const updateIsApply = (bool:boolean) => {
+    setIsApply(bool)
+  }
+
   useImperativeHandle(ref, () => ({
     form,
+    updateIsApply
   }));
   return (
     <div>
