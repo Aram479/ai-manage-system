@@ -1,28 +1,27 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Empty, ModalProps, Tabs, TabsProps } from "antd";
 import {
   AllAgentCategory,
   RolePlayAgentCategory,
-  SocialAgentCategory,
   StudyAgentCategory,
   WorkAgentCategory,
 } from "@/constant/agentCategory";
 import CategoryCard from "./CategoryCard";
 import SearchRole from "./SearchRole";
+import { useAgentRoleContext } from "@/context/AgentRoleContext";
 
 interface IAgentCategory extends ModalProps {
   open?: boolean;
-  onChange?: (data?: IAgentCategoryRole) => void;
 }
 
 const Default_Active_Tab = "AllCategory";
 
 const AgentCategory = (props: IAgentCategory) => {
-  const { open, onChange } = props;
   const [searchValue, setSearchValue] = useState("");
   const [searchCategorys, setSearchCategorys] = useState<IAgentCategoryRole[]>(
     []
   );
+  const { confirmRole } = useAgentRoleContext();
   const [activeTab, setActiveTab] = useState(Default_Active_Tab);
 
   // 分类
@@ -30,24 +29,22 @@ const AgentCategory = (props: IAgentCategory) => {
     {
       key: "AllCategory",
       label: "全部分类",
-      children: <CategoryCard items={AllAgentCategory} onChange={onChange} />,
+      children: <CategoryCard items={AllAgentCategory} />,
     },
     {
-      key: "StudyCategory",
+      key: StudyAgentCategory[0].categoryType || "",
       label: "学习",
-      children: <CategoryCard items={StudyAgentCategory} onChange={onChange} />,
+      children: <CategoryCard items={StudyAgentCategory} />,
     },
     {
-      key: "WorkCategory",
+      key: WorkAgentCategory[0].categoryType || "",
       label: "工作",
-      children: <CategoryCard items={WorkAgentCategory} onChange={onChange} />,
+      children: <CategoryCard items={WorkAgentCategory} />,
     },
     {
-      key: "RolePlay",
+      key: RolePlayAgentCategory[0].categoryType || "",
       label: "角色扮演",
-      children: (
-        <CategoryCard items={RolePlayAgentCategory} onChange={onChange} />
-      ),
+      children: <CategoryCard items={RolePlayAgentCategory} />,
     },
   ];
 
@@ -80,6 +77,11 @@ const AgentCategory = (props: IAgentCategory) => {
     setSearchCategorys(newItems);
   };
 
+  useEffect(() => {
+    if (confirmRole?.categoryType) {
+      setActiveTab(confirmRole.categoryType);
+    }
+  }, [confirmRole]);
   return (
     <div>
       {searchValue ? (

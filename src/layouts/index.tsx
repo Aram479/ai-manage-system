@@ -34,7 +34,7 @@ const Layouts = () => {
           </Content>
         </Layout>
       </Layout>
-      <div style={{ display: isAssistant ? "block" : "none" }}>
+      <div style={{ display: true ? "block" : "none" }}>
         <Assistant />
       </div>
     </div>

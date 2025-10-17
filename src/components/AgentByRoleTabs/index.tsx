@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flex, Tabs, TabsProps } from "antd";
 import { AllAgentCategory } from "@/constant/agentCategory";
 import ChatCmp from "../Assistant/ChatCmp";
@@ -6,6 +6,10 @@ import CategoryOper from "../AgentOpeartion/CategoryOper";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import _ from "lodash";
 import styles from "./index.less";
+import {
+  AgentRoleProvider,
+  useAgentRoleContext,
+} from "@/context/AgentRoleContext";
 
 interface IAgentByRoleTabs extends TabsProps {}
 
@@ -21,6 +25,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
     closable: false,
     children: <ChatCmp agentRole={defaultAgent} isGlobalConfig={false} />,
   };
+  const { updateSelectRole, updateConfirmRole } = useAgentRoleContext();
   const [roleAgentTabs, setRoleAgentTabs] = useState([defaultAgentTab]);
   const [activeTab, setActiveTab] = useState(Default_Active_Tab);
 
@@ -54,6 +59,14 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
     }
   };
 
+  useEffect(() => {
+    const activeTabItem = AllAgentCategory.find(
+      (item) => item.key === activeTab
+    );
+    updateConfirmRole?.(activeTabItem);
+    updateSelectRole?.(activeTabItem);
+  }, [activeTab]);
+
   return (
     <Tabs
       className={styles.agentByRoleTabs}
@@ -74,4 +87,11 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
   );
 };
 
-export default AgentByRoleTabs;
+const AgentByRoleTabsProvider = (props: IAgentByRoleTabs) => {
+  return (
+    <AgentRoleProvider>
+      <AgentByRoleTabs {...props} />
+    </AgentRoleProvider>
+  );
+};
+export default AgentByRoleTabsProvider;

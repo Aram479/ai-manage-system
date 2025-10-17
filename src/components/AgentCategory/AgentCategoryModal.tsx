@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Modal, ModalProps } from "antd";
 import { useModel } from "@umijs/max";
 import AgentCategory from ".";
+import { useAgentRoleContext } from "@/context/AgentRoleContext";
 
 interface IAgentConfigModal extends ModalProps {
   onOk?: (data?: any) => void;
@@ -10,20 +10,15 @@ interface IAgentConfigModal extends ModalProps {
 
 const AgentCategoryModal = (props: IAgentConfigModal) => {
   const { open, onOk, onCancel } = props;
-  const { setAgentRoleAction } = useModel("agent");
-  const [currentAgentRole, setCurrentAgentRole] =
-    useState<IAgentCategoryRole>();
-
-  const handleAgentRole = (agentRoleRecord: typeof currentAgentRole) => {
-    setCurrentAgentRole(agentRoleRecord);
-  };
+  const { selectRole, confirmRole, updateSelectRole, updateConfirmRole } = useAgentRoleContext();
 
   const handleConfirm = () => {
-    setAgentRoleAction(currentAgentRole || {});
-    onOk?.(currentAgentRole);
+    updateConfirmRole?.(selectRole);
+    onOk?.(selectRole);
   };
 
   const handleCencel = () => {
+    updateSelectRole?.(confirmRole)
     onCancel?.(false);
   };
 
@@ -46,7 +41,7 @@ const AgentCategoryModal = (props: IAgentConfigModal) => {
         onOk={handleConfirm}
         onCancel={handleCencel}
       >
-        <AgentCategory open={open} onChange={handleAgentRole} />
+        <AgentCategory open={open} />
       </Modal>
     </div>
   );

@@ -1,22 +1,19 @@
 import { useState } from "react";
 import { Col, Empty, Flex, Row, Tooltip } from "antd";
 import { FireOutlined, HeartOutlined } from "@ant-design/icons";
+import { useAgentRoleContext } from "@/context/AgentRoleContext";
 import styles from "./index.less";
 
 interface ICategoryCard {
   open?: boolean;
   items?: IAgentCategoryRole[];
-  onChange?: (data?: IAgentCategoryRole) => void;
 }
 
 const CategoryCard = (props: ICategoryCard) => {
-  const { items, onChange } = props;
-  const [currentAgentRole, setCurrentAgentRole] =
-    useState<IAgentCategoryRole>();
-
+  const { items } = props;
+  const { selectRole, updateSelectRole } = useAgentRoleContext();
   const handleAgentRole = (roleRecord: IAgentCategoryRole) => {
-    setCurrentAgentRole(roleRecord);
-    onChange?.(roleRecord);
+    updateSelectRole?.(roleRecord);
   };
 
   return (
@@ -27,7 +24,7 @@ const CategoryCard = (props: ICategoryCard) => {
             <Col key={item.key} span={6} onClick={() => handleAgentRole(item)}>
               <Flex
                 className={`${styles.cardItemBox} ${
-                  currentAgentRole?.key === item.key ? styles.activeItemBox : ""
+                  selectRole?.key === item.key ? styles.activeItemBox : ""
                 }`}
                 justify="space-between"
                 vertical

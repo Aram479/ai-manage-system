@@ -31,4 +31,5 @@ interface IAgentCategoryRole {
   collect?: number;
   hot?: number;
   hideFooter?: boolean
+  categoryType?: string
 }
