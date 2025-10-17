@@ -165,7 +165,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
         newChatList.length
           ? ""
           : props.userDefaultMessage && isAutoRoute
-          ? chatPrompt.towntalk(props.userDefaultMessage)
+          ? chatPrompt.towntalk()
           : ""
       }${messagesData.message?.chatContent}`,
       // content: messagesData.message?.chatContent,
