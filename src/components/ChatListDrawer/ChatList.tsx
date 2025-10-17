@@ -7,14 +7,17 @@ import ClipboardUtil from "@/utils/clipboardUtil";
 import { ToolsNameMap } from "@/constant/common";
 
 const ChatList = () => {
-  const { eventList, setCommandExecutor } = useModel("chat");
+  const { eventList, setCommandExecutor, setToolCommandExecutor } =
+    useModel("chat");
 
   return (
     <div className={styles.chatList}>
       {eventList.current.length ? (
         eventList.current?.map((item, index) => (
           <div key={index} className={styles.chatItemBox}>
-            <div className={styles.cmdName}>{ToolsNameMap.get(item.name)}：</div>
+            <div className={styles.cmdName}>
+              {ToolsNameMap.get(item.name)}：
+            </div>
             <div className={styles.cmdText}>{item.jsonString}</div>
             <div className={styles.cmdOperBox}>
               <div className={styles.leftBox}>
@@ -25,6 +28,7 @@ const ChatList = () => {
                   <PlayCircleOutlined
                     onClick={_.throttle(() => {
                       setCommandExecutor(item.jsonString);
+                      setToolCommandExecutor(item.jsonString, true);
                     }, 300)}
                   />
                 </Tooltip>

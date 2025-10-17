@@ -411,6 +411,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                             <PlayCircleOutlined
                               onClick={_.throttle(() => {
                                 setCommandExecutor(message.toolContent);
+                                setToolCommandExecutor(message.toolContent, true)
                               }, 300)}
                             />
                           </Tooltip>
