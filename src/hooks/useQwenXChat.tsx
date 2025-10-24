@@ -345,7 +345,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       ...item,
       role: item.status === "local" ? item.status : "assistant",
       content:
-        (item.message.chatContent || item.message.toolContent) ?? item.message,
+        (item.message.chatContent || item.message.toolContent) ?? String(item.message),
       loading: item.status === "loading" && !streamClass?.readable.locked,
     }));
 
