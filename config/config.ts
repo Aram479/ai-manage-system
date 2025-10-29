@@ -10,6 +10,7 @@ export default defineConfig({
   model: {}, // 开启 useModel
   layout: false,
   routes, // 开始配置式路由
+  publicPath: UMI_ENV === 'pro' ? './' : '/',
   title: "Veloce",
   base: "/", //路由前缀
   request: {
@@ -18,6 +19,7 @@ export default defineConfig({
   locale: {
     default: 'zh-CN',
   },
+  devtool: UMI_ENV === 'pro' ? 'source-map' : false,
   favicons: ['/favicon.ico'],
   initialState: {},
   esbuildMinifyIIFE: true,
