@@ -39,4 +39,16 @@ export default {
       pathRewrite: { "^/ali": "" },
     },
   },
+    pro: {
+    "/api": {
+      target: "https://api.deepseek.com/v1",
+      changeOrigin: true,
+      pathRewrite: { "^/api": "" },
+    },
+    "/ali": {
+      target: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      changeOrigin: true,
+      pathRewrite: { "^/ali": "" },
+    },
+  },
 };

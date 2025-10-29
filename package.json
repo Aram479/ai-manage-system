@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "pc:build": "cross-env mode=prod max build",
+    "build": "cross-env UMI_ENV=pro max build",
     "start": "cross-env max dev",
     "start:uat": "cross-env UMI_ENV=uat max dev",
     "node-server:dev": "pnpm -C  ./node-server dev",
