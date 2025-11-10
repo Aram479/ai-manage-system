@@ -8,11 +8,19 @@ import {
   useState,
 } from "react";
 import {
+  OpenAIFilled,
   PaperClipOutlined,
   SettingOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import { Bubble, Sender, SenderProps } from "@ant-design/x";
+import {
+  Bubble,
+  Prompts,
+  Sender,
+  SenderProps,
+  Suggestion,
+  Welcome,
+} from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
 import { useModel } from "@umijs/max";
 import {
@@ -34,10 +42,12 @@ import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
 import { useParentMessage } from "@/hooks/useIframe";
 import SenderHeader, { TSenderHeaderRef } from "./SenderHeader";
+import Logo from "@/asset/png/logo.png";
 import LogoWhite from "@/asset/png/logoWhite.png";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
 import styles from "./index.less";
+import PromptsCmp from "./PromptsCmp";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
@@ -52,6 +62,26 @@ interface IChatCmpProps {
   content?: string; // 输入框内容
   onSuccess?: (messageData: TResultStream) => void;
 }
+
+const suggestions: any[] = [
+  { label: "Write a report", value: "report" },
+  { label: "Draw a picture", value: "draw" },
+  {
+    label: "Check some knowledge",
+    value: "knowledge",
+    icon: <OpenAIFilled />,
+    children: [
+      {
+        label: "About React",
+        value: "react",
+      },
+      {
+        label: "About Ant Design",
+        value: "antd",
+      },
+    ],
+  },
+];
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const {
@@ -319,13 +349,40 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
             roles={roles}
           />
         ) : (
-          // 智能体介绍
-          <div className={styles.agentRoleBox}>
-            <Flex gap={8} vertical align="center" justify="center">
-              <div className={styles.title}>{agentRole?.title}</div>
-              <div className={styles.desc}>{agentRole?.desc}</div>
-            </Flex>
-          </div>
+          // <div className={styles.agentRoleBox}>
+          //   <Flex gap={8} vertical align="center" justify="center">
+          //     <div className={styles.title}>{agentRole?.title}</div>
+          //     <div className={styles.desc}>{agentRole?.desc}</div>
+          //   </Flex>
+          // </div>
+          <Flex gap={10} vertical wrap style={{ height: "100%" }}>
+            <Welcome
+              icon={
+                <img
+                  src={
+                    agentRole.avatar
+                      ? `https://img.loliapi.com/i/pp/img${agentRole.avatar}.webp`
+                      : Logo
+                  }
+                  className={styles.avatarLogo}
+                />
+              }
+              title={agentRole?.title}
+              description={agentRole?.desc}
+              style={{
+                backgroundColor: "#ffffff00",
+                backgroundImage:
+                  "linear-gradient(97deg, rgba(90,196,255,0.12) 0%, rgba(174,136,255,0.12) 100%)",
+              }}
+            />
+            <Prompts
+              items={agentRole.promptList}
+              vertical
+              onItemClick={(item) => {
+                handleSendChat(item.data.description as string);
+              }}
+            />
+          </Flex>
         )}
 
         {isSender && (
@@ -388,30 +445,44 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
               </Tooltip>
               {/* 重置 */}
             </Flex>
-            <Sender
-              value={content}
-              header={
-                <SenderHeader
-                  ref={senderHeaderRef}
-                  files={uploadFiles}
-                  open={senderHeaderOpen}
-                  onUpload={handleUploadFile}
-                  onOpenChange={setSenderHeaderOpen}
+
+            {/* 快捷指令 */}
+            <Suggestion items={suggestions}>
+              {({ onTrigger, onKeyDown }) => (
+                <Sender
+                  value={content}
+                  header={
+                    <SenderHeader
+                      ref={senderHeaderRef}
+                      files={uploadFiles}
+                      open={senderHeaderOpen}
+                      onUpload={handleUploadFile}
+                      onOpenChange={setSenderHeaderOpen}
+                    />
+                  }
+                  disabled={
+                    !!uploadFiles.find((item) => item.status === "uploading")
+                  }
+                  prefix={attachmentsNode}
+                  placeholder={placeholder}
+                  loading={Ai_Primary.loading}
+                  onChange={(value) => {
+                    if (value === "/") {
+                      onTrigger();
+                    } else if (!value) {
+                      onTrigger(false);
+                    }
+                    setContent(value);
+                  }}
+                  onKeyDown={onKeyDown}
+                  onSubmit={handleSendChat}
+                  onCancel={handleStopChat}
+                  onPasteFile={(file) =>
+                    senderHeaderRef.current?.uploadAction?.(file)
+                  }
                 />
-              }
-              disabled={
-                !!uploadFiles.find((item) => item.status === "uploading")
-              }
-              prefix={attachmentsNode}
-              placeholder={placeholder}
-              loading={Ai_Primary.loading}
-              onChange={setContent}
-              onSubmit={handleSendChat}
-              onCancel={handleStopChat}
-              onPasteFile={(file) =>
-                senderHeaderRef.current?.uploadAction?.(file)
-              }
-            />
+              )}
+            </Suggestion>
           </>
         )}
       </div>

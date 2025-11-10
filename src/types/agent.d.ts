@@ -22,6 +22,7 @@ interface IAgentIframeTabFormData {
   isDataTransfer?: boolean;
 }
 
+type TPromptList = import("@ant-design/x").PromptsProps["items"];
 interface IAgentCategoryRole {
   key?: string;
   icon?: any;
@@ -33,4 +34,6 @@ interface IAgentCategoryRole {
   hot?: number;
   hideFooter?: boolean;
   categoryType?: string;
+  avatar?: string | number;
+  promptList?: TPromptList;
 }
