@@ -119,7 +119,8 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   const formartMessage = (): TResultStream => {
     const allContent = processorRef.current.getAllContent();
     if (!startTime.current) startTime.current = dayjs();
-    if (!cmptTime.current && allContent.chatContent) {
+    const isTimeContent = allContent.chatContent || allContent.toolContent;
+    if (!cmptTime.current && isTimeContent) {
       cmptTime.current = dayjs().diff(startTime.current, "second");
     }
 
@@ -129,7 +130,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       ctmpLoadingMessage: allContent.ctmpContent
         ? isStreamLocked.current && !allContent.chatContent
           ? "思考已中止"
-          : allContent.chatContent
+          : isTimeContent
           ? `已完成深度思考（用时${cmptTime.current}秒）`
           : "思考中..."
         : "",
