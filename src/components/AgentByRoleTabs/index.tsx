@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Flex, Tabs, TabsProps } from "antd";
 import { AllAgentCategory } from "@/constant/agentCategory";
-import ChatCmp from "../Assistant/ChatCmp";
+import ChatCmp, { TChatRef } from "../Assistant/ChatCmp";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import _ from "lodash";
@@ -28,6 +28,14 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
   const { updateSelectRole, updateConfirmRole } = useAgentRoleContext();
   const [roleAgentTabs, setRoleAgentTabs] = useState([defaultAgentTab]);
   const [activeTab, setActiveTab] = useState(Default_Active_Tab);
+  const chatRefs = useRef<Record<string, React.RefObject<TChatRef>>>({});
+
+  const getChatRef = (id: string): React.RefObject<TChatRef> => {
+    if (!chatRefs.current[id]) {
+      chatRefs.current[id] = React.createRef<TChatRef>();
+    }
+    return chatRefs.current[id];
+  };
 
   const handleTabAddOrDel: TabsProps["onEdit"] = (key, action) => {
     if (action === "remove") {
@@ -38,6 +46,8 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
     }
   };
   const handleTabChange: TabsProps["onChange"] = (activeKey) => {
+    const newChartRef = getChatRef(activeKey);
+    newChartRef.current?.hideHistoryDrawer();
     setActiveTab(activeKey);
   };
 
@@ -50,7 +60,13 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
         key: agentRecord.key as string,
         label: agentRecord.title,
         closable: true,
-        children: <ChatCmp agentRole={agentRecord} isGlobalConfig={false} />,
+        children: (
+          <ChatCmp
+            ref={getChatRef(activeTab)}
+            agentRole={agentRecord}
+            isGlobalConfig={false}
+          />
+        ),
       };
       setRoleAgentTabs([...roleAgentTabs, newRoleAgentTab]);
       setActiveTab(agentRecord.key as string);

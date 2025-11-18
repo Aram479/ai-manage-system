@@ -44,16 +44,22 @@ interface ChatCompletionChunk {
   };
 }
 
+type TChatList = {
+  id?: string;
+  role: string;
+  content: string;
+}[];
+
 type TResultStream = {
   ctmpContent?: string; // 思考内容
   chatContent?: string; // 对话内容
   toolContent?: string; // 工具内容(特指JSON数据)
-  toolContentChunk?: string // 工具内容(每个片段)
+  toolContentChunk?: string; // 工具内容(每个片段)
   toolContentChunks?: string[]; // 工具内容(多个片段)
   ctmpLoadingMessage?: string; // 思考loading
   chatLoadngMessage?: string; // 对话loading
   abortedReason?: string; // 中断内容
-  chatList?: any[], // 对话列表
+  chatList?: TChatList; // 对话列表
   chatFiles?: import("antd").UploadFile<
     import("openai/resources.mjs").FileObject
   >[];

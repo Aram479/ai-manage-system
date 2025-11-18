@@ -1,0 +1,27 @@
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 6px;
+
+  .actionItemsBox {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.45);
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 15px;
+  }
+}
+
+.actionHover {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #615ced;
+  }
+}
+
+.actionDisabled {
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed;
+  user-select: none;
+}

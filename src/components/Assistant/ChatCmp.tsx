@@ -1,4 +1,4 @@
-import {
+import React, {
   forwardRef,
   Ref,
   useEffect,
@@ -7,18 +7,21 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  OpenAIFilled,
+import Icon, {
+  CopyOutlined,
   PaperClipOutlined,
-  SettingOutlined,
+  RedoOutlined,
   SyncOutlined,
+  UpCircleFilled,
 } from "@ant-design/icons";
+import { RenderChildrenProps } from "@ant-design/x/es/suggestion";
 import {
   Bubble,
   Prompts,
   Sender,
   SenderProps,
   Suggestion,
+  SuggestionProps,
   Welcome,
 } from "@ant-design/x";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
@@ -27,16 +30,17 @@ import {
   Badge,
   Button,
   ButtonProps,
+  Drawer,
   Dropdown,
+  Empty,
   Flex,
   GetProp,
   GetRef,
-  message,
   Tooltip,
   UploadFile,
 } from "antd";
 import _ from "lodash";
-import { Ai_Options } from "@/constant/base";
+import { Ai_Options, chatPrompt } from "@/constant/base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
@@ -46,12 +50,15 @@ import Logo from "@/asset/png/logo.png";
 import LogoWhite from "@/asset/png/logoWhite.png";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
+import routes from "@/../config/routes";
 import styles from "./index.less";
-import PromptsCmp from "./PromptsCmp";
+import Actions from "../Actions";
+import HistorySentDrawer from "./HistorySentDrawer";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
 export type TChatRef = {
+  hideHistoryDrawer: () => void;
   sendChat: (message: string) => void;
 };
 interface IChatCmpProps {
@@ -62,26 +69,6 @@ interface IChatCmpProps {
   content?: string; // 输入框内容
   onSuccess?: (messageData: TResultStream) => void;
 }
-
-const suggestions: any[] = [
-  { label: "Write a report", value: "report" },
-  { label: "Draw a picture", value: "draw" },
-  {
-    label: "Check some knowledge",
-    value: "knowledge",
-    icon: <OpenAIFilled />,
-    children: [
-      {
-        label: "About React",
-        value: "react",
-      },
-      {
-        label: "About Ant Design",
-        value: "antd",
-      },
-    ],
-  },
-];
 
 const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const {
@@ -94,6 +81,8 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     isGlobalConfig = true,
     onSuccess,
   } = props;
+  // 查找routes下System的子route
+  const systemRoutes = _.find(routes, { name: "System" })?.routes;
   const { menuList, userMenus, userList } = useModel("user");
   const senderHeaderRef = useRef<TSenderHeaderRef>(null);
   const { orderList } = useModel("order");
@@ -110,7 +99,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
+  const [historySentOpen, setHistorySentOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
+  const [chatListByUser, setChatListByUser] = useState<TChatList>([]);
   const [messageTags, setMessageTags] = useState<
     (ButtonProps & { desc: string })[]
   >([
@@ -125,6 +116,56 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
       desc: "联网搜索",
     },
   ]);
+  const suggestions = useMemo<SuggestionProps["items"]>(() => {
+    const newRoutes = systemRoutes
+      ?.filter((item) => item.name)
+      .map((item) => {
+        const icon = item.meta?.icon as any;
+        const iconNode = icon
+          ? React.createElement(Icon, {
+              component: icon,
+              style: { fontSize: "1.4em" },
+            })
+          : undefined;
+        return {
+          label: item.meta?.title || "",
+          value: chatPrompt.page(item.meta?.title),
+          // icon: iconNode
+        };
+      });
+    return [
+      { label: "选择页面", value: "checkPage", children: newRoutes },
+      {
+        label: "选择图表",
+        value: "checkChart",
+        children: [
+          {
+            label: "饼图",
+            value: chatPrompt.chart("饼图"),
+          },
+          {
+            label: "柱状图",
+            value: chatPrompt.chart("柱状图"),
+          },
+          {
+            label: "折线图",
+            value: chatPrompt.chart("折线图"),
+          },
+          {
+            label: "瀑布图",
+            value: chatPrompt.chart("瀑布图"),
+          },
+
+          {
+            label: "股票图",
+            value: chatPrompt.chart("股票图"),
+          },
+        ],
+      },
+      { label: "历史发送", value: "historySent" },
+      { label: "指令中心", value: "指令中心" },
+    ];
+  }, []);
 
   const listRef = useRef<GetRef<typeof Bubble.List>>(null);
   // 是否开启深度思考
@@ -293,6 +334,22 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     setUploadFiles(files);
   };
 
+  const suggestionInupt = (value: string, events: RenderChildrenProps<any>) => {
+    const { onTrigger } = events;
+    if (value === "/") {
+      onTrigger();
+    } else if (!value) {
+      onTrigger(false);
+    }
+  };
+
+  const handleSuggestion: SuggestionProps["onSelect"] = (value) => {
+    if (value === "historySent") {
+      setHistorySentOpen(true);
+      return;
+    }
+    setContent(value);
+  };
   // 输入框左侧图标
   const attachmentsNode = (
     <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
@@ -328,16 +385,23 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     setMessageTags([...messageTags]);
   }, [chatUploadFiles.current]);
 
+  useEffect(() => {
+    const newListByUser = _.filter(Ai_Primary.chatList, { role: "user" }).map(
+      (item, index) => ({ ...item, id: index + 1 })
+    );
+    setChatListByUser(newListByUser);
+  }, [Ai_Primary.messages]);
+
+  // 关闭对话发送Drawer
+  const hideHistoryDrawer = () => {
+    setHistorySentOpen(false);
+  };
   // 暴露给父组件的属性
   useImperativeHandle(ref, () => ({
+    hideHistoryDrawer,
     sendChat: handleSendChat,
   }));
 
-  // useEffect(() => {
-  //   if (contentProp) {
-  //     setContent(contentProp);
-  //   }
-  // }, [contentProp]);
   return (
     <div className={styles.chatBox}>
       <div className={styles.chatListBox}>
@@ -447,7 +511,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
             </Flex>
 
             {/* 快捷指令 */}
-            <Suggestion items={suggestions}>
+            <Suggestion items={suggestions} onSelect={handleSuggestion}>
               {({ onTrigger, onKeyDown }) => (
                 <Sender
                   value={content}
@@ -467,15 +531,14 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                   placeholder={placeholder}
                   loading={Ai_Primary.loading}
                   onChange={(value) => {
-                    if (value === "/") {
-                      onTrigger();
-                    } else if (!value) {
-                      onTrigger(false);
-                    }
+                    suggestionInupt(value, { onTrigger, onKeyDown });
+                    if (value.length === 1 && value === "/") return;
                     setContent(value);
                   }}
                   onKeyDown={onKeyDown}
-                  onSubmit={handleSendChat}
+                  onSubmit={(value) => {
+                    handleSendChat(value);
+                  }}
                   onCancel={handleStopChat}
                   onPasteFile={(file) =>
                     senderHeaderRef.current?.uploadAction?.(file)
@@ -486,6 +549,16 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           </>
         )}
       </div>
+      <HistorySentDrawer
+        title="历史发送"
+        open={historySentOpen}
+        chatList={chatListByUser}
+        width={500}
+        mask={false}
+        maskClosable={false}
+        onClose={() => setHistorySentOpen(false)}
+        onSend={handleSendChat}
+      />
     </div>
   );
 };

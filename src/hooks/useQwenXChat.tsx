@@ -7,6 +7,7 @@ import {
   LikeOutlined,
   LoadingOutlined,
   PlayCircleOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   Attachments,
@@ -28,6 +29,7 @@ import { chatPrompt } from "@/constant/base";
 import ClipboardUtil from "@/utils/clipboardUtil";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
 import { fixJSONSyntax } from "@/utils";
+import Layouts from "./../layouts/index";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -87,7 +89,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   const requestProps = useRef(requestBody);
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
-  const [chatList, setChatList] = useState<any[]>([]);
+  const [chatList, setChatList] = useState<TChatList>([]);
   const location = useLocation();
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -249,7 +251,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
           onUpdate(formartMessage());
         },
         onError: (error) => {
-          setChatList([...chatList]);
+          setChatList([...(chatList || [])]);
           // 清除上一次上传的文件
           chatUploadFiles.current = [];
           onError(error);
@@ -345,12 +347,13 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       ...item,
       role: item.status === "local" ? item.status : "assistant",
       content:
-        (item.message.chatContent || item.message.toolContent) ?? String(item.message),
+        (item.message.chatContent || item.message.toolContent) ??
+        String(item.message),
       loading: item.status === "loading" && !streamClass?.readable.locked,
     }));
 
     newItems = [...newMessages];
-    return newItems.map(({ message, status, ...item }) => ({
+    return newItems.map(({ message, status, ...item }, index) => ({
       ...item,
       messageRender: (content) => {
         const newCtmpLoadingMessage = message.ctmpLoadingMessage || "";
@@ -411,7 +414,10 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                             <PlayCircleOutlined
                               onClick={_.throttle(() => {
                                 setCommandExecutor(message.toolContent);
-                                setToolCommandExecutor(message.toolContent, true)
+                                setToolCommandExecutor(
+                                  message.toolContent,
+                                  true
+                                );
                               }, 300)}
                             />
                           </Tooltip>
@@ -435,6 +441,23 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                             });
                           }, 300)}
                         />
+                        {index === newItems.length - 1 && (
+                          <Tooltip title="重新生成">
+                            <ReloadOutlined
+                              onClick={() => {
+                                const lastUserMessage = _.findLast(chatList, {
+                                  role: "user",
+                                })?.content;
+                                messages;
+                                chatList.splice(-2, 2);
+                                messages.splice(-2, 2);
+                                setChatList(chatList);
+                                setMessages(messages);
+                                handleSendChat(lastUserMessage || "");
+                              }}
+                            />
+                          </Tooltip>
+                        )}
                       </div>
                     )}
                   </div>

@@ -35,3 +35,45 @@
   height: 60px;
   object-fit: contain;
 }
+
+.assistantContent {
+  min-width: calc(100% - 50px);
+  background: #fff
+}
+
+
+.drawerChatListBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+
+  &:hover .actionsBox {
+    opacity: 1;
+  }
+
+  .contentBox {
+    display: inline-flex;
+    justify-content: end;
+
+    .content {
+      display: inline-box;
+      padding: 12px;
+      background-color: #e0dfff;
+      border-radius: 8px;
+    }
+  }
+
+
+  .actionsBox {
+    opacity: 0;
+    transition: opacity .3s;
+  }
+
+  .textareaBox {
+    border: 1px solid #8985f6;
+    border-radius: 8px;
+    padding: 8px;
+  }
+
+}
