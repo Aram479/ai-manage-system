@@ -46,7 +46,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
     }
   };
   const handleTabChange: TabsProps["onChange"] = (activeKey) => {
-    const newChartRef = getChatRef(activeKey);
+    const newChartRef = chatRefs.current[activeKey];
     newChartRef.current?.hideDrawer();
     setActiveTab(activeKey);
   };
@@ -81,6 +81,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
     );
     updateConfirmRole?.(activeTabItem);
     updateSelectRole?.(activeTabItem);
+    getChatRef(activeTab);
   }, [activeTab]);
 
   return (

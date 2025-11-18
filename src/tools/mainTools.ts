@@ -51,5 +51,5 @@ const create_component = (props: TToolsProps) => {
 };
 
 export const MainToolsFunctions = {
-  create_component,
+  // create_component,
 } as const;
