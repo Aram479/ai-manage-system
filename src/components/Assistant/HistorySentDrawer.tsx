@@ -57,7 +57,7 @@ const HistorySentDrawer = (props: IHistorySentDrawerProps) => {
     restTextArea();
   };
   return (
-    <Drawer {...draweProps}>
+    <Drawer {...draweProps} mask={false} maskClosable={false}>
       {chatList?.length ? (
         <Flex vertical gap={5} align="end" justify="end">
           {chatList.map((item) => (

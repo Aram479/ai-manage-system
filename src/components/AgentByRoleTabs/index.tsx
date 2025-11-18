@@ -47,7 +47,7 @@ const AgentByRoleTabs = (props: IAgentByRoleTabs) => {
   };
   const handleTabChange: TabsProps["onChange"] = (activeKey) => {
     const newChartRef = getChatRef(activeKey);
-    newChartRef.current?.hideHistoryDrawer();
+    newChartRef.current?.hideDrawer();
     setActiveTab(activeKey);
   };
 

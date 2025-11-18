@@ -7,13 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import Icon, {
-  CopyOutlined,
-  PaperClipOutlined,
-  RedoOutlined,
-  SyncOutlined,
-  UpCircleFilled,
-} from "@ant-design/icons";
+import { PaperClipOutlined, SyncOutlined } from "@ant-design/icons";
 import { RenderChildrenProps } from "@ant-design/x/es/suggestion";
 import {
   Bubble,
@@ -30,9 +24,7 @@ import {
   Badge,
   Button,
   ButtonProps,
-  Drawer,
   Dropdown,
-  Empty,
   Flex,
   GetProp,
   GetRef,
@@ -40,7 +32,7 @@ import {
   UploadFile,
 } from "antd";
 import _ from "lodash";
-import { Ai_Options, chatPrompt } from "@/constant/base";
+import { Ai_Options } from "@/constant/base";
 import useDeepSeekXChat from "@/hooks/useDeepSeekXChat";
 import useQwenXChat from "@/hooks/useQwenXChat";
 import { allTools } from "@/tools";
@@ -50,15 +42,15 @@ import Logo from "@/asset/png/logo.png";
 import LogoWhite from "@/asset/png/logoWhite.png";
 import SettingOper from "../AgentOpeartion/SettingOper";
 import CategoryOper from "../AgentOpeartion/CategoryOper";
+import HistorySentDrawer from "./HistorySentDrawer";
+import CommandCenterTabsDrawer from "../CommandCenter/CommandCenterTabsDrawer";
 import routes from "@/../config/routes";
 import styles from "./index.less";
-import Actions from "../Actions";
-import HistorySentDrawer from "./HistorySentDrawer";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 
 export type TChatRef = {
-  hideHistoryDrawer: () => void;
+  hideDrawer: () => void;
   sendChat: (message: string) => void;
 };
 interface IChatCmpProps {
@@ -100,6 +92,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   const [placeholder, setPlaceholder] = useState(defaultPlaceholder);
   const [senderHeaderOpen, setSenderHeaderOpen] = useState(false);
   const [historySentOpen, setHistorySentOpen] = useState(false);
+  const [commandCenterOpen, setCommandCenterOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [chatListByUser, setChatListByUser] = useState<TChatList>([]);
   const [messageTags, setMessageTags] = useState<
@@ -117,53 +110,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     },
   ]);
   const suggestions = useMemo<SuggestionProps["items"]>(() => {
-    const newRoutes = systemRoutes
-      ?.filter((item) => item.name)
-      .map((item) => {
-        const icon = item.meta?.icon as any;
-        const iconNode = icon
-          ? React.createElement(Icon, {
-              component: icon,
-              style: { fontSize: "1.4em" },
-            })
-          : undefined;
-        return {
-          label: item.meta?.title || "",
-          value: chatPrompt.page(item.meta?.title),
-          // icon: iconNode
-        };
-      });
     return [
-      { label: "选择页面", value: "checkPage", children: newRoutes },
-      {
-        label: "选择图表",
-        value: "checkChart",
-        children: [
-          {
-            label: "饼图",
-            value: chatPrompt.chart("饼图"),
-          },
-          {
-            label: "柱状图",
-            value: chatPrompt.chart("柱状图"),
-          },
-          {
-            label: "折线图",
-            value: chatPrompt.chart("折线图"),
-          },
-          {
-            label: "瀑布图",
-            value: chatPrompt.chart("瀑布图"),
-          },
-
-          {
-            label: "股票图",
-            value: chatPrompt.chart("股票图"),
-          },
-        ],
-      },
       { label: "历史发送", value: "historySent" },
-      // { label: "指令中心", value: "指令中心" },
+      { label: "指令中心", value: "commandCenter" },
     ];
   }, []);
 
@@ -347,6 +296,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     if (value === "historySent") {
       setHistorySentOpen(true);
       return;
+    } else if (value === "commandCenter") {
+      setCommandCenterOpen(true);
+      return;
     }
     setContent(value);
   };
@@ -393,12 +345,13 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
   }, [Ai_Primary.messages]);
 
   // 关闭对话发送Drawer
-  const hideHistoryDrawer = () => {
+  const hideDrawer = () => {
+    setCommandCenterOpen(false)
     setHistorySentOpen(false);
   };
   // 暴露给父组件的属性
   useImperativeHandle(ref, () => ({
-    hideHistoryDrawer,
+    hideDrawer,
     sendChat: handleSendChat,
   }));
 
@@ -549,13 +502,17 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
           </>
         )}
       </div>
+      <CommandCenterTabsDrawer
+        title="指令中心"
+        open={commandCenterOpen}
+        onItemClick={(data) => setContent(data.value)}
+        onClose={() => setCommandCenterOpen(false)}
+      />
       <HistorySentDrawer
         title="历史发送"
+        width={500}
         open={historySentOpen}
         chatList={chatListByUser}
-        width={500}
-        mask={false}
-        maskClosable={false}
         onClose={() => setHistorySentOpen(false)}
         onSend={handleSendChat}
       />
