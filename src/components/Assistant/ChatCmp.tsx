@@ -163,7 +163,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
         ],
       },
       { label: "历史发送", value: "historySent" },
-      { label: "指令中心", value: "指令中心" },
+      // { label: "指令中心", value: "指令中心" },
     ];
   }, []);
 

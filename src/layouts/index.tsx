@@ -9,7 +9,7 @@ import Assistant from "@/components/Assistant";
 import styles from "./index.less";
 const { Header, Sider, Content } = Layout;
 
-const agentBlackRoute = ["/Main", "/Chats/AutoChat", "/ScreenChat"];
+const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat"];
 const Layouts = () => {
   useGlobalChatEvent();
   const location = useLocation();
@@ -34,7 +34,7 @@ const Layouts = () => {
           </Content>
         </Layout>
       </Layout>
-      <div style={{ display: true ? "block" : "none" }}>
+      <div style={{ display: isAssistant ? "block" : "none" }}>
         <Assistant />
       </div>
     </div>
