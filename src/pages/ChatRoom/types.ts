@@ -2,7 +2,7 @@
 export interface Message {
   id: string;
   content: string;
-  sender: 'me' | 'other';
+  sender: "me" | "other";
   senderId?: string; // 发送者ID
   receiverId?: string; // 接收者ID
   timestamp: string;

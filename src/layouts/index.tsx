@@ -9,7 +9,7 @@ import Assistant from "@/components/Assistant";
 import styles from "./index.less";
 const { Header, Sider, Content } = Layout;
 
-const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat"];
+const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat", '/ChatRoom'];
 const Layouts = () => {
   useGlobalChatEvent();
   const location = useLocation();

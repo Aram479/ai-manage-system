@@ -90,6 +90,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<TChatList>([]);
+  const selectRole = useRef<IAgentCategoryRole>();
   const location = useLocation();
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -174,10 +175,10 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       // content: messagesData.message?.chatContent,
     };
 
-    if (!newChatList.length && props.agentRole?.prompt) {
+    if (!newChatList.length && selectRole.current?.prompt) {
       const agentMessage = {
         role: aiRole,
-        content: props.agentRole?.prompt,
+        content: selectRole.current?.prompt,
       };
       newChatList.push(agentMessage);
     }
@@ -507,6 +508,11 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   useEffect(() => {
     requestProps.current = requestBody;
   }, [requestBody]);
+
+  useEffect(() => {
+    selectRole.current = props.agentRole;
+  }, [props.agentRole]);
+
   return {
     items: items(),
     messages,

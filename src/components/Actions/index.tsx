@@ -23,7 +23,7 @@ export interface IActionsProps<T = any> {
 }
 
 const Actions = (props: IActionsProps) => {
-  const { className, items, itemData, style, onClick } = props;
+  const { className = '', items, itemData, style, onClick } = props;
   return (
     <div className={`${className} ${styles.actions}`} style={style}>
       {items.map((item) => (

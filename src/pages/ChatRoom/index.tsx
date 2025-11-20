@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Layout } from "antd";
 import { ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
@@ -33,7 +33,6 @@ const ChatRoom = () => {
   const handleReceiveMessage = useCallback(
     (message: Message) => {
       if (message.receiverId !== currentUserId) return;
-
       // 找到对应的聊天项
       const targetChatId = message.senderId || "unknown";
 
@@ -106,7 +105,7 @@ const ChatRoom = () => {
 
   // 处理发送消息
   const handleSendMessage = useCallback(
-    (content: string, chatId: string) => {
+    (content: string = "", chatId: string) => {
       if (!content.trim() || !chatId || !isConnected) return;
 
       const now = new Date();

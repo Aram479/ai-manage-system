@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Button, Tooltip } from "antd";
+import { Button, ButtonProps, Tooltip } from "antd";
 import AgentCategoryModal from "../AgentCategory/AgentCategoryModal";
 import _ from "lodash";
 
 interface ICategoryOper {
+  buttonProps?: ButtonProps;
   onOk?: (data: IAgentCategoryRole) => void;
 }
 
 const CategoryOper = (props: ICategoryOper) => {
-  const { onOk } = props;
+  const { buttonProps, onOk } = props;
   const [agentCategoryOpen, setAgentCategoryOpen] = useState(false);
   const [selectAgents, setSelectAgents] = useState<IAgentCategoryRole[]>([]);
   const handleAgentCategory = () => {
@@ -21,6 +22,7 @@ const CategoryOper = (props: ICategoryOper) => {
     setAgentCategoryOpen(false);
     onOk?.(agentRecord);
   };
+
   return (
     <div>
       <Tooltip
@@ -28,8 +30,9 @@ const CategoryOper = (props: ICategoryOper) => {
         placement="top"
       >
         <Button
-          variant="outlined"
-          icon={<>AI</>}
+          {...buttonProps}
+          variant={buttonProps?.variant || "outlined"}
+          icon={buttonProps?.icon || "AI"}
           onClick={handleAgentCategory}
         />
       </Tooltip>
