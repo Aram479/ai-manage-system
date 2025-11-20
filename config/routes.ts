@@ -79,6 +79,15 @@ const routes: IRouteTypes[] = [
           icon: ProfileOutlined,
         },
       },
+      {
+        name: "ChatRoom",
+        path: "/ChatRoom",
+        component: "@/pages/ChatRoom",
+        meta: {
+          title: "聊天室",
+          icon: ProfileOutlined,
+        },
+      },
       // {
       //   name: "WorkFlow",
       //   path: "/WorkFlow",

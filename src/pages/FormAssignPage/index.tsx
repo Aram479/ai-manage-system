@@ -15,6 +15,7 @@ import {
   Row,
   Select,
   Switch,
+  Tooltip,
 } from "antd";
 import { Rule } from "antd/es/form";
 import {
@@ -172,13 +173,15 @@ const FormAssignPage = (props: IFormAssignPage) => {
       }
     }
   });
-
+  
   return (
     <div className="dap-main-content">
       <Card>
         <div>
-          实时赋值：
-          <Switch onChange={setIsAutoAssign} />
+          <Tooltip title="开启后，对话“表单赋值”相关内容时，数据将会实时填充">
+            实时赋值：
+            <Switch onChange={setIsAutoAssign} />
+          </Tooltip>
         </div>
         <Form layout="vertical" form={form}>
           <Row gutter={24}>

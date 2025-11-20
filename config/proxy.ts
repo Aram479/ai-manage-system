@@ -38,17 +38,10 @@ export default {
       changeOrigin: true,
       pathRewrite: { "^/ali": "" },
     },
-  },
-    pro: {
-    "/api": {
-      target: "https://api.deepseek.com/v1",
+    "/socket.io": {
+      target: "http://localhost:3000",
+      ws: true, // 启用 WebSocket 代理
       changeOrigin: true,
-      pathRewrite: { "^/api": "" },
-    },
-    "/ali": {
-      target: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      changeOrigin: true,
-      pathRewrite: { "^/ali": "" },
     },
   },
 };
