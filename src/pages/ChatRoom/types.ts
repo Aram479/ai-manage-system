@@ -3,6 +3,8 @@ export interface Message {
   id: string;
   content: string;
   sender: 'me' | 'other';
+  senderId?: string; // 发送者ID
+  receiverId?: string; // 接收者ID
   timestamp: string;
 }
 
@@ -29,5 +31,6 @@ export interface ChatListProps {
 // 聊天对话组件Props
 export interface ChatConversationProps {
   chat: ChatItem;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, chatId: string) => void;
+  isConnected: boolean;
 }

@@ -1,20 +1,97 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Layout } from "antd";
-import ChatList from "./components/ChatList";
-import ChatConversation from "./components/ChatConversation";
 import { ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
+import { useSocket } from "@/hooks/useSocket";
+import ChatList from "./components/ChatList";
+import ChatConversation from "./components/ChatConversation";
 import styles from "./index.less";
 
 const { Sider, Content } = Layout;
 
 const ChatRoom = () => {
+  // 当前用户ID (实际应用中应从认证系统获取)
+  const currentUserId = `user_${window.location.port}`;
   const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
 
+  // WebSocket连接管理
+  const { isConnected, on, emit, reconnect } = useSocket("/", {
+    autoConnect: true,
+    connectionOptions: {
+      // 可选：添加认证、路径等
+      // auth: { token: 'your-jwt' },
+      // path: '/socket.io',
+    },
+  });
+
   // 获取当前选中的聊天
   const selectedChat = chatList?.find((chat) => chat.id === selectedChatId);
+
+  // 处理接收到的新消息
+  const handleReceiveMessage = useCallback(
+    (message: Message) => {
+      if (message.receiverId !== currentUserId) return;
+
+      // 找到对应的聊天项
+      const targetChatId = message.senderId || "unknown";
+
+      // 创建接收到的消息
+      const receivedMessage: Message = {
+        ...message,
+        sender: "other", // 标记为对方发送的
+      };
+
+      setChatList((prev = []) => {
+        // 检查是否已存在该聊天
+        const existingChatIndex = prev.findIndex(
+          (chat) => chat.id === targetChatId
+        );
+
+        if (existingChatIndex >= 0) {
+          // 更新现有聊天
+          const updatedChats = [...prev];
+          updatedChats[existingChatIndex] = {
+            ...updatedChats[existingChatIndex],
+            messages: [
+              ...updatedChats[existingChatIndex].messages,
+              receivedMessage,
+            ],
+            lastMessage: receivedMessage.content,
+            lastMessageTime: new Date().toISOString(),
+            // 如果不是当前选中的聊天，则增加未读数
+            unreadCount:
+              updatedChats[existingChatIndex].id === selectedChatId
+                ? updatedChats[existingChatIndex].unreadCount
+                : updatedChats[existingChatIndex].unreadCount + 1,
+          };
+          return updatedChats;
+        } else {
+          // 创建新聊天 (实际应用中应该从服务器获取用户信息)
+          const newChat: ChatItem = {
+            id: targetChatId,
+            name: `用户${targetChatId}`,
+            avatar: `https://randomuser.me/api/portraits/${
+              Math.random() > 0.5 ? "men" : "women"
+            }/${Math.floor(Math.random() * 100)}.jpg`,
+            lastMessage: receivedMessage.content,
+            lastMessageTime: new Date().toISOString(),
+            unreadCount: 1,
+            messages: [receivedMessage],
+          };
+          return [newChat, ...prev];
+        }
+      });
+    },
+    [currentUserId, selectedChatId]
+  );
+
+  // 监听来自其他用户的消息
+  useEffect(() => {
+    const unsubscribe = on("receive_message", handleReceiveMessage);
+    return unsubscribe;
+  }, [on, handleReceiveMessage]);
 
   // 处理选择聊天
   const handleSelectChat = (chatId: string) => {
@@ -28,24 +105,40 @@ const ChatRoom = () => {
   };
 
   // 处理发送消息
-  const handleSendMessage = (content: string) => {
-    if (!selectedChatId || !content.trim()) return;
+  const handleSendMessage = useCallback(
+    (content: string, chatId: string) => {
+      if (!content.trim() || !chatId || !isConnected) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: content.trim(),
-      sender: "me",
-      timestamp: new Date().toISOString(),
-    };
+      const now = new Date();
+      const newMessage: Message = {
+        id: `msg-${Date.now()}`,
+        content: content.trim(),
+        sender: "me",
+        timestamp: now.toISOString(),
+        senderId: currentUserId,
+        receiverId: chatId,
+      };
 
-    setChatList((prev = []) =>
-      prev.map((chat) =>
-        chat.id === selectedChatId
-          ? { ...chat, messages: [...chat.messages, newMessage] }
-          : chat
-      )
-    );
-  };
+      // 通过WebSocket发送消息
+      emit("send_message", newMessage);
+
+      // 更新本地状态
+      setChatList((prev = []) =>
+        prev.map((chat) => {
+          if (chat.id === chatId) {
+            return {
+              ...chat,
+              messages: [...chat.messages, newMessage],
+              lastMessage: newMessage.content,
+              lastMessageTime: now.toISOString(),
+            };
+          }
+          return chat;
+        })
+      );
+    },
+    [isConnected, currentUserId, emit]
+  );
 
   // 处理搜索
   const filteredChatList = chatList?.filter(
@@ -65,6 +158,14 @@ const ChatRoom = () => {
         breakpoint="lg"
         collapsedWidth={0}
       >
+        <div className={styles.connectionStatus}>
+          <span>WebSocket状态: {isConnected ? "🟢 已连接" : "🔴 未连接"}</span>
+          {!isConnected && (
+            <button onClick={reconnect} className={styles.reconnectBtn}>
+              重新连接
+            </button>
+          )}
+        </div>
         <ChatList
           chatList={filteredChatList}
           selectedChatId={selectedChatId}
@@ -78,6 +179,7 @@ const ChatRoom = () => {
           <ChatConversation
             chat={selectedChat}
             onSendMessage={handleSendMessage}
+            isConnected={isConnected}
           />
         ) : (
           <div className={styles.emptyContainer}>

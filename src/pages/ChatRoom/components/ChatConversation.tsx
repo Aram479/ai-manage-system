@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input, Avatar, InputRef, Button } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { useSocket } from "@/hooks/useSocket";
 import { ChatConversationProps } from "../types";
 import dayjs from "dayjs";
 import styles from "./ChatConversation.less";
@@ -11,71 +10,34 @@ const { TextArea } = Input;
 const ChatConversation: React.FC<ChatConversationProps> = ({
   chat,
   onSendMessage,
+  isConnected
 }) => {
-  const { isConnected, on, emit, reconnect } = useSocket("/", {
-    autoConnect: true,
-    connectionOptions: {
-      // 可选：添加认证、路径等
-      // auth: { token: 'your-jwt' },
-      // path: '/socket.io',
-    },
-  });
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<InputRef>(null);
 
   // 自动滚动到最新消息
-  const scrollToBottom = () => {
-    // scrollIntoView({ behavior: 'smooth' }); 缓入
-    messagesEndRef.current?.scrollIntoView();
-  };
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   // 当消息列表变化时，滚动到底部
   useEffect(() => {
     scrollToBottom();
   }, [chat.messages, scrollToBottom]);
 
-  // 监听服务器广播的消息
-  useEffect(() => {
-    const unsubscribe = on("message", (msg: string) => {
-      // onSendMessage(msg);
-    });
-
-    return () => {
-      unsubscribe(); // 组件卸载时取消监听
-    };
-  }, [on]);
-
-  // 处理发送消息
-  const handleSend = () => {
-    if (message.trim() && isConnected) {
-      emit("message", message);
-      onSendMessage(message);
-      setMessage("");
-      // 发送后自动聚焦回输入框
-      messageInputRef.current?.focus();
-    }
-  };
-
-  // 处理按键事件，支持回车发送
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 按下Ctrl+Enter或Cmd+Enter换行，单独Enter发送
-    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   // 格式化消息时间
-  const formatMessageTime = (timestamp: string) => {
+  const formatMessageTime = useCallback((timestamp: string) => {
     return dayjs(timestamp).format("HH:mm");
-  };
+  }, []);
 
   // 生成日期分隔符
-  const renderDateSeparator = (message: any, index: number) => {
+  const renderDateSeparator = useCallback((message: any, index: number) => {
+    if (!chat.messages || !Array.isArray(chat.messages)) return null;
+    
     const currentDate = dayjs(message.timestamp).format("YYYY-MM-DD");
-    const prevDate =
-      index > 0
+    const prevDate = 
+      index > 0 && chat.messages[index - 1]
         ? dayjs(chat.messages[index - 1].timestamp).format("YYYY-MM-DD")
         : "";
 
@@ -101,7 +63,62 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
       );
     }
     return null;
-  };
+  }, [chat.messages]);
+
+  // 处理发送消息
+  const handleSend = useCallback(() => {
+    if (message.trim() && isConnected && onSendMessage && chat?.id) {
+      onSendMessage(message.trim(), chat.id);
+      setMessage("");
+      // 发送后自动聚焦回输入框
+      messageInputRef.current?.focus();
+    }
+  }, [message, isConnected, onSendMessage, chat?.id]);
+
+  // 处理按键事件，支持回车发送
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 按下Ctrl+Enter或Cmd+Enter换行，单独Enter发送
+    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }, [handleSend]);
+
+  // 渲染单个消息行
+  const renderMessageRow = useCallback((msg: any, index: number) => {
+    return (
+      <React.Fragment key={msg?.id || `msg-${index}`}>
+        {renderDateSeparator(msg, index)}
+        <div
+          className={`${styles.messageRow} ${msg.sender === "me" ? styles.myMessage : styles.otherMessage}`}
+        >
+          {/* 对方回答的 */}
+          {msg.sender === "other" && (
+            <Avatar
+              src={chat.avatar}
+              alt={chat.name}
+              className={styles.messageAvatar}
+            >
+              {chat.name.charAt(0)}
+            </Avatar>
+          )}
+          {/* 消息内容 */}
+          <div
+            className={`${styles.messageContent} ${msg.sender === "me" ? styles.myMessageContent : styles.otherMessageContent}`}
+          >
+            <div className={styles.messageText}>{msg.content}</div>
+            <div className={styles.messageTime}>
+              {msg.timestamp && formatMessageTime(msg.timestamp)}
+            </div>
+          </div>
+          {/* 我的头像 */}
+          {msg.sender === "me" && (
+            <Avatar className={styles.messageAvatar}>我</Avatar>
+          )}
+        </div>
+      </React.Fragment>
+    );
+  }, [chat, renderDateSeparator, formatMessageTime]);
 
   return (
     <div className={styles.container}>
@@ -113,52 +130,18 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </Avatar>
           <span className={styles.headerTitle}>
             {chat.name}
-            <p>状态: {isConnected ? "🟢 已连接" : "🔴 未连接"}</p>
-            {!isConnected && (
-              <button onClick={reconnect} style={{ marginBottom: "10px" }}>
-                重新连接
-              </button>
-            )}
           </span>
         </div>
       </div>
       {/* 消息列表 */}
       <div className={styles.messagesContainer}>
-        {chat.messages.map((msg, index) => (
-          <React.Fragment key={msg.id}>
-            {renderDateSeparator(msg, index)}
-            <div
-              className={`${styles.messageRow} ${
-                msg.sender === "me" ? styles.myMessage : styles.otherMessage
-              }`}
-            >
-              {msg.sender === "other" && (
-                <Avatar
-                  src={chat.avatar}
-                  alt={chat.name}
-                  className={styles.messageAvatar}
-                >
-                  {chat.name.charAt(0)}
-                </Avatar>
-              )}
-              <div
-                className={`${styles.messageContent} ${
-                  msg.sender === "me"
-                    ? styles.myMessageContent
-                    : styles.otherMessageContent
-                }`}
-              >
-                <div className={styles.messageText}>{msg.content}</div>
-                <div className={styles.messageTime}>
-                  {formatMessageTime(msg.timestamp)}
-                </div>
-              </div>
-              {msg.sender === "me" && (
-                <Avatar className={styles.messageAvatar}>我</Avatar>
-              )}
-            </div>
-          </React.Fragment>
-        ))}
+        {chat.messages && Array.isArray(chat.messages) && chat.messages.length > 0 ? (
+          chat.messages.map((msg, index) => renderMessageRow(msg, index))
+        ) : (
+          <div className={styles.emptyMessage}>
+            暂无消息，开始聊天吧！
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       {/* 消息输入框 */}
@@ -175,7 +158,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         <Button
           type="primary"
           shape="circle"
-          disabled={!message.trim()}
+          disabled={!message.trim() || !isConnected}
           icon={<SendOutlined />}
           onClick={handleSend}
         />
