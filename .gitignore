@@ -24,4 +24,4 @@ yarn-error.log
 /node-script/dist
 dist
 pnpm-lock.yaml
-/config/.env.*.ts
+/config/.env.uat.ts

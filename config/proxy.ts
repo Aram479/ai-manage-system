@@ -39,7 +39,7 @@ export default {
       pathRewrite: { "^/ali": "" },
     },
     "/socket.io": {
-      target: "http://localhost:3000",
+      target: "http://82.156.247.24:3000",
       ws: true, // 启用 WebSocket 代理
       changeOrigin: true,
     },

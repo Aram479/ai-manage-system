@@ -1,9 +1,10 @@
-import React from "react";
-import { Input, Avatar } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Input, Avatar, Flex, Button, Tooltip, Modal, Form } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { ChatListProps } from "../types";
+import { ChatItem, ChatListProps } from "../types";
 import styles from "./ChatList.less";
+import AddFriendModal from "./AddFriendModal";
 
 const { Search } = Input;
 
@@ -12,8 +13,10 @@ const ChatList: React.FC<ChatListProps> = ({
   selectedChatId,
   onSelectChat,
   onSearch,
+  onAddConfirm,
   searchKeyword,
 }) => {
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
   // 格式化时间显示
   const formatTime = (timestamp: string) => {
     const messageTime = dayjs(timestamp);
@@ -37,22 +40,35 @@ const ChatList: React.FC<ChatListProps> = ({
       : content;
   };
 
+  const handleAddFriend = (formValues: ChatItem) => {
+    onAddConfirm?.(formValues);
+    setAddFriendOpen(false);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.searchContainer}>
-        <Search
-          placeholder="搜索聊天"
-          allowClear
-          prefix={<SearchOutlined />}
-          value={searchKeyword}
-          onChange={(e) => onSearch(e.target.value)}
-          className={styles.searchInput}
-        />
+        <Flex gap={5}>
+          <Search
+            placeholder="搜索聊天"
+            allowClear
+            prefix={<SearchOutlined />}
+            value={searchKeyword}
+            onChange={(e) => onSearch(e.target.value)}
+            className={styles.searchInput}
+          />
+          <Tooltip title="添加好友">
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => setAddFriendOpen(true)}
+            />
+          </Tooltip>
+        </Flex>
       </div>
       <div className={styles.chatListContainer}>
         {chatList.map((chat) => {
           // 获取最后一条消息的时间
-          const lastMessage = chat.messages[chat.messages.length - 1];
+          const lastMessage = chat.messages?.[chat.messages?.length - 1];
           const lastMessageTime = lastMessage
             ? formatTime(lastMessage.timestamp)
             : "";
@@ -90,6 +106,11 @@ const ChatList: React.FC<ChatListProps> = ({
           <div className={styles.emptyList}>没有找到匹配的聊天</div>
         )}
       </div>
+      <AddFriendModal
+        open={addFriendOpen}
+        onOk={handleAddFriend}
+        onCancel={setAddFriendOpen}
+      />
     </div>
   );
 };

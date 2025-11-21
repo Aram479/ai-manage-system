@@ -3,28 +3,34 @@ import { Button, Flex, Layout } from "antd";
 import { ChatConversationProps, ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
 import { useSocket } from "@/hooks/useSocket";
+import { v4 as uuidv4 } from "uuid";
 import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
 import styles from "./index.less";
+import _ from "lodash";
 
 const { Sider, Content } = Layout;
 
+const currentUserId = uuidv4();
+
 const ChatRoom = () => {
   // 当前用户ID (实际应用中应从认证系统获取)
-  const currentUserId = `user_${window.location.port}`;
   const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
 
   // WebSocket连接管理
-  const { isConnected, on, emit, reconnect } = useSocket("/", {
-    autoConnect: true,
-    connectionOptions: {
-      // 可选：添加认证、路径等
-      // auth: { token: 'your-jwt' },
-      // path: '/socket.io',
-    },
-  });
+  const { isConnected, on, emit, reconnect } = useSocket(
+    process.env.SOCKET_BASE_URL || "/",
+    {
+      autoConnect: true,
+      connectionOptions: {
+        // 可选：添加认证、路径等
+        // auth: { token: 'your-jwt' },
+        // path: '/socket.io',
+      },
+    }
+  );
 
   // 获取当前选中的聊天
   const selectedChat = chatList?.find((chat) => chat.id === selectedChatId);
@@ -141,6 +147,12 @@ const ChatRoom = () => {
     [isConnected, currentUserId, emit]
   );
 
+  // 添加朋友
+  const handleAddFriend = (formValues: ChatItem) => {
+    const newChatList = _.uniqBy([...chatList, formValues], "id");
+    setChatList(newChatList);
+  };
+
   // 处理搜索
   const filteredChatList = chatList?.filter(
     (chat) =>
@@ -160,13 +172,15 @@ const ChatRoom = () => {
         collapsedWidth={0}
       >
         <Flex vertical>
+          <div>用户ID: {currentUserId}</div>
           <div style={{ overflowY: "auto" }}>
             <ChatList
               chatList={filteredChatList}
+              searchKeyword={searchKeyword}
               selectedChatId={selectedChatId}
               onSelectChat={handleSelectChat}
               onSearch={setSearchKeyword}
-              searchKeyword={searchKeyword}
+              onAddConfirm={handleAddFriend}
             />
           </div>
           <div className={styles.connectionStatus}>
