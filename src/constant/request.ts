@@ -4,3 +4,6 @@ export const ERROR_CODE = "000";
 export const MOCK_SERVER = "/admin-server";
 // 后端服务
 export const BACK_SERVER = "/server";
+
+// 通一千问API
+export const QWEN_BASE_URL = process.env.QWEN_BASE_URL || '/ali'

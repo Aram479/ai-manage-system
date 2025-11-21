@@ -1,11 +1,12 @@
 /* 通义千问 */
 
+import { QWEN_BASE_URL } from "@/constant/request";
 import { XRequest } from "@ant-design/x";
 import OpenAI from "openai";
 
 export const qwenXRequest = (config?: any) => {
   return XRequest({
-    baseURL: "/ali/chat/completions",
+    baseURL: `${QWEN_BASE_URL}/chat/completions`,
     // model: "deepseek-chat",
     dangerouslyApiKey: `Bearer ${config.apiKey || process.env.QWEN_API_KEY}`,
     fetch: (url, config) => {
@@ -27,7 +28,7 @@ export const open_ai = new OpenAI({
 export const qwenFileUpload = open_ai.files;
 
 export const qwenPictureXRequest = XRequest({
-  baseURL: "/ali/services/aigc/text2image/image-synthesis",
+  baseURL: `${QWEN_BASE_URL}/services/aigc/text2image/image-synthesis`,
   model: "wanx2.1-t2i-turbo", // wanx2.1-t2i-turbo wanx-v1
   dangerouslyApiKey: `Bearer ${process.env.QWEN_API_KEY}`,
   fetch: (url, config) => {

@@ -26,11 +26,11 @@ const AddFriendModal = (props: IAddFriendModal) => {
     const formData = await form.validateFields();
     const newFormData = {
       ...formData,
-      avatar: "",
-      lastMessage: "",
-      lastMessageTime: `https://randomuser.me/api/portraits/men/${
+      avatar: `https://randomuser.me/api/portraits/men/${
         Math.floor(Math.random() * 30) + 1
       }.jpg`,
+      lastMessage: "",
+      lastMessageTime: "",
       unreadCount: 0,
       messages: [],
     };
