@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Layout } from "antd";
-import { ChatItem, Message } from "./types";
+import { Button, Flex, Layout } from "antd";
+import { ChatConversationProps, ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
 import { useSocket } from "@/hooks/useSocket";
 import ChatList from "./components/ChatList";
@@ -104,8 +104,9 @@ const ChatRoom = () => {
   };
 
   // 处理发送消息
-  const handleSendMessage = useCallback(
-    (content: string = "", chatId: string) => {
+  const handleSendMessage = useCallback<ChatConversationProps["onSendMessage"]>(
+    (data) => {
+      const { content, chatId, agent } = data;
       if (!content.trim() || !chatId || !isConnected) return;
 
       const now = new Date();
@@ -116,6 +117,7 @@ const ChatRoom = () => {
         timestamp: now.toISOString(),
         senderId: currentUserId,
         receiverId: chatId,
+        agent,
       };
 
       // 通过WebSocket发送消息
@@ -151,27 +153,40 @@ const ChatRoom = () => {
   return (
     <Layout className={styles.container}>
       <Sider
-        width={320}
+        width={250}
         theme="light"
         className={styles.sider}
         breakpoint="lg"
         collapsedWidth={0}
       >
-        <div className={styles.connectionStatus}>
-          <span>WebSocket状态: {isConnected ? "🟢 已连接" : "🔴 未连接"}</span>
-          {!isConnected && (
-            <button onClick={reconnect} className={styles.reconnectBtn}>
-              重新连接
-            </button>
-          )}
-        </div>
-        <ChatList
-          chatList={filteredChatList}
-          selectedChatId={selectedChatId}
-          onSelectChat={handleSelectChat}
-          onSearch={setSearchKeyword}
-          searchKeyword={searchKeyword}
-        />
+        <Flex vertical>
+          <div style={{ overflowY: "auto" }}>
+            <ChatList
+              chatList={filteredChatList}
+              selectedChatId={selectedChatId}
+              onSelectChat={handleSelectChat}
+              onSearch={setSearchKeyword}
+              searchKeyword={searchKeyword}
+            />
+          </div>
+          <div className={styles.connectionStatus}>
+            <Flex
+              align="center"
+              justify="space-between"
+              style={{ width: "100%" }}
+            >
+              <div>WebSocket状态:</div>
+              <Flex vertical gap={2}>
+                <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
+                {!isConnected && (
+                  <Button type="primary" size="small" onClick={reconnect}>
+                    重新连接
+                  </Button>
+                )}
+              </Flex>
+            </Flex>
+          </div>
+        </Flex>
       </Sider>
       <Content className={styles.content}>
         {selectedChat ? (

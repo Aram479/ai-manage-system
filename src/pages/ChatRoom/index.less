@@ -1,14 +1,13 @@
-
 .container {
-  height: 100vh;
-  overflow: hidden;
+  height: 100%;
+  overflow-y: hidden;
   background-color: #f5f5f5;
-  
+
   & .sider {
+    position: relative;
+    height: 100%;
     background: #fff;
     border-right: 1px solid #f0f0f0;
-    overflow-y: auto;
-    height: 100vh;
 
     &::-webkit-scrollbar {
       width: 6px;
@@ -26,7 +25,7 @@
 
   & .content {
     background: #f5f5f5;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     padding: 0;
 
@@ -42,9 +41,13 @@
 }
 
 .connectionStatus {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   padding: 12px 16px;
-  background-color: #f0f2f5;
-  border-bottom: 1px solid #e8e8e8;
+  border-top: 1px solid #e8e8e8;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -59,9 +62,8 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
-  
+
   &:hover {
     background-color: #40a9ff;
   }
 }
-

@@ -29,7 +29,6 @@ import { chatPrompt } from "@/constant/base";
 import ClipboardUtil from "@/utils/clipboardUtil";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
 import { fixJSONSyntax } from "@/utils";
-import Layouts from "./../layouts/index";
 
 export const useStreamController = () => {
   const streamController = useRef<TransformStreamDefaultController | null>(
@@ -57,7 +56,7 @@ export const useStreamController = () => {
   };
 };
 
-interface IUseQwenXChat {
+export interface IUseQwenXChat {
   userName?: string;
   aiName?: string;
   userDefaultMessage?: string;
@@ -71,7 +70,8 @@ interface IUseQwenXChat {
   onSuccess?: (
     messageData: TResultStream,
     chatList?: any[],
-    isComplete?: boolean
+    isComplete?: boolean,
+    agentRole?: IAgentCategoryRole
   ) => void;
 }
 interface IUseQwenXChatRef {
@@ -90,7 +90,6 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   const [userRole, setUserRole] = useState("user");
   const [aiRole, setAiRole] = useState("assistant");
   const [chatList, setChatList] = useState<TChatList>([]);
-  const selectRole = useRef<IAgentCategoryRole>();
   const location = useLocation();
   // 流数据处理Util工具
   const processorRef = useRef(new StreamDataProcessor());
@@ -175,10 +174,12 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       // content: messagesData.message?.chatContent,
     };
 
-    if (!newChatList.length && selectRole.current?.prompt) {
+    const currentAgentRole = messagesData.message?.agentRole;
+    // !newChatList.length &&
+    if (currentAgentRole?.prompt) {
       const agentMessage = {
-        role: aiRole,
-        content: selectRole.current?.prompt,
+        role: currentAgentRole.key ? userRole : aiRole,
+        content: currentAgentRole?.prompt,
       };
       newChatList.push(agentMessage);
     }
@@ -215,7 +216,12 @@ const useQwenXChat = (props: IUseQwenXChat) => {
             cmptTime.current = 0;
             // 流执行完，没被锁(暂停)执行指令触发
             if (!isStreamLocked.current) {
-              props.onSuccess?.(result, newChatList, true);
+              props.onSuccess?.(
+                result,
+                newChatList,
+                true,
+                messagesData.message?.agentRole
+              );
               // 清除上一次上传的文件
               chatUploadFiles.current = [];
               // 设置指令分发器
@@ -320,6 +326,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       chatContent: message,
       chatFiles: chatUploadFiles.current,
       chatList,
+      agentRole: props.agentRole,
     });
   };
 
@@ -508,10 +515,6 @@ const useQwenXChat = (props: IUseQwenXChat) => {
   useEffect(() => {
     requestProps.current = requestBody;
   }, [requestBody]);
-
-  useEffect(() => {
-    selectRole.current = props.agentRole;
-  }, [props.agentRole]);
 
   return {
     items: items(),

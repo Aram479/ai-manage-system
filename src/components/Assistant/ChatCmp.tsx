@@ -292,6 +292,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
     }
   };
 
+  const hasHttpProtocol = (str: string | number) =>
+    /^https?:\/\//.test(String(str));
+
   const handleSuggestion: SuggestionProps["onSelect"] = (value) => {
     if (value === "historySent") {
       setHistorySentOpen(true);
@@ -346,7 +349,7 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
 
   // 关闭对话发送Drawer
   const hideDrawer = () => {
-    setCommandCenterOpen(false)
+    setCommandCenterOpen(false);
     setHistorySentOpen(false);
   };
   // 暴露给父组件的属性
@@ -378,7 +381,9 @@ const ChatCmp = (props: IChatCmpProps, ref: Ref<TChatRef>) => {
                 <img
                   src={
                     agentRole.avatar
-                      ? `https://img.loliapi.com/i/pp/img${agentRole.avatar}.webp`
+                      ? hasHttpProtocol(agentRole.avatar)
+                        ? String(agentRole.avatar)
+                        : `https://img.loliapi.com/i/pp/img${agentRole.avatar}.webp`
                       : Logo
                   }
                   className={styles.avatarLogo}

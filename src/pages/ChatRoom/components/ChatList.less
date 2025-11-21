@@ -1,6 +1,5 @@
-
 .container {
-  height: 100%;
+  height: calc(100vh - 110px);
   display: flex;
   flex-direction: column;
 
@@ -16,6 +15,7 @@
   & .chatListContainer {
     flex: 1;
     overflow-y: auto;
+    height: 100%;
 
     &::-webkit-scrollbar {
       width: 6px;

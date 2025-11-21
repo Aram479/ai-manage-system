@@ -63,6 +63,7 @@ type TResultStream = {
   chatFiles?: import("antd").UploadFile<
     import("openai/resources.mjs").FileObject
   >[];
+  agentRole?: IAgentCategoryRole
 };
 
 type TToolsProps = {

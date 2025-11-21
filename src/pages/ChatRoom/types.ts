@@ -6,6 +6,7 @@ export interface Message {
   senderId?: string; // 发送者ID
   receiverId?: string; // 接收者ID
   timestamp: string;
+  agent?: IAgentCategoryRole;
 }
 
 // 聊天项类型定义
@@ -31,6 +32,10 @@ export interface ChatListProps {
 // 聊天对话组件Props
 export interface ChatConversationProps {
   chat: ChatItem;
-  onSendMessage: (content: string, chatId: string) => void;
+  onSendMessage: (data: {
+    content: string;
+    chatId: string;
+    agent?: Message["agent"];
+  }) => void;
   isConnected: boolean;
 }

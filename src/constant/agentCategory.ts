@@ -403,7 +403,7 @@ export const RolePlayAgentCategory: IAgentCategoryRole[] = [
     collect: 85,
     hot: 135,
     categoryType: "RolePlay",
-    avatar: 16,
+    avatar: "https://ts4.tc.mm.bing.net/th/id/OIP-C.BvPvbu5N3VY2DpSSkJdb7gAAAA?rs=1&pid=ImgDetMain&o=7&rm=3",
     promptList: [
       {
         key: "1",
@@ -428,7 +428,8 @@ export const RolePlayAgentCategory: IAgentCategoryRole[] = [
     collect: 95,
     hot: 150,
     categoryType: "RolePlay",
-    avatar: 17,
+    avatar:
+      "https://mobile-img-baofun.zhhainiao.com/pcwallpaper_ugc_mobile/static/c9705976dbea82ccf5740fd9afcbdc99.jpg?x-oss-process=image%2fresize%2cm_lfit%2cw_640%2ch_1138",
     promptList: [
       {
         key: "1",
@@ -453,7 +454,8 @@ export const RolePlayAgentCategory: IAgentCategoryRole[] = [
     collect: 90,
     hot: 160,
     categoryType: "RolePlay",
-    avatar: 18,
+    avatar:
+      "https://ts3.tc.mm.bing.net/th/id/OIP-C.pZLxF-BsL5qSff0incmc6AHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
     promptList: [
       {
         key: "1",
