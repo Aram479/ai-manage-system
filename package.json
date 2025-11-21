@@ -1,6 +1,7 @@
 {
   "scripts": {
     "build": "cross-env UMI_ENV=pro max build",
+    "build:pro": "cross-env UMI_ENV=pro max build --mode pro",
     "start": "cross-env max dev",
     "start:uat": "cross-env UMI_ENV=uat max dev",
     "node-server:dev": "pnpm -C  ./node-server dev",
