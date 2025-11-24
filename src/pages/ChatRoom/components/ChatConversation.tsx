@@ -44,7 +44,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   const defaultRequestConfig: IUseQwenXChat = {
     agentRole: confirmRole,
     requestBody: {
-      stream: false,
+      stream: true,
       // max_tokens: 2048,
       // temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
       // top_p: 0.9, // 调整此值也可能影响简洁性
