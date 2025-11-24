@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Button, Flex, Layout } from "antd";
+import { useModel } from "@umijs/max";
+import { useKeepAlive } from "@/hooks/useKeepAlive";
 import { ChatConversationProps, ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
 import { useSocket } from "@/hooks/useSocket";
-import { v4 as uuidv4 } from "uuid";
 import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
 import styles from "./index.less";
 import _ from "lodash";
-import { useModel } from "@umijs/max";
 
 const { Sider, Content } = Layout;
 
@@ -219,4 +219,4 @@ const ChatRoom = () => {
   );
 };
 
-export default ChatRoom;
+export default useKeepAlive(ChatRoom, ChatRoom.name);

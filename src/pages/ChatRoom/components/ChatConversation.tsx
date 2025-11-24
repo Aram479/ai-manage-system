@@ -48,7 +48,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
       // max_tokens: 2048,
       // temperature: 0.5, // 默认为1.0，降低它以获得更集中、简洁的回答
       // top_p: 0.9, // 调整此值也可能影响简洁性
-      model: "qwen-max-latest",
+      model: "qwq-plus",
       // stop: ["停止", "stop", "cancel"], // 遇到停止词时，将中断流式调用
       enable_search: true,
       // tool_choice: 'auto',
