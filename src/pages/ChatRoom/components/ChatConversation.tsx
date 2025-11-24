@@ -6,12 +6,12 @@ import { ChatConversationProps, Message } from "../types";
 import useQwenXChat, { IUseQwenXChat } from "@/hooks/useQwenXChat";
 import Actions, { IActionsProps } from "@/components/Actions";
 import CategoryOper from "@/components/AgentOpeartion/CategoryOper";
-import styles from "./ChatConversation.less";
 import {
   AgentRoleProvider,
   useAgentRoleContext,
 } from "@/context/AgentRoleContext";
 import MarkDownCmp from "@/components/MarkDownCmp";
+import styles from "./ChatConversation.less";
 
 const { TextArea } = Input;
 const ChatConversation: React.FC<ChatConversationProps> = ({
@@ -21,6 +21,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 }) => {
   const { confirmRole, updateSelectRole, updateConfirmRole } =
     useAgentRoleContext();
+
   const [message, setMessage] = useState("");
   const [otherMessages, setOtherMessages] = useState<Message[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -176,7 +177,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               </div>
             )}
             <div className={styles.messageText}>
-              <MarkDownCmp theme="onDark" content={String(msg.content)} />
+              {msg.agent?.title ? (
+                <MarkDownCmp theme="onDark" content={String(msg.content)} />
+              ) : (
+                <>{msg.content}</>
+              )}
             </div>
             <div
               className={
@@ -216,7 +221,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
   // 监听对方发送消息
   useEffect(() => {
-    const otherLastMessage = _.findLast(otherMessages)?.content;
+    const otherLast = _.findLast(otherMessages);
+    const otherLastMessage = otherLast?.content;
     if (otherLastMessage) {
       if (isAgentChat) {
         Ai_Qwen.onCancel();

@@ -9,10 +9,13 @@ import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
 import styles from "./index.less";
 import _ from "lodash";
+import { useNotification } from "@/hooks/useNotification";
 
 const { Sider, Content } = Layout;
 
 const ChatRoom = () => {
+  const { notify } = useNotification();
+
   const { userInfo } = useModel("user");
   // 当前用户ID (实际应用中应从认证系统获取)
   const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
@@ -47,7 +50,8 @@ const ChatRoom = () => {
         ...message,
         sender: "other", // 标记为对方发送的
       };
-
+      // 浏览器通知
+      notify(message);
       setChatList((prev = []) => {
         // 检查是否已存在该聊天
         const existingChatIndex = prev.findIndex(
@@ -92,6 +96,7 @@ const ChatRoom = () => {
     [userInfo.userId, selectedChatId]
   );
 
+  // useTitleFlash(hasNotification, "你有未读消息");
   // 监听来自其他用户的消息
   useEffect(() => {
     const unsubscribe = on("receive_message", handleReceiveMessage);

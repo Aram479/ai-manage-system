@@ -1,3 +1,4 @@
+import { Message } from "@/pages/ChatRoom/types";
 import { UploadFile } from "antd";
 import CryptoJS from "crypto-js";
 import _ from "lodash";
@@ -159,4 +160,15 @@ export const copy = (text: string) => {
   const res = document.execCommand("copy");
   document.body.removeChild(textValue); //移除DOM元素
   return res;
+};
+
+export const requestNotify = async (message: Message) => {
+  if (Notification.permission === "granted") {
+    new Notification("新消息", { body: message.content });
+  } else if (Notification.permission !== "denied") {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      new Notification("新消息", { body: message.content });
+    }
+  }
 };
