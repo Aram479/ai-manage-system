@@ -4,7 +4,7 @@ import { Avatar, Dropdown, MenuProps, message } from "antd";
 import { GithubOutlined, UserOutlined } from "@ant-design/icons";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
-import ClipboardUtil from "@/utils/clipboardUtil";
+import { copy } from "@/utils";
 import ChatListDrawer from "@/components/ChatListDrawer";
 import Logo from "@/asset/png/logo.png";
 import styles from "./index.less";
@@ -18,7 +18,7 @@ const HeaderCmp = () => {
       key: "copyUserId",
       label: "复制ID",
       onClick: () => {
-        ClipboardUtil.writeText(userInfo?.userId ?? "");
+        copy(userInfo?.userId ?? "");
         message.success({
           key: "copy",
           content: "复制成功",

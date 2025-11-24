@@ -7,9 +7,8 @@ import {
 } from "@ant-design/icons";
 import Actions, { IActionsProps } from "../Actions";
 import styles from "./index.less";
-import ClipboardUtil from "@/utils/clipboardUtil";
+import { copy } from "@/utils";
 import { useState } from "react";
-
 interface IHistorySentDrawerProps extends DrawerProps {
   chatList?: TChatList;
   onSend?: (content: string) => void;
@@ -34,7 +33,7 @@ const HistorySentDrawer = (props: IHistorySentDrawerProps) => {
       icon: <CopyOutlined />,
       label: "复制",
       onItemClick: (item) => {
-        ClipboardUtil.writeText(item?.content ?? "");
+        copy(item?.content ?? "");
         message.success({
           key: "copy",
           content: "复制成功",

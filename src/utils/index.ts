@@ -116,31 +116,47 @@ export const fixJSONSyntax = (str: string): string => {
   return result;
 };
 
-/**
- * 模拟生成一个 JWT 格式的 Token（仅用于前端开发/演示）
- * 此 Token 无真实签名，不可用于生产环境身份验证！
- */
-export const generateMockToken = (payload: MockTokenPayload): string => {
-  const header = { alg: "HS256", typ: "JWT" };
+export const generateMockToken = (
+  payload: MockTokenPayload,
+  options: { expireInSeconds?: number } = {}
+): string => {
+  const { expireInSeconds = 3600 } = options;
 
-  // Base64Url 编码（安全 URL 编码的 Base64）
+  // 安全的 Base64 编码（支持 Unicode）
+  const safeBtoa = (str: string): string => {
+    return btoa(unescape(encodeURIComponent(str)));
+  };
+
+  // Base64URL 编码（JWT 标准）
   const base64UrlEncode = (obj: unknown): string => {
-    return btoa(JSON.stringify(obj))
+    return safeBtoa(JSON.stringify(obj))
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=/g, "");
   };
 
   const now = Math.floor(Date.now() / 1000);
-  const defaultPayload: MockTokenPayload = {
+  const header = { alg: "HS256", typ: "JWT" };
+  const fullPayload = {
     iat: now,
-    exp: now + 3600, // 默认 1 小时后过期
+    exp: now + expireInSeconds,
     ...payload,
   };
 
   const encodedHeader = base64UrlEncode(header);
-  const encodedPayload = base64UrlEncode(defaultPayload);
+  const encodedPayload = base64UrlEncode(fullPayload);
   const fakeSignature = "fake-signature-for-demo";
 
   return `${encodedHeader}.${encodedPayload}.${fakeSignature}`;
+};
+
+export const copy = (text: string) => {
+  let textValue = document.createElement("textarea");
+  textValue.setAttribute("readonly", "readonly"); //设置只读属性防止手机上弹出软键盘
+  textValue.value = text;
+  document.body.appendChild(textValue); //将textarea添加为body子元素
+  textValue.select();
+  const res = document.execCommand("copy");
+  document.body.removeChild(textValue); //移除DOM元素
+  return res;
 };

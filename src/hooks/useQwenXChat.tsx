@@ -26,7 +26,7 @@ import _ from "lodash";
 import { qwenXRequest } from "@/services/qwen.api";
 import MarkDownCmp from "@/components/MarkDownCmp";
 import { chatPrompt } from "@/constant/base";
-import ClipboardUtil from "@/utils/clipboardUtil";
+import { copy } from "@/utils";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
 import { fixJSONSyntax } from "@/utils";
 
@@ -443,7 +443,7 @@ const useQwenXChat = (props: IUseQwenXChat) => {
                         <DislikeOutlined />
                         <CopyOutlined
                           onClick={_.throttle(() => {
-                            ClipboardUtil.writeText(content);
+                            copy(content);
                             AMessage.success({
                               key: "copy",
                               content: "复制成功",

@@ -15,7 +15,7 @@ import _ from "lodash";
 import { deepSeekXRequest } from "@/services/deepseek.api";
 import MarkDownCmp from "@/components/MarkDownCmp";
 import { chatPrompt } from "@/constant/base";
-import ClipboardUtil from "@/utils/clipboardUtil";
+import { copy } from "@/utils";
 import { StreamDataProcessor } from "@/utils/deepseek.utils";
 
 export const useStreamController = () => {
@@ -289,7 +289,7 @@ const useDeepSeekXChat = (props: IUseDeepSeekXChat) => {
                     <DislikeOutlined />
                     <CopyOutlined
                       onClick={_.throttle(() => {
-                        ClipboardUtil.writeText(content);
+                        copy(content);
                         AMessage.success({
                           key: "copy",
                           content: "复制成功",

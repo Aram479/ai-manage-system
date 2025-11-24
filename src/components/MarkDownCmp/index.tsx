@@ -9,7 +9,7 @@ import rehypeRaw from 'rehype-raw';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import ClipboardUtil from '@/utils/clipboardUtil';
+import { copy } from '@/utils';
 import './index.less';
 import { CheckOutlined, CopyOutlined, DownOutlined } from '@ant-design/icons';
 import { message } from 'antd';
@@ -77,7 +77,7 @@ const MarkDownCmp: React.FC<Props> = ({ content, theme, loading }) => {
                               className="preview-code-copy"
                               onClick={_.throttle(() => {
                                 setIsShowCopy(true);
-                                ClipboardUtil.writeText(String(children));
+                                copy(String(children));
                                 message.success('复制成功');
                                 setTimeout(() => {
                                   setIsShowCopy(false);

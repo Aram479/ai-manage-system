@@ -3,7 +3,7 @@ import styles from "./index.less";
 import { CopyOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { Empty, message, Tooltip } from "antd";
 import _ from "lodash";
-import ClipboardUtil from "@/utils/clipboardUtil";
+import { copy } from "@/utils";
 import { ToolsNameMap } from "@/constant/common";
 
 const ChatList = () => {
@@ -35,7 +35,7 @@ const ChatList = () => {
 
                 <CopyOutlined
                   onClick={_.throttle(() => {
-                    ClipboardUtil.writeText(item.jsonString);
+                    copy(item.jsonString);
                     message.success({
                       key: "copy",
                       content: "复制成功",
