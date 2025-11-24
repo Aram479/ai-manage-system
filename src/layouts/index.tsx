@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import {  useMemo } from "react";
 import { Layout } from "antd";
 import { Outlet, useLocation } from "@umijs/max";
 import { AliveScope } from "react-activation";
@@ -9,7 +9,7 @@ import Assistant from "@/components/Assistant";
 import styles from "./index.less";
 const { Header, Sider, Content } = Layout;
 
-const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat", '/ChatRoom'];
+const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat", "/ChatRoom"];
 const Layouts = () => {
   useGlobalChatEvent();
   const location = useLocation();
@@ -17,6 +17,7 @@ const Layouts = () => {
     () => !agentBlackRoute.includes(location.pathname),
     [location.pathname]
   );
+
   return (
     <div className={styles.layouts}>
       <Layout className={styles["ant-layout"]}>

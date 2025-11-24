@@ -1,6 +1,7 @@
 // 消息类型定义
 export interface Message {
   id: string;
+  name: string
   content: string;
   sender: "me" | "other";
   senderId?: string; // 发送者ID

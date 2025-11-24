@@ -115,3 +115,32 @@ export const fixJSONSyntax = (str: string): string => {
 
   return result;
 };
+
+/**
+ * 模拟生成一个 JWT 格式的 Token（仅用于前端开发/演示）
+ * 此 Token 无真实签名，不可用于生产环境身份验证！
+ */
+export const generateMockToken = (payload: MockTokenPayload): string => {
+  const header = { alg: "HS256", typ: "JWT" };
+
+  // Base64Url 编码（安全 URL 编码的 Base64）
+  const base64UrlEncode = (obj: unknown): string => {
+    return btoa(JSON.stringify(obj))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const defaultPayload: MockTokenPayload = {
+    iat: now,
+    exp: now + 3600, // 默认 1 小时后过期
+    ...payload,
+  };
+
+  const encodedHeader = base64UrlEncode(header);
+  const encodedPayload = base64UrlEncode(defaultPayload);
+  const fakeSignature = "fake-signature-for-demo";
+
+  return `${encodedHeader}.${encodedPayload}.${fakeSignature}`;
+};

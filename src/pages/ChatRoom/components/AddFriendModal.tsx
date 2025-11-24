@@ -48,7 +48,7 @@ const AddFriendModal = (props: IAddFriendModal) => {
   return (
     <div className="catalogModal">
       <Modal
-        title={"用户"}
+        title="添加朋友"
         open={open}
         maskClosable={false}
         cancelButtonProps={{ loading: false }}

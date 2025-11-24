@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Avatar, Flex, Button, Tooltip, Modal, Form } from "antd";
+import { Input, Avatar, Flex, Button, Tooltip, Modal, Form, message } from "antd";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { ChatItem, ChatListProps } from "../types";
@@ -41,6 +41,8 @@ const ChatList: React.FC<ChatListProps> = ({
   };
 
   const handleAddFriend = (formValues: ChatItem) => {
+    const isInclude = chatList?.find(item => formValues.id === item.id)
+    if(isInclude) return message.error('已添加朋友')
     onAddConfirm?.(formValues);
     setAddFriendOpen(false);
   };
@@ -57,7 +59,7 @@ const ChatList: React.FC<ChatListProps> = ({
             onChange={(e) => onSearch(e.target.value)}
             className={styles.searchInput}
           />
-          <Tooltip title="添加好友">
+          <Tooltip title="添加朋友">
             <Button
               icon={<PlusOutlined />}
               onClick={() => setAddFriendOpen(true)}

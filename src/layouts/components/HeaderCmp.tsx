@@ -1,14 +1,38 @@
 import { useState } from "react";
-import styles from "./index.less";
+import { history, useModel } from "@umijs/max";
+import { Avatar, Dropdown, MenuProps, message } from "antd";
+import { GithubOutlined, UserOutlined } from "@ant-design/icons";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
-import { history } from "@umijs/max";
-import Logo from "@/asset/png/logo.png";
-import { GithubOutlined } from "@ant-design/icons";
+import ClipboardUtil from "@/utils/clipboardUtil";
 import ChatListDrawer from "@/components/ChatListDrawer";
+import Logo from "@/asset/png/logo.png";
+import styles from "./index.less";
 
 const HeaderCmp = () => {
+  const { userInfo, logoutAction } = useModel("user");
   const [title, setTile] = useState("Veloce智能管理系统");
+
+  const avatarItems: MenuProps["items"] = [
+    {
+      key: "copyUserId",
+      label: "复制ID",
+      onClick: () => {
+        ClipboardUtil.writeText(userInfo?.userId ?? "");
+        message.success({
+          key: "copy",
+          content: "复制成功",
+        });
+      },
+    },
+    {
+      key: "logout",
+      label: "退出登录",
+      onClick: () => {
+        logoutAction();
+      },
+    },
+  ];
   const handleTitle = () => {
     history.push("/Main");
   };
@@ -40,6 +64,10 @@ const HeaderCmp = () => {
         <div dangerouslySetInnerHTML={{ __html: title }}></div>
       </div>
       <div className={styles.operation}>
+        <Dropdown menu={{ items: avatarItems }}>
+          <Avatar icon={<UserOutlined />} />
+        </Dropdown>
+
         <ChatListDrawer />
         <div
           style={{ cursor: "pointer", fontWeight: "bold", fontSize: 17 }}

@@ -7,10 +7,17 @@ import {
 } from "@ant-design/icons";
 
 const routes: IRouteTypes[] = [
+  {
+    path: "/Login",
+    component: "@/pages/Login",
+    layout: false,
+    wrappers: ["@/wrappers/auth"],
+  },
   // 管理系统相关页面
   {
     name: "System",
     path: "/",
+    wrappers: ["@/wrappers/auth"],
     routes: [
       {
         path: "/",

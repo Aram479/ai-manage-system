@@ -8,12 +8,12 @@ import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
 import styles from "./index.less";
 import _ from "lodash";
+import { useModel } from "@umijs/max";
 
 const { Sider, Content } = Layout;
 
-const currentUserId = uuidv4();
-
 const ChatRoom = () => {
+  const { userInfo } = useModel("user");
   // 当前用户ID (实际应用中应从认证系统获取)
   const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -38,7 +38,7 @@ const ChatRoom = () => {
   // 处理接收到的新消息
   const handleReceiveMessage = useCallback(
     (message: Message) => {
-      if (message.receiverId !== currentUserId) return;
+      if (message.receiverId !== userInfo.userId) return;
       // 找到对应的聊天项
       const targetChatId = message.senderId || "unknown";
 
@@ -76,7 +76,7 @@ const ChatRoom = () => {
           // 创建新聊天 (实际应用中应该从服务器获取用户信息)
           const newChat: ChatItem = {
             id: targetChatId,
-            name: `用户${targetChatId}`,
+            name: message.name,
             avatar: `https://randomuser.me/api/portraits/${
               Math.random() > 0.5 ? "men" : "women"
             }/${Math.floor(Math.random() * 100)}.jpg`,
@@ -89,7 +89,7 @@ const ChatRoom = () => {
         }
       });
     },
-    [currentUserId, selectedChatId]
+    [userInfo.userId, selectedChatId]
   );
 
   // 监听来自其他用户的消息
@@ -118,10 +118,11 @@ const ChatRoom = () => {
       const now = new Date();
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
+        name: userInfo.username,
         content: content.trim(),
         sender: "me",
         timestamp: now.toISOString(),
-        senderId: currentUserId,
+        senderId: userInfo.userId,
         receiverId: chatId,
         agent,
       };
@@ -144,7 +145,7 @@ const ChatRoom = () => {
         })
       );
     },
-    [isConnected, currentUserId, emit]
+    [isConnected, userInfo.userId, emit]
   );
 
   // 添加朋友
@@ -172,7 +173,6 @@ const ChatRoom = () => {
         collapsedWidth={0}
       >
         <Flex vertical>
-          <div>用户ID: {currentUserId}</div>
           <div style={{ overflowY: "auto" }}>
             <ChatList
               chatList={filteredChatList}

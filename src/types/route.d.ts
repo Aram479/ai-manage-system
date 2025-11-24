@@ -7,6 +7,7 @@ interface IRouteTypes {
   routes?: IRouteTypes[];
   layout?: boolean;
   redirect?: string;
+  wrappers?: string[]
   meta?: {
     title?: string;
     icon?: RefIcon;
