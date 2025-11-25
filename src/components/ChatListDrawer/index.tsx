@@ -1,5 +1,5 @@
 import styles from "./index.less";
-import { CodeOutlined, CommentOutlined } from "@ant-design/icons";
+import { CodeOutlined, CommentOutlined, InboxOutlined } from "@ant-design/icons";
 import { Drawer } from "antd";
 import _ from "lodash";
 import { useState } from "react";
@@ -14,12 +14,12 @@ const ChatListDrawer = () => {
   return (
     <div className={styles.chatListDrawer}>
       <div className={styles.drawIcon}>
-        <CodeOutlined onClick={() => setIsCMDList(true)} />
+        <InboxOutlined onClick={() => setIsCMDList(true)} style={{ fontSize: 22 }} />
       </div>
       <Drawer
         title="已执行对话命令"
         open={isCMDList}
-        width={480}
+        width={400}
         destroyOnClose={true}
         styles={{
           body: {

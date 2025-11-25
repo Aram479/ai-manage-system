@@ -5,6 +5,7 @@ import { Empty, message, Tooltip } from "antd";
 import _ from "lodash";
 import { copy } from "@/utils";
 import { ToolsNameMap } from "@/constant/common";
+import MarkDownCmp from "../MarkDownCmp";
 
 const ChatList = () => {
   const { eventList, setCommandExecutor, setToolCommandExecutor } =
@@ -18,7 +19,17 @@ const ChatList = () => {
             <div className={styles.cmdName}>
               {ToolsNameMap.get(item.name)}：
             </div>
-            <div className={styles.cmdText}>{item.jsonString}</div>
+            <div className={styles.cmdText}>
+              <MarkDownCmp
+                theme="onDark"
+                copyCode={false}
+                content={`\`\`\`js\n${JSON.stringify(
+                  JSON.parse(item.jsonString),
+                  null,
+                  2
+                )}\n\`\`\``}
+              />
+            </div>
             <div className={styles.cmdOperBox}>
               <div className={styles.leftBox}>
                 <div>执行次数: {item.exNumber}</div>
@@ -35,7 +46,7 @@ const ChatList = () => {
 
                 <CopyOutlined
                   onClick={_.throttle(() => {
-                    copy(item.jsonString);
+                    copy(JSON.stringify(JSON.parse(item.jsonString), null, 2));
                     message.success({
                       key: "copy",
                       content: "复制成功",

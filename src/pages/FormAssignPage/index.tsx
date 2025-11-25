@@ -178,7 +178,7 @@ const FormAssignPage = (props: IFormAssignPage) => {
     <div className="dap-main-content">
       <Card>
         <div>
-          <Tooltip title="开启后，对话“表单赋值”相关内容时，数据将会实时填充">
+          <Tooltip title="开启后，AI对话 “表单赋值” 相关内容时，数据将会实时填充">
             实时赋值：
             <Switch onChange={setIsAutoAssign} />
           </Tooltip>

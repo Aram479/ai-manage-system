@@ -7,6 +7,7 @@ import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
 import { copy } from "@/utils";
 import UserInfoModal from "./UserInfoModal";
 import ChatListDrawer from "@/components/ChatListDrawer";
+import Gitee from "@/asset/png/giteeIcon.png";
 import Logo from "@/asset/png/logo.png";
 import styles from "./index.less";
 
@@ -42,22 +43,34 @@ const HeaderCmp = () => {
       },
     },
   ];
+
+  const projectUrlItem: MenuProps["items"] = [
+    {
+      key: "github",
+      label: "GitHub",
+      icon: <GithubOutlined style={{ fontSize: 18 }} />,
+      onClick: () => {
+        window.open(
+          "https://github.com/Aram479/ai-manage-system/tree/ai-main",
+          "_blank"
+        );
+      },
+    },
+    {
+      key: "gitee",
+      label: "Gitee",
+      icon: <img src={Gitee} style={{ width: 20 }} />,
+      onClick: () => {
+        window.open(
+          "https://gitee.com/clzhloafl/my-ai-project/tree/ai-main/",
+          "_blank"
+        );
+      },
+    },
+  ];
+
   const handleTitle = () => {
-    history.push("/Main");
-  };
-
-  const handleGitee = () => {
-    window.open(
-      "https://gitee.com/clzhloafl/my-ai-project/tree/ai-main/",
-      "_blank"
-    );
-  };
-
-  const handleGitHunb = () => {
-    window.open(
-      "https://github.com/Aram479/ai-manage-system/tree/ai-main",
-      "_blank"
-    );
+    history.push("/");
   };
 
   useChatEvent<TBaseTools>((event) => {
@@ -74,21 +87,18 @@ const HeaderCmp = () => {
           <div dangerouslySetInnerHTML={{ __html: title }}></div>
         </div>
         <div className={styles.operation}>
+          <ChatListDrawer />
           <Dropdown menu={{ items: avatarItems }} placement="bottom">
             <Avatar
               icon={<UserOutlined />}
               size="large"
               src={userInfo.avatar}
+              style={{ cursor: "pointer" }}
             />
           </Dropdown>
-          <ChatListDrawer />
-          <div
-            style={{ cursor: "pointer", fontWeight: "bold", fontSize: 17 }}
-            onClick={handleGitee}
-          >
-            Gitee
-          </div>
-          <GithubOutlined onClick={handleGitHunb} />
+          <Dropdown menu={{ items: projectUrlItem }} placement="bottom">
+            <div style={{ cursor: "pointer" }}>项目地址</div>
+          </Dropdown>
         </div>
       </Flex>
       <UserInfoModal open={userInfoOpen} onCancel={setUserInfoOpen} />
