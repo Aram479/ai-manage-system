@@ -14,12 +14,10 @@ export default defineConfig({
   publicPath: "/",
   title: "Veloce",
   base: "/", //路由前缀
-  request: {
-    dataField: "",
-  },
   locale: {
     default: "zh-CN",
   },
+  request: {},
   esbuildMinifyIIFE: true,
   devtool: UMI_ENV === "pro" ? "source-map" : false,
   favicons: ["/favicon.ico"],

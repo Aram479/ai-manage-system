@@ -1,8 +1,6 @@
 .headerCmp {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 0 10px;
+
   .title {
     cursor: pointer;
     display: flex;
@@ -22,16 +20,37 @@
     display: flex;
     align-items: center;
     gap: 15px;
+
     // antd 图标
     & span[role] {
       cursor: pointer;
       font-size: 25px;
     }
   }
+
+
 }
+
 .menuCmp {
   height: 100%;
+
   .menuItemLabel {
     font-size: 12px;
+  }
+}
+
+.userInfoModal {
+  
+  :global {
+    .ant-upload {
+      overflow: hidden;
+    }
+  }
+
+  .uploadAvatar {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    object-fit: contain;
   }
 }

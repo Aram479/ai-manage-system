@@ -1,5 +1,6 @@
-interface IUserInfo extends ILoginData {
-  userId?: string
+interface IUserInfo extends Omit<ILoginData, "password"> {
+  userId?: string;
+  avatar?: string;
 }
 
 interface ILoginData {

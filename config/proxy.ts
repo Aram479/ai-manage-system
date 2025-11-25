@@ -29,9 +29,9 @@ export default {
   },
   uat: {
     "/api": {
-      target: "https://api.deepseek.com/v1",
+      target: "http://82.156.247.24:3000",
+      ws: true,
       changeOrigin: true,
-      pathRewrite: { "^/api": "" },
     },
     "/ali": {
       target: "https://dashscope.aliyuncs.com/compatible-mode/v1",

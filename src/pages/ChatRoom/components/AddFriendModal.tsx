@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Checkbox, Col, Form, Input, Modal, ModalProps, Row } from "antd";
+import { useEffect, useMemo } from "react";
+import {  Col, Form, Input, Modal, ModalProps, Row } from "antd";
 import { Rule } from "antd/es/form";
 import { ChatItem } from "../types";
 
@@ -62,7 +62,7 @@ const AddFriendModal = (props: IAddFriendModal) => {
         <Form layout="vertical" form={form} preserve={false}>
           <Row gutter={24}>
             <Col span={24}>
-              <Form.Item name="id" label="用户id" rules={formRules.id}>
+              <Form.Item name="id" label="用户ID" rules={formRules.id}>
                 <Input placeholder={"请输入"} allowClear />
               </Form.Item>
             </Col>

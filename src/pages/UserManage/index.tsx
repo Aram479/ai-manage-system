@@ -82,7 +82,7 @@ const UserManagePage = () => {
     {
       manual: true,
       onSuccess: (res) => {
-        const newUserList = res.data;
+        const newUserList = res;
         setUserList([...newUserList]);
         setTableData(newUserList);
       },

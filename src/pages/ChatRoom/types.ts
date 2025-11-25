@@ -2,6 +2,7 @@
 export interface Message {
   id: string;
   name: string
+  avatar?: string,
   content: string;
   sender: "me" | "other";
   senderId?: string; // 发送者ID

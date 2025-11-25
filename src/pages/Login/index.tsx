@@ -1,12 +1,12 @@
 import { useModel } from "@umijs/max";
 import { Button, Col, Flex, Form, Input, Row } from "antd";
 import { Rule } from "antd/es/form";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import Logo from "@/asset/png/logo.png";
 import styles from "./index.less";
-
 const LoginPage = () => {
   const { loginAction } = useModel("user");
-  const [form] = Form.useForm<IUserInfo>();
+  const [form] = Form.useForm<ILoginData>();
   const formRules: Record<keyof Omit<ILoginData, "userId">, Rule[]> = {
     username: [{ required: true }],
     password: [{ required: true }],
@@ -35,7 +35,7 @@ const LoginPage = () => {
                 label="用户名"
                 rules={formRules.username}
               >
-                <Input placeholder="用户名/手机号" />
+                <Input prefix={<UserOutlined />} placeholder="用户名/手机号" />
               </Form.Item>
             </Col>
             <Col span={24}>
@@ -44,7 +44,7 @@ const LoginPage = () => {
                 label="密码"
                 rules={formRules.password}
               >
-                <Input.Password placeholder="密码" />
+                <Input.Password prefix={<LockOutlined />} placeholder="密码" />
               </Form.Item>
             </Col>
           </Row>

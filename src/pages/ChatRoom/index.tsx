@@ -1,15 +1,16 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button, Flex, Layout } from "antd";
 import { useModel } from "@umijs/max";
 import { useKeepAlive } from "@/hooks/useKeepAlive";
 import { ChatConversationProps, ChatItem, Message } from "./types";
 import { mockChatData } from "./mockData";
 import { useSocket } from "@/hooks/useSocket";
+import { useNotification } from "@/hooks/useNotification";
 import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
-import styles from "./index.less";
+
 import _ from "lodash";
-import { useNotification } from "@/hooks/useNotification";
+import styles from "./index.less";
 
 const { Sider, Content } = Layout;
 
@@ -21,7 +22,7 @@ const ChatRoom = () => {
   const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
-
+  const [isCollapse, setIsCollapse] = useState(false);
   // WebSocket连接管理
   const { isConnected, on, emit, reconnect } = useSocket(
     process.env.SOCKET_BASE_URL || "/",
@@ -81,9 +82,7 @@ const ChatRoom = () => {
           const newChat: ChatItem = {
             id: targetChatId,
             name: message.name,
-            avatar: `https://randomuser.me/api/portraits/${
-              Math.random() > 0.5 ? "men" : "women"
-            }/${Math.floor(Math.random() * 100)}.jpg`,
+            avatar: message.avatar,
             lastMessage: receivedMessage.content,
             lastMessageTime: new Date().toISOString(),
             unreadCount: 1,
@@ -124,6 +123,7 @@ const ChatRoom = () => {
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
         name: userInfo.username,
+        avatar: userInfo.avatar,
         content: content.trim(),
         sender: "me",
         timestamp: now.toISOString(),
@@ -171,11 +171,12 @@ const ChatRoom = () => {
   return (
     <Layout className={styles.container}>
       <Sider
-        width={250}
+        width="18vw"
         theme="light"
         className={styles.sider}
         breakpoint="lg"
         collapsedWidth={0}
+        onCollapse={(collapse) => setIsCollapse(collapse)}
       >
         <Flex vertical>
           <div style={{ overflowY: "auto" }}>
@@ -188,23 +189,25 @@ const ChatRoom = () => {
               onAddConfirm={handleAddFriend}
             />
           </div>
-          <div className={styles.connectionStatus}>
-            <Flex
-              align="center"
-              justify="space-between"
-              style={{ width: "100%" }}
-            >
-              <div>WebSocket状态:</div>
-              <Flex vertical gap={2}>
-                <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
-                {!isConnected && (
-                  <Button type="primary" size="small" onClick={reconnect}>
-                    重新连接
-                  </Button>
-                )}
+          {!isCollapse && (
+            <div className={styles.connectionStatus}>
+              <Flex
+                align="center"
+                justify="space-between"
+                style={{ width: "100%" }}
+              >
+                <div>WebSocket状态:</div>
+                <Flex vertical gap={2}>
+                  <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
+                  {!isConnected && (
+                    <Button type="primary" size="small" onClick={reconnect}>
+                      重新连接
+                    </Button>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
-          </div>
+            </div>
+          )}
         </Flex>
       </Sider>
       <Content className={styles.content}>

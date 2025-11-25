@@ -172,3 +172,10 @@ export const requestNotify = async (message: Message) => {
     }
   }
 };
+
+// 获取文件名称后缀
+export const getFilenameSuffix = (filename?: string) => {
+  const suffixMatch = filename?.match(/\.([^.]+)$/);
+  const fileSuffix = suffixMatch ? suffixMatch[1] : null;
+  return fileSuffix;
+};
