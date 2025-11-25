@@ -21,7 +21,7 @@ export default defineConfig({
     dataField: "",
   },
   esbuildMinifyIIFE: true,
-  devtool: UMI_ENV === "pro" ? "source-map" : false,
+  // devtool: UMI_ENV === "pro" ? "source-map" : false,
   favicons: ["/favicon.ico"],
   initialState: {},
   define: env,

@@ -17,7 +17,7 @@ import { Rule } from "antd/es/form";
 import { useModel, useRequest } from "@umijs/max";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { getFilenameSuffix } from "@/utils";
-import { uploadImageApi } from "@/services/api/uploadApi";
+import { uploadAvatarByUser } from "@/services/api/uploadApi";
 import styles from "./index.less";
 
 interface IUserInfoModal extends ModalProps {
@@ -38,7 +38,7 @@ const UserInfoModal = (props: IUserInfoModal) => {
     avatar: [],
   };
 
-  const uploadImageReq = useRequest(uploadImageApi, {
+  const uploadAvatarReq = useRequest(uploadAvatarByUser, {
     manual: true,
     onSuccess: (res) => {
       form.setFieldValue("avatar", res.fullUrl);
@@ -51,7 +51,10 @@ const UserInfoModal = (props: IUserInfoModal) => {
     const fileTypeArr = fileAccept?.split(",");
     const isFileType = fileTypeArr.includes(`.${fileSuffix}`);
     if (isFileType) {
-      uploadImageReq.run(file);
+      uploadAvatarReq.run({
+        userId: userInfo.userId,
+        avatar: file,
+      });
     } else {
       const fileTypeMessage = fileTypeArr.join("、");
       message.error(`请上传${fileTypeMessage}类型文件`);
@@ -128,7 +131,7 @@ const UserInfoModal = (props: IUserInfoModal) => {
                         mask: "选择图片",
                       }}
                     />
-                    {uploadImageReq.loading && (
+                    {uploadAvatarReq.loading && (
                       <Flex
                         className={styles.loadingMask}
                         align="center"
@@ -141,7 +144,7 @@ const UserInfoModal = (props: IUserInfoModal) => {
                   </>
                 ) : (
                   <Flex vertical align="center" gap={5}>
-                    {uploadImageReq.loading ? (
+                    {uploadAvatarReq.loading ? (
                       <LoadingOutlined />
                     ) : (
                       <PlusOutlined />

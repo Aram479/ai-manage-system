@@ -29,7 +29,7 @@ export default {
   },
   uat: {
     "/api": {
-      target: "http://82.156.247.24:3000",
+      target: "http://localhost:3000",
       ws: true,
       changeOrigin: true,
     },
@@ -39,7 +39,7 @@ export default {
       pathRewrite: { "^/ali": "" },
     },
     "/socket.io": {
-      target: "http://82.156.247.24:3000",
+      target: "http://localhost:3000",
       ws: true, // 启用 WebSocket 代理
       changeOrigin: true,
     },
