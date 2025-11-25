@@ -152,7 +152,7 @@ const ChatRoom = () => {
         })
       );
     },
-    [isConnected, userInfo.userId, emit]
+    [isConnected, userInfo, emit]
   );
 
   // 添加朋友
