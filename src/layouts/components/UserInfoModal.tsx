@@ -31,7 +31,6 @@ const UserInfoModal = (props: IUserInfoModal) => {
   const { data = {}, title, open, onOk, onCancel, ...modalProps } = props;
   const [form] = Form.useForm<IUserInfo>();
   const formValues = Form.useWatch([], form);
-  const [uploadLoading, setUploadLoading] = useState(false);
   const fileAccept = ".jpg,.png";
   const formRules: Record<keyof IUserInfo, Rule[]> = {
     userId: [],
@@ -39,23 +38,13 @@ const UserInfoModal = (props: IUserInfoModal) => {
     avatar: [],
   };
 
-  const uploadImageReq = useRequest(
-    (file: RcFile) => {
-      setUploadLoading(true);
-      return uploadImageApi(file);
+  const uploadImageReq = useRequest(uploadImageApi, {
+    manual: true,
+    onSuccess: (res) => {
+      form.setFieldValue("avatar", res.fullUrl);
     },
-    {
-      manual: true,
-      onSuccess: (res) => {
-        setUploadLoading(false);
-        console.log(res);
-        form.setFieldValue("avatar", res.fullUrl);
-      },
-      onError: () => {
-        setUploadLoading(false);
-      },
-    }
-  );
+    onError: () => {},
+  });
 
   const handleBeforeUpload: UploadProps["beforeUpload"] = (file) => {
     const fileSuffix = getFilenameSuffix(file.name);
@@ -71,15 +60,6 @@ const UserInfoModal = (props: IUserInfoModal) => {
     return Upload.LIST_IGNORE;
   };
 
-  const handleUploadChange: UploadProps["onChange"] = (info) => {
-    if (info.file.status === "uploading") {
-      setUploadLoading(true);
-      return;
-    }
-    if (info.file.status === "done") {
-      setUploadLoading(false);
-    }
-  };
   const handleConfirm = async () => {
     const formData = await form.validateFields();
     updateUserAction(formData);
@@ -139,14 +119,33 @@ const UserInfoModal = (props: IUserInfoModal) => {
                 // onChange={handleUploadChange}
               >
                 {formValues?.avatar ? (
-                  <Image
-                    className={styles.uploadAvatar}
-                    src={formValues.avatar}
-                    preview={false}
-                  />
+                  <>
+                    <Image
+                      className={styles.uploadAvatar}
+                      src={formValues.avatar}
+                      preview={{
+                        visible: false,
+                        mask: "选择图片",
+                      }}
+                    />
+                    {uploadImageReq.loading && (
+                      <Flex
+                        className={styles.loadingMask}
+                        align="center"
+                        justify="center"
+                      >
+                        <LoadingOutlined />
+                        <div>加载中</div>
+                      </Flex>
+                    )}
+                  </>
                 ) : (
                   <Flex vertical align="center" gap={5}>
-                    {uploadLoading ? <LoadingOutlined /> : <PlusOutlined />}
+                    {uploadImageReq.loading ? (
+                      <LoadingOutlined />
+                    ) : (
+                      <PlusOutlined />
+                    )}
                     <div>Upload</div>
                   </Flex>
                 )}

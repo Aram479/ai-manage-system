@@ -17,7 +17,9 @@ export default defineConfig({
   locale: {
     default: "zh-CN",
   },
-  request: {},
+  request: {
+    dataField: "",
+  },
   esbuildMinifyIIFE: true,
   devtool: UMI_ENV === "pro" ? "source-map" : false,
   favicons: ["/favicon.ico"],

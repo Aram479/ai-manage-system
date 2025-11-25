@@ -76,7 +76,7 @@ const OrderManagePage = () => {
     {
       manual: true,
       onSuccess: (res) => {
-        const newOrderList = res;
+        const newOrderList = res.data;
         setOrderList([...newOrderList]);
         setTableData(newOrderList);
       },

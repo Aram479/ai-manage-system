@@ -1,5 +1,5 @@
 import "./global.less";
-import { type RequestConfig } from "@umijs/max";
+import { AxiosResponse, type RequestConfig } from "@umijs/max";
 const { API_BASE_URL } = process.env;
 
 export const request: RequestConfig = {
@@ -24,7 +24,7 @@ export const request: RequestConfig = {
     errorThrower: () => null,
   },
   responseInterceptors: [
-    async (response) => {
+    async (response: AxiosResponse<any>) => {
       // const { data } = response;
       // // 检查errcode并处理错误
       // if (data?.errcode && data?.errcode !== 0) {
@@ -43,7 +43,7 @@ export const request: RequestConfig = {
       //   }
       //   response.data = data.result;
       // }
-
+      response.data = response.data.data;
       return response;
     },
     [
