@@ -75,6 +75,8 @@ const ChatRoom = () => {
               updatedChats[existingChatIndex].id === selectedChatId
                 ? updatedChats[existingChatIndex].unreadCount
                 : updatedChats[existingChatIndex].unreadCount + 1,
+            name:  message.name,
+            avatar: message.avatar
           };
           return updatedChats;
         } else {
@@ -123,7 +125,7 @@ const ChatRoom = () => {
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
         name: userInfo.username,
-        avatar: userInfo.avatar,
+        avatar: userInfo.avatar ?? userInfo.username.charAt(0),
         content: content.trim(),
         sender: "me",
         timestamp: now.toISOString(),

@@ -3,6 +3,7 @@ import { Input, Avatar, InputRef, Button, Flex, Tag } from "antd";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { ChatConversationProps, Message } from "../types";
+import { useModel } from '@umijs/max';
 import useQwenXChat, { IUseQwenXChat } from "@/hooks/useQwenXChat";
 import Actions, { IActionsProps } from "@/components/Actions";
 import CategoryOper from "@/components/AgentOpeartion/CategoryOper";
@@ -21,7 +22,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 }) => {
   const { confirmRole, updateSelectRole, updateConfirmRole } =
     useAgentRoleContext();
-
+  const { userInfo } = useModel('user')
   const [message, setMessage] = useState("");
   const [otherMessages, setOtherMessages] = useState<Message[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -195,7 +196,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </div>
           {/* 我的头像 */}
           {msg.sender === "me" && (
-            <Avatar className={styles.messageAvatar}>我</Avatar>
+            <Avatar className={styles.messageAvatar} src={userInfo.avatar}>我</Avatar>
           )}
         </div>
       </React.Fragment>
