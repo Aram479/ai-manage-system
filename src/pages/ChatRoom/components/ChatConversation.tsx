@@ -3,7 +3,7 @@ import { Input, Avatar, InputRef, Button, Flex, Tag } from "antd";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { ChatConversationProps, Message } from "../types";
-import { useModel } from '@umijs/max';
+import { useModel } from "@umijs/max";
 import useQwenXChat, { IUseQwenXChat } from "@/hooks/useQwenXChat";
 import Actions, { IActionsProps } from "@/components/Actions";
 import CategoryOper from "@/components/AgentOpeartion/CategoryOper";
@@ -13,6 +13,7 @@ import {
 } from "@/context/AgentRoleContext";
 import MarkDownCmp from "@/components/MarkDownCmp";
 import styles from "./ChatConversation.less";
+import TipTapEditor from "@/components/TipTapEditor";
 
 const { TextArea } = Input;
 const ChatConversation: React.FC<ChatConversationProps> = ({
@@ -22,7 +23,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 }) => {
   const { confirmRole, updateSelectRole, updateConfirmRole } =
     useAgentRoleContext();
-  const { userInfo } = useModel('user')
+  const { userInfo } = useModel("user");
   const [message, setMessage] = useState("");
   const [otherMessages, setOtherMessages] = useState<Message[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -196,7 +197,9 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </div>
           {/* 我的头像 */}
           {msg.sender === "me" && (
-            <Avatar className={styles.messageAvatar} src={userInfo.avatar}>我</Avatar>
+            <Avatar className={styles.messageAvatar} src={userInfo.avatar}>
+              我
+            </Avatar>
           )}
         </div>
       </React.Fragment>
@@ -270,10 +273,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         )}
 
         {/* 功能 */}
-        <Actions className={styles.chatActionsBox} items={actionItems} />
+        {/* <Actions className={styles.chatActionsBox} items={actionItems} /> */}
         {/* 输入框 */}
-        <Flex align="end" gap={10}>
-          <TextArea
+        <Flex vertical align="end" gap={10}>
+          <TipTapEditor onChange={(value) => setMessage(value)} />
+          {/* <TextArea
             ref={messageInputRef}
             className={styles.textArea}
             value={message}
@@ -281,7 +285,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
             onKeyPress={handleKeyPress}
             placeholder="输入消息..."
             autoSize={{ minRows: 4 }}
-          />
+          /> */}
           <Button
             type="primary"
             disabled={!message.trim() || !isConnected}
