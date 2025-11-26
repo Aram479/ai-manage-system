@@ -1,6 +1,7 @@
 @import "./style.less";
 
 @tiptap-editor-height: 100px;
+@tiptap-text-color: #000 !important;
 
 .tiptap {
   height: 100%;
@@ -32,6 +33,11 @@
 .tiptap p {
   margin: 0;
   padding: 0;
+
+  &,
+  & span {
+    color: @tiptap-text-color
+  }
 }
 
 .tiptap code {

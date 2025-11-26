@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Input, Avatar, InputRef, Button, Flex, Tag } from "antd";
+import {
+  Input,
+  Avatar,
+  InputRef,
+  Button,
+  Flex,
+  Tag,
+  message as AntdMessage,
+} from "antd";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { ChatConversationProps, Message } from "../types";
@@ -14,6 +22,7 @@ import {
 import MarkDownCmp from "@/components/MarkDownCmp";
 import styles from "./ChatConversation.less";
 import TipTapEditor from "@/components/TipTapEditor";
+import { Editor } from "@tiptap/core";
 
 const { TextArea } = Input;
 const ChatConversation: React.FC<ChatConversationProps> = ({
@@ -25,9 +34,10 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
     useAgentRoleContext();
   const { userInfo } = useModel("user");
   const [message, setMessage] = useState("");
+  const [htmlMessage, setHtmlMessage] = useState("");
   const [otherMessages, setOtherMessages] = useState<Message[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messageInputRef = useRef<InputRef>(null);
+  const editorRef = useRef<IEditorRef>(null);
   const isAgentChat = useMemo(() => confirmRole?.title, [confirmRole?.key]);
   const actionItems: IActionsProps<TChatList[number]>["items"] = [
     {
@@ -67,7 +77,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
   // 自动滚动到最新消息
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView();
   };
 
   // 格式化消息时间
@@ -111,15 +121,27 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
   // 处理发送消息
   const handleSend = (msg?: string) => {
-    const sendMessage = msg || message;
-    if (sendMessage.trim() && isConnected && onSendMessage && chat?.id) {
-      onSendMessage({
-        content: sendMessage.trim(),
-        chatId: chat.id,
+    const sendMessage = (msg || message).trim();
+    const sendHtmlMseeage = htmlMessage.trim();
+    if (sendHtmlMseeage) {
+      if (isConnected && chat?.id) {
+        onSendMessage?.({
+          htmlContent: htmlMessage,
+          content: sendMessage,
+          chatId: chat.id,
+        });
+        setMessage("");
+        setHtmlMessage("");
+        // 发送后自动聚焦回输入框
+        editorRef.current?.editor?.commands.focus();
+      }
+    } else {
+      AntdMessage.warning({
+        key: "noContent",
+        content: "消息不能为空",
       });
       setMessage("");
-      // 发送后自动聚焦回输入框
-      messageInputRef.current?.focus();
+      setHtmlMessage(" ");
     }
   };
 
@@ -131,7 +153,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   // 处理按键事件，支持回车发送
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // 按下Ctrl+Enter或Cmd+Enter换行，单独Enter发送
-    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -179,11 +201,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               </div>
             )}
             <div className={styles.messageText}>
-              {msg.agent?.title ? (
-                <MarkDownCmp theme="onDark" content={String(msg.content)} />
-              ) : (
-                <>{msg.content}</>
-              )}
+              <MarkDownCmp theme="onDark" content={String(msg.htmlContent)} />
             </div>
             <div
               className={
@@ -275,20 +293,19 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         {/* 功能 */}
         {/* <Actions className={styles.chatActionsBox} items={actionItems} /> */}
         {/* 输入框 */}
-        <Flex vertical align="end" gap={10}>
-          <TipTapEditor onChange={(value) => setMessage(value)} />
-          {/* <TextArea
-            ref={messageInputRef}
-            className={styles.textArea}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="输入消息..."
-            autoSize={{ minRows: 4 }}
-          /> */}
+        <Flex vertical align="end" gap={10} onKeyDown={handleKeyPress}>
+          <TipTapEditor
+            ref={editorRef}
+            value={htmlMessage}
+            onChange={(value, htmlValue) => {
+              setMessage(value);
+              setHtmlMessage(htmlValue);
+            }}
+            payload={{ userId: userInfo.userId, chatId: chat.id }}
+          />
           <Button
             type="primary"
-            disabled={!message.trim() || !isConnected}
+            disabled={!htmlMessage.trim() || !isConnected}
             onClick={() => handleSend()}
           >
             发送

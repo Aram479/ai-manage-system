@@ -4,6 +4,7 @@ export interface Message {
   name: string
   avatar?: string,
   content: string;
+  htmlContent?: string,
   sender: "me" | "other";
   senderId?: string; // 发送者ID
   receiverId?: string; // 接收者ID
@@ -37,6 +38,7 @@ export interface ChatConversationProps {
   chat: ChatItem;
   onSendMessage: (data: {
     content: string;
+    htmlContent?: string,
     chatId: string;
     agent?: Message["agent"];
   }) => void;

@@ -2,7 +2,13 @@ import { EditorContent, useEditor } from "@tiptap/react";
 // import { variables } from '../../../variables.js'
 import { Editor } from "@tiptap/core";
 import { Dropdown, MenuProps } from "antd";
-import { useState } from "react";
+import {
+  forwardRef,
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import TableAttrModal from "./Components/Table/TableAttrModal";
 import getExtensions from "./extensions";
 import MenuBar from "./MenuBar/MenuBar";
@@ -11,15 +17,17 @@ import "./styles.less";
 interface ITipTapEditor {
   value?: string;
   maxLength?: number;
-  onChange?: (value: any, length: number) => void;
+  payload?: any;
+  onChange?: (value: string, htmlValue: string, length: number) => void;
 }
 
-const TipTapEditor = (props: ITipTapEditor) => {
-  const { value = "", maxLength, onChange } = props;
+const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
+  const { value = "", payload, maxLength, onChange } = props;
   const [isTableAttrModal, setIsTableAttrModal] = useState(false);
   const [isDropdown, setIsDropdown] = useState(false);
   const editor = useEditor(
     {
+      editorProps: payload,
       extensions: [...getExtensions(maxLength)],
       content: value, // 默认值
       onUpdate: (data) => {
@@ -31,7 +39,7 @@ const TipTapEditor = (props: ITipTapEditor) => {
         handleEditorChange(data);
       },
     },
-    [value]
+    []
   );
   const items: MenuProps["items"] = [
     {
@@ -143,17 +151,25 @@ const TipTapEditor = (props: ITipTapEditor) => {
         ? ""
         : editorData.view.dom.innerHTML;
     // 傻逼tiptap <br>会在浏览器渲染两次, 给它干掉！
-    editorHtml = editorHtml.replace(
-      new RegExp('<br class="ProseMirror-trailingBreak">', "g"),
-      " "
-    );
-    onChange?.(editorData.getText(), editorData.getText().length);
+    editorHtml = editorHtml
+      .replace(new RegExp('<br class="ProseMirror-trailingBreak">', "g"), " ")
+      .replace(/<p\b[^>]*>(?:\s*<br\s*\/?>\s*)*\s*<\/p>/gi, "");
+    onChange?.(editorData.getText(), editorHtml, editorData.getText().length);
   };
   const handleDropdown = (bol: boolean) => {
     setIsDropdown(bol);
   };
+
+  useImperativeHandle(ref, () => ({
+    editor,
+  }));
+
+  useEffect(() => {
+    editor?.commands.setContent(value);
+  }, [value]);
+
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: "100%" }}>
       <div className="editor">
         {editor && <MenuBar editor={editor} />}
         <Dropdown
@@ -161,7 +177,8 @@ const TipTapEditor = (props: ITipTapEditor) => {
           menu={{ items }}
           trigger={["contextMenu"]}
           onOpenChange={handleDropdown}
-          destroyOnHidden
+          destroyPopupOnHide
+          // destroyOnHidden
         >
           <EditorContent className="editor__content" editor={editor} />
         </Dropdown>
@@ -179,4 +196,4 @@ const TipTapEditor = (props: ITipTapEditor) => {
     </div>
   );
 };
-export default TipTapEditor;
+export default forwardRef(TipTapEditor);

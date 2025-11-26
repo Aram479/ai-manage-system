@@ -1,6 +1,10 @@
+import { useRequest } from "@umijs/max";
+import { uploadChatImageById } from "@/services/api/uploadApi";
+import { Editor, NodeConfig } from "@tiptap/react";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
 import BulletList from "@tiptap/extension-bullet-list";
 import CharacterCount from "@tiptap/extension-character-count";
-import { Color } from "@tiptap/extension-color";
 import Document from "@tiptap/extension-document";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
@@ -14,11 +18,11 @@ import TableRow from "@tiptap/extension-table-row";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import TextAlign from "@tiptap/extension-text-align";
-import { TextStyle } from "@tiptap/extension-text-style";
 import Youtube from "@tiptap/extension-youtube";
 import StarterKit from "@tiptap/starter-kit";
-
-import { NodeConfig } from "@tiptap/react";
+import FileHandler, {
+  FileHandlerOptions,
+} from "@tiptap/extension-file-handler";
 
 export default function (limit: number = 3000) {
   const tableExtends: Partial<NodeConfig<any, any>> = {
@@ -45,6 +49,36 @@ export default function (limit: number = 3000) {
       };
     },
   };
+  const uploadChatImage = useRequest(uploadChatImageById, {
+    manual: true,
+  });
+  const handleFileChange: FileHandlerOptions["onPaste"] &
+    FileHandlerOptions["onDrop"] = (editor, files, htmlContent) => {
+    files.forEach((file) => {
+      if (htmlContent) {
+        return false;
+      }
+      const { userId, chatId } = editor.view.props as any;
+      uploadChatImage
+        .run({
+          image: file,
+          userId,
+          chatId,
+        })
+        .then((res) => {
+          editor
+            .chain()
+            .insertContentAt(editor.state.selection.anchor, {
+              type: "image",
+              attrs: {
+                src: res.fullUrl,
+              },
+            })
+            .focus()
+            .run();
+        });
+    });
+  };
   return [
     Document,
     StarterKit,
@@ -66,7 +100,7 @@ export default function (limit: number = 3000) {
     Image.configure({
       inline: true,
       HTMLAttributes: {
-        style: "max-width: 32rem; max-height: 32rem; object-fit: contain;",
+        style: "max-width: 15rem; max-height: 15rem; object-fit: contain;",
       },
     }),
     Youtube.extend({
@@ -121,6 +155,11 @@ export default function (limit: number = 3000) {
     TableRow.extend(tableExtends),
     CharacterCount.configure({
       limit,
+    }),
+    FileHandler.configure({
+      allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
+      onDrop: handleFileChange,
+      onPaste: handleFileChange,
     }),
   ];
 }

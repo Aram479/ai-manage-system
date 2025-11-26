@@ -75,8 +75,8 @@ const ChatRoom = () => {
               updatedChats[existingChatIndex].id === selectedChatId
                 ? updatedChats[existingChatIndex].unreadCount
                 : updatedChats[existingChatIndex].unreadCount + 1,
-            name:  message.name,
-            avatar: message.avatar
+            name: message.name,
+            avatar: message.avatar,
           };
           return updatedChats;
         } else {
@@ -118,15 +118,16 @@ const ChatRoom = () => {
   // 处理发送消息
   const handleSendMessage = useCallback<ChatConversationProps["onSendMessage"]>(
     (data) => {
-      const { content, chatId, agent } = data;
-      if (!content.trim() || !chatId || !isConnected) return;
+      const { content, htmlContent, chatId, agent } = data;
+      if (!htmlContent || !chatId || !isConnected) return;
 
       const now = new Date();
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
         name: userInfo.username,
         avatar: userInfo.avatar ?? userInfo.username.charAt(0),
-        content: content.trim(),
+        content: content,
+        htmlContent: htmlContent,
         sender: "me",
         timestamp: now.toISOString(),
         senderId: userInfo.userId,

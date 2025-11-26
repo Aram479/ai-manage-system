@@ -58,9 +58,12 @@ const Image = (props: IImage) => {
   const handleSetImage = (url: string) => {
     if (url) {
       editor
-        .chain()
+        ?.chain()
         .focus()
-        .setImage({ src: url, style: { maxWidth: "512px", maxHeight: "512px" } })
+        .setImage({
+          src: url,
+          style: { maxWidth: "512px", maxHeight: "512px" },
+        })
         .run();
       // editor.commands.insertContent(`<p style="display: flex"><img src="${url}" /></p>`)
     }
@@ -85,7 +88,11 @@ const Image = (props: IImage) => {
       <Dropdown menu={{ items }} trigger={["click"]}>
         <BarItem title={title} icon={icon} isActive={isActive} />
       </Dropdown>
-      <ImageModal open={isImageModal} onOk={handleSetImage} onCancel={() => setIsImageModal(false)} />
+      <ImageModal
+        open={isImageModal}
+        onOk={handleSetImage}
+        onCancel={() => setIsImageModal(false)}
+      />
     </>
   );
 };
