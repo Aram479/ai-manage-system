@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Image, message } from "antd";
 import { CheckOutlined, CopyOutlined } from "@ant-design/icons";
@@ -22,23 +22,16 @@ import remarkMath from "remark-math";
 import { copy } from "@/utils";
 import "./index.less";
 
-
 // 主题枚举
 type TThemeType = "default" | "onDark" | "darcula" | "vs";
 
+// 静态配置提取到组件外部
 const ThemeMap = new Map<TThemeType, SyntaxHighlighterProps["style"]>([
   ["default", prism],
   ["onDark", oneDark],
   ["darcula", darcula],
   ["vs", vs],
 ]);
-
-interface Props {
-  content: string;
-  theme?: TThemeType;
-  copyCode?: boolean;
-  loading?: boolean;
-}
 
 const inlineCodeStyle = {
   background: "rgba(243, 244, 244)",
@@ -47,153 +40,206 @@ const inlineCodeStyle = {
   color: "rgba(51, 51, 51)",
 };
 
-const MarkDownCmp: React.FC<Props> = ({
-  content,
+const remarkPlugins = [remarkGfm, remarkMath, remarkGemoji];
+const rehypePlugins = [rehypeKatex, rehypeRaw] as const;
+
+interface Props {
+  content: string;
+  theme?: TThemeType;
+  copyCode?: boolean;
+  loading?: boolean;
+}
+
+// 独立的代码块组件
+interface CodeBlockProps {
+  children: React.ReactNode;
+  className?: string;
+  inline: boolean;
+  theme?: TThemeType;
+  copyCode: boolean;
+  loading: boolean;
+}
+
+const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
+  children,
+  className,
+  inline,
   theme,
-  copyCode = true,
+  copyCode,
   loading,
 }) => {
-  let index = 0;
+  // 匹配指定语言
+  const match = /language-(\w+)/.exec(className || "");
+  const [isShowCopy, setIsShowCopy] = useState(true);
+
+  // 处理复制代码
+  const handleCopy = useCallback(() => {
+    setIsShowCopy(true);
+    copy(String(children));
+    message.success("复制成功");
+    setTimeout(() => {
+      setIsShowCopy(false);
+    }, 3000);
+  }, [children]);
+
+  // 内联代码
+  if (inline) {
+    return (
+      <code className={className} style={inlineCodeStyle}>
+        {children}
+      </code>
+    );
+  }
+
+  // 代码块
+  if (match && match[1]) {
+    return (
+      <>
+        {/* 代码头部 */}
+        {!loading && (
+          <div className="code-header">
+            <div className="lang-box">{match[1]}</div>
+            {copyCode && (
+              <div className="preview-code-box">
+                {!isShowCopy ? (
+                  <CopyOutlined
+                    className="preview-code-copy"
+                    onClick={_.throttle(handleCopy, 3000)}
+                  />
+                ) : (
+                  <div>
+                    <CheckOutlined
+                      style={{
+                        color: "#78c326",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <SyntaxHighlighter
+          showLineNumbers={true}
+          wrapLines
+          wrapLongLines
+          style={ThemeMap.get(theme ?? "default")}
+          language={match[1]}
+        >
+          {String(children).replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      </>
+    );
+  }
+
+  // 无语言代码块
+  return <code className={className}>{children}</code>;
+});
+
+// 标题组件
+interface HeadingProps {
+  level: number;
+  children: React.ReactNode;
+  id: string;
+}
+
+const Heading: React.FC<HeadingProps> = React.memo(({ level, children, id }) => {
+  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+  return (
+    <HeadingTag id={id} className="heading">
+      {children}
+    </HeadingTag>
+  );
+});
+
+// 图片组件
+interface ImgProps {
+  className?: string;
+  style?: React.CSSProperties;
+  src?: string;
+  alt?: string;
+}
+
+const MarkdownImage: React.FC<ImgProps> = React.memo(({ className, style, src, alt }) => {
+  return (
+    <Image
+      className={className}
+      src={src}
+      alt={alt}
+      preview={{
+        mask: <div style={{ opacity: 0 }}>1</div>,
+        maskClassName: "imageMask",
+      }}
+      style={style}
+    />
+  );
+});
+
+const MarkDownCmp: React.FC<Props> = React.memo(({
+  content,
+  theme = "default",
+  copyCode = true,
+  loading = false,
+}) => {
+  // 生成稳定的id
+  const generateId = useCallback((prefix: string, index: number) => {
+    // 使用content的哈希值作为前缀的一部分，确保同一内容生成相同的id
+    const contentHash = content.length % 1000;
+    return `${prefix}-${contentHash}-${index}`;
+  }, [content]);
+
+  // 缓存组件配置，避免每次渲染都创建新对象
+  const components = useMemo(() => {
+    // 用于跟踪标题和图片的索引
+    let headingIndex = 0;
+    let imgIndex = 0;
+
+    return {
+      code: (props: any) => (
+        <CodeBlock
+          {...props}
+          theme={theme}
+          copyCode={copyCode}
+          loading={loading}
+        />
+      ),
+      h1: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={1} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      h2: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={2} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      h3: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={3} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      h4: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={4} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      h5: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={5} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      h6: ({ children }: { children: React.ReactNode }) => (
+        <Heading level={6} children={children} id={generateId('heading', ++headingIndex)} />
+      ),
+      img: (props: ImgProps) => (
+        <MarkdownImage {...props} />
+      ),
+    };
+  }, [theme, copyCode, loading, generateId]);
+
   return (
     <div className="markDownCmp">
       <ReactMarkdown
         children={content}
-        remarkPlugins={[remarkGfm, remarkMath, remarkGemoji]}
-        rehypePlugins={[rehypeKatex, rehypeRaw]}
-        components={{
-          code({ children, className, inline }) {
-            // 匹配否指定语言
-            const match: any = /language-(\w+)/.exec(className || "");
-            const [isShowCode, setIsShowCode] = useState(true);
-            const [isShowCopy, setIsShowCopy] = useState(true);
-            return (
-              <>
-                {!inline && match && match[1] ? (
-                  <>
-                    {/* 代码头部 */}
-                    {!loading && (
-                      <div className="code-header">
-                        {/* 展开/折叠 */}
-                        {/* <div
-                          style={{
-                            cursor: 'pointer',
-                            marginRight: '10px',
-                            transformOrigin: '8px',
-                          }}
-                          className={isShowCode ? 'code-rotate-down' : 'code-rotate-right'}
-                          onClick={() => setIsShowCode(!isShowCode)}
-                        >
-                          <DownOutlined />
-                        </div> */}
-                        <div className="lang-box">{match && match[1]}</div>
-                        {copyCode && (
-                          <div className="preview-code-box">
-                            {!isShowCopy ? (
-                              <CopyOutlined
-                                className="preview-code-copy"
-                                onClick={_.throttle(() => {
-                                  setIsShowCopy(true);
-                                  copy(String(children));
-                                  message.success("复制成功");
-                                  setTimeout(() => {
-                                    setIsShowCopy(false);
-                                  }, 3000);
-                                }, 3000)}
-                              />
-                            ) : (
-                              <div>
-                                <CheckOutlined
-                                  style={{
-                                    color: "#78c326",
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {isShowCode && (
-                      <SyntaxHighlighter
-                        showLineNumbers={true}
-                        wrapLines
-                        wrapLongLines
-                        style={ThemeMap.get(theme ?? "default")}
-                        language={match && match[1]}
-                      >
-                        {String(children).replace(/\n$/, "")}
-                      </SyntaxHighlighter>
-                    )}
-                  </>
-                ) : (
-                  <code className={className} style={inlineCodeStyle}>
-                    {children}
-                  </code>
-                )}
-              </>
-            );
-          },
-          h1({ children }) {
-            return (
-              <h1 id={"heading-" + ++index} className="heading">
-                {children}
-              </h1>
-            );
-          },
-          h2({ children }) {
-            return (
-              <h2 id={"heading-" + ++index} className="heading">
-                {children}
-              </h2>
-            );
-          },
-          h3({ children }) {
-            return (
-              <h3 id={"heading-" + ++index} className="heading">
-                {children}
-              </h3>
-            );
-          },
-          h4({ children }) {
-            return (
-              <h4 id={"heading-" + ++index} className="heading">
-                {children}
-              </h4>
-            );
-          },
-          h5({ children }) {
-            return (
-              <h5 id={"heading-" + ++index} className="heading">
-                {children}
-              </h5>
-            );
-          },
-          h6({ children }) {
-            return (
-              <h6 id={"heading-" + ++index} className="heading">
-                {children}
-              </h6>
-            );
-          },
-          img({ className, style, src }) {
-            return (
-              <Image
-                id={"img-" + ++index}
-                className={className}
-                src={src}
-                preview={{
-                  mask: <div style={{ opacity: 0 }}>1</div>,
-                  maskClassName: "imageMask",
-                }}
-                style={style}
-              />
-            );
-          },
-        }}
+        remarkPlugins={remarkPlugins}
+        rehypePlugins={rehypePlugins}
+        components={components}
       />
     </div>
   );
-};
+});
+
+MarkDownCmp.displayName = 'MarkDownCmp';
 
 export default MarkDownCmp;
