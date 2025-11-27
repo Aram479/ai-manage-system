@@ -1,12 +1,13 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 // import { variables } from '../../../variables.js'
-import { Editor } from "@tiptap/core";
+import { Editor, JSONContent } from "@tiptap/core";
 import { Dropdown, MenuProps } from "antd";
 import {
   forwardRef,
   Ref,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 import TableAttrModal from "./Components/Table/TableAttrModal";
@@ -18,7 +19,12 @@ interface ITipTapEditor {
   value?: string;
   maxLength?: number;
   payload?: any;
-  onChange?: (value: string, htmlValue: string, length: number) => void;
+  onChange?: (data: {
+    text: string;
+    html: string;
+    json: JSONContent;
+    length: number;
+  }) => void;
 }
 
 const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
@@ -154,7 +160,12 @@ const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
     editorHtml = editorHtml
       .replace(new RegExp('<br class="ProseMirror-trailingBreak">', "g"), " ")
       .replace(/<p\b[^>]*>(?:\s*<br\s*\/?>\s*)*\s*<\/p>/gi, "");
-    onChange?.(editorData.getText(), editorHtml, editorData.getText().length);
+    onChange?.({
+      text: editorData.getText(),
+      html: editorHtml,
+      json: editorData.getJSON(),
+      length: editorData.getText().length,
+    });
   };
   const handleDropdown = (bol: boolean) => {
     setIsDropdown(bol);
@@ -163,10 +174,6 @@ const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
   useImperativeHandle(ref, () => ({
     editor,
   }));
-
-  useEffect(() => {
-    editor?.commands.setContent(value);
-  }, [value]);
 
   return (
     <div style={{ width: "100%" }}>

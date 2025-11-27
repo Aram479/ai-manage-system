@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { Image, message } from "antd";
+import { CheckOutlined, CopyOutlined } from "@ant-design/icons";
 import {
   Prism as SyntaxHighlighter,
   SyntaxHighlighterProps,
@@ -19,8 +21,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { copy } from "@/utils";
 import "./index.less";
-import { CheckOutlined, CopyOutlined, DownOutlined } from "@ant-design/icons";
-import { message } from "antd";
+
 
 // 主题枚举
 type TThemeType = "default" | "onDark" | "darcula" | "vs";
@@ -173,6 +174,20 @@ const MarkDownCmp: React.FC<Props> = ({
               <h6 id={"heading-" + ++index} className="heading">
                 {children}
               </h6>
+            );
+          },
+          img({ className, style, src }) {
+            return (
+              <Image
+                id={"img-" + ++index}
+                className={className}
+                src={src}
+                preview={{
+                  mask: <div style={{ opacity: 0 }}>1</div>,
+                  maskClassName: "imageMask",
+                }}
+                style={style}
+              />
             );
           },
         }}

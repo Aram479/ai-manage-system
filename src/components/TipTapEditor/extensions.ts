@@ -1,6 +1,4 @@
-import { useRequest } from "@umijs/max";
-import { uploadChatImageById } from "@/services/api/uploadApi";
-import { Editor, NodeConfig } from "@tiptap/react";
+import { NodeConfig } from "@tiptap/react";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import BulletList from "@tiptap/extension-bullet-list";
@@ -49,34 +47,25 @@ export default function (limit: number = 3000) {
       };
     },
   };
-  const uploadChatImage = useRequest(uploadChatImageById, {
-    manual: true,
-  });
+
   const handleFileChange: FileHandlerOptions["onPaste"] &
     FileHandlerOptions["onDrop"] = (editor, files, htmlContent) => {
     files.forEach((file) => {
       if (htmlContent) {
         return false;
       }
-      const { userId, chatId } = editor.view.props as any;
-      uploadChatImage
-        .run({
-          image: file,
-          userId,
-          chatId,
+      const url = URL.createObjectURL(file);
+      editor
+        .chain()
+        .insertContentAt(editor.state.selection.anchor, {
+          type: "image",
+          attrs: {
+            src: url,
+            title: file.name,
+          },
         })
-        .then((res) => {
-          editor
-            .chain()
-            .insertContentAt(editor.state.selection.anchor, {
-              type: "image",
-              attrs: {
-                src: res.fullUrl,
-              },
-            })
-            .focus()
-            .run();
-        });
+        .focus()
+        .run();
     });
   };
   return [

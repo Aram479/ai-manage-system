@@ -1,30 +1,21 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import {
-  Input,
-  Avatar,
-  InputRef,
-  Button,
-  Flex,
-  Tag,
-  message as AntdMessage,
-} from "antd";
+import { useModel, useRequest } from "@umijs/max";
+import { Avatar, Button, Flex, Tag, message as AntdMessage } from "antd";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { ChatConversationProps, Message } from "../types";
-import { useModel } from "@umijs/max";
 import useQwenXChat, { IUseQwenXChat } from "@/hooks/useQwenXChat";
-import Actions, { IActionsProps } from "@/components/Actions";
-import CategoryOper from "@/components/AgentOpeartion/CategoryOper";
 import {
   AgentRoleProvider,
   useAgentRoleContext,
 } from "@/context/AgentRoleContext";
+import { JSONContent } from "@tiptap/core";
+import { extractUniqueImageNodes, replaceImageSrcByTitle } from "@/utils";
+import { uploadChatImageById } from "@/services/api/uploadApi";
 import MarkDownCmp from "@/components/MarkDownCmp";
-import styles from "./ChatConversation.less";
 import TipTapEditor from "@/components/TipTapEditor";
-import { Editor } from "@tiptap/core";
+import styles from "./ChatConversation.less";
 
-const { TextArea } = Input;
 const ChatConversation: React.FC<ChatConversationProps> = ({
   chat,
   onSendMessage,
@@ -35,24 +26,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   const { userInfo } = useModel("user");
   const [message, setMessage] = useState("");
   const [htmlMessage, setHtmlMessage] = useState("");
+  const [jsonMessage, setJSONMessage] = useState<JSONContent>();
   const [otherMessages, setOtherMessages] = useState<Message[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<IEditorRef>(null);
   const isAgentChat = useMemo(() => confirmRole?.title, [confirmRole?.key]);
-  const actionItems: IActionsProps<TChatList[number]>["items"] = [
-    {
-      key: "agent",
-      icon: (
-        <CategoryOper
-          buttonProps={{ type: "text", style: { background: "none" } }}
-        />
-      ),
-    },
-    // {
-    //   key: "setting",
-    //   icon: <SettingOper />,
-    // },
-  ];
 
   const defaultRequestConfig: IUseQwenXChat = {
     agentRole: confirmRole,
@@ -68,13 +46,21 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
     },
     onSuccess: (messageData, _l, _i, agentRole): any => {
       const content = messageData.chatContent || "";
-      onSendMessage({ content, chatId: chat.id, agent: agentRole });
+      onSendMessage({
+        content,
+        htmlContent: content,
+        chatId: chat.id,
+        agent: agentRole,
+      });
     },
   };
 
   // 通义千问
   const Ai_Qwen = useQwenXChat(defaultRequestConfig);
 
+  const uploadChatImage = useRequest(uploadChatImageById, {
+    manual: true,
+  });
   // 自动滚动到最新消息
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView();
@@ -120,20 +106,40 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   };
 
   // 处理发送消息
-  const handleSend = (msg?: string) => {
+  const handleSend = async (msg?: string) => {
     const sendMessage = (msg || message).trim();
-    const sendHtmlMseeage = htmlMessage.trim();
+    let sendHtmlMseeage = htmlMessage.trim();
     if (sendHtmlMseeage) {
       if (isConnected && chat?.id) {
+        const imgFileList = await extractUniqueImageNodes(jsonMessage);
+        // 上传输入框内的图片
+        for (let item of imgFileList) {
+          await uploadChatImage
+            .run({
+              image: item.file,
+              userId: userInfo.userId,
+              chatId: chat.id,
+            })
+            .then((res) => {
+              const newHtmlMseeage = replaceImageSrcByTitle(htmlMessage, {
+                name: item.file.name,
+                url: res.fullUrl,
+              });
+              sendHtmlMseeage = newHtmlMseeage;
+              URL.revokeObjectURL(item.src);
+            });
+        }
         onSendMessage?.({
-          htmlContent: htmlMessage,
+          htmlContent: sendHtmlMseeage,
           content: sendMessage,
           chatId: chat.id,
         });
         setMessage("");
         setHtmlMessage("");
+        setJSONMessage({});
         // 发送后自动聚焦回输入框
         editorRef.current?.editor?.commands.focus();
+        editorRef.current?.editor?.commands.clearContent();
       }
     } else {
       AntdMessage.warning({
@@ -142,6 +148,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
       });
       setMessage("");
       setHtmlMessage(" ");
+      setJSONMessage({});
     }
   };
 
@@ -201,7 +208,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               </div>
             )}
             <div className={styles.messageText}>
-              <MarkDownCmp theme="onDark" content={String(msg.htmlContent)} />
+              <MarkDownCmp
+                theme="onDark"
+                content={String(msg.htmlContent)}
+                copyCode={false}
+              />
             </div>
             <div
               className={
@@ -290,16 +301,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </div>
         )}
 
-        {/* 功能 */}
-        {/* <Actions className={styles.chatActionsBox} items={actionItems} /> */}
         {/* 输入框 */}
         <Flex vertical align="end" gap={10} onKeyDown={handleKeyPress}>
           <TipTapEditor
             ref={editorRef}
             value={htmlMessage}
-            onChange={(value, htmlValue) => {
-              setMessage(value);
-              setHtmlMessage(htmlValue);
+            maxLength={1000}
+            onChange={({ text, html, json }) => {
+              setMessage(text);
+              setHtmlMessage(html);
+              setJSONMessage(json);
             }}
             payload={{ userId: userInfo.userId, chatId: chat.id }}
           />
