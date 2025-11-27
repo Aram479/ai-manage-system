@@ -74,11 +74,11 @@ const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
 
   // 处理复制代码
   const handleCopy = useCallback(() => {
-    setIsShowCopy(true);
+    setIsShowCopy(false);
     copy(String(children));
     message.success("复制成功");
     setTimeout(() => {
-      setIsShowCopy(false);
+      setIsShowCopy(true);
     }, 3000);
   }, [children]);
 
@@ -101,7 +101,7 @@ const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
             <div className="lang-box">{match[1]}</div>
             {copyCode && (
               <div className="preview-code-box">
-                {!isShowCopy ? (
+                {isShowCopy ? (
                   <CopyOutlined
                     className="preview-code-copy"
                     onClick={_.throttle(handleCopy, 3000)}

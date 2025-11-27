@@ -92,7 +92,7 @@ const HeaderCmp = () => {
             <Avatar
               icon={<UserOutlined />}
               size="large"
-              src={userInfo.avatar}
+              src={userInfo?.avatar}
               style={{ cursor: "pointer" }}
             />
           </Dropdown>

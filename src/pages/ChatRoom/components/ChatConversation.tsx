@@ -211,7 +211,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               <MarkDownCmp
                 theme="onDark"
                 content={String(msg.htmlContent)}
-                copyCode={false}
+                copyCode={true}
               />
             </div>
             <div
@@ -226,7 +226,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </div>
           {/* 我的头像 */}
           {msg.sender === "me" && (
-            <Avatar className={styles.messageAvatar} src={userInfo.avatar}>
+            <Avatar className={styles.messageAvatar} src={userInfo?.avatar}>
               我
             </Avatar>
           )}
@@ -306,13 +306,14 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           <TipTapEditor
             ref={editorRef}
             value={htmlMessage}
-            maxLength={1000}
+            maxLength={500}
+            showMaxLength={false}
             onChange={({ text, html, json }) => {
               setMessage(text);
               setHtmlMessage(html);
               setJSONMessage(json);
             }}
-            payload={{ userId: userInfo.userId, chatId: chat.id }}
+            payload={{ userId: userInfo?.userId, chatId: chat.id }}
           />
           <Button
             type="primary"

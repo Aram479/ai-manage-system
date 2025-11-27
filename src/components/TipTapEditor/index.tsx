@@ -19,6 +19,7 @@ interface ITipTapEditor {
   value?: string;
   maxLength?: number;
   payload?: any;
+  showMaxLength?: boolean;
   onChange?: (data: {
     text: string;
     html: string;
@@ -28,7 +29,7 @@ interface ITipTapEditor {
 }
 
 const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
-  const { value = "", payload, maxLength, onChange } = props;
+  const { value = "", payload, showMaxLength, maxLength, onChange } = props;
   const [isTableAttrModal, setIsTableAttrModal] = useState(false);
   const [isDropdown, setIsDropdown] = useState(false);
   const editor = useEditor(
@@ -197,7 +198,8 @@ const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
         />
       </div>
       <span className="editorLimit">
-        {maxLength &&
+        {showMaxLength &&
+          maxLength &&
           `${editor?.storage.characterCount.characters()} / ${maxLength}`}
       </span>
     </div>
