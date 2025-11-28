@@ -1,4 +1,5 @@
 import { Flex } from "antd";
+import { Editor } from "@tiptap/core";
 import {
   EmojiCategory,
   EmojiName,
@@ -6,7 +7,6 @@ import {
   getEmojisByCategory,
 } from "@/components/wechat-emojis/wechatEmoji";
 import styles from "./index.less";
-import { Editor } from "@tiptap/core";
 
 interface IEmojisList {
   editor?: Editor;
@@ -14,15 +14,16 @@ interface IEmojisList {
 
 const EmojisList = (props: IEmojisList) => {
   const { editor } = props;
-  const faceEmojis = getEmojisByCategory(EmojiCategory.FACE);
+  // 所有表情
+  const allEmojis = getEmojisByCategory(EmojiCategory.ALL);
 
-  const handleEmoji = (emoji: (typeof faceEmojis)[number]) => {
+  const handleEmoji = (emoji: (typeof allEmojis)[number]) => {
     editor?.chain().focus().setEmoji(emoji.name).run();
   };
 
   return (
     <Flex className={styles.emjiosBox} gap={3} wrap>
-      {faceEmojis.map((emoji) => (
+      {allEmojis.map((emoji) => (
         <img
           key={emoji.name}
           src={getEmojiPath(emoji.name as EmojiName) || ""}
@@ -35,4 +36,4 @@ const EmojisList = (props: IEmojisList) => {
   );
 };
 
-export default EmojisList
+export default EmojisList;

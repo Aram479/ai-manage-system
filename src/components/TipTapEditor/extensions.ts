@@ -54,7 +54,7 @@ export default function (limit: number = 3000) {
     },
   };
 
-  const faceEmojis: EmojiItem[] = getEmojisByCategory(EmojiCategory.FACE).map(
+  const faceEmojis: EmojiItem[] = getEmojisByCategory(EmojiCategory.ALL).map(
     (item) => ({
       name: item.name,
       shortcodes: [item.name],

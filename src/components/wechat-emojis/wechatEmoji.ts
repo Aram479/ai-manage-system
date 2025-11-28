@@ -8,6 +8,8 @@
  */
 export enum EmojiCategory {
   /** 人脸表情 */
+  ALL = 'ALL',
+  /** 人脸表情 */
   FACE = 'face',
   /** 手势表情 */
   GESTURE = 'gesture',
@@ -200,6 +202,7 @@ function getAllEmojiData(): EmojiInfo[] {
  * 按类别分组的表情数据
  */
 export const EMOJI_CATEGORIES = {
+  [EmojiCategory.ALL]: getAllEmojiData(),
   [EmojiCategory.FACE]: getAllEmojiData().filter(emoji => emoji.category === EmojiCategory.FACE),
   [EmojiCategory.GESTURE]: getAllEmojiData().filter(emoji => emoji.category === EmojiCategory.GESTURE),
   [EmojiCategory.ANIMAL]: getAllEmojiData().filter(emoji => emoji.category === EmojiCategory.ANIMAL),
