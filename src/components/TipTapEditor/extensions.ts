@@ -1,6 +1,14 @@
+import { DOMAIN } from "@/constant/request";
 import { NodeConfig } from "@tiptap/react";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
+import FileHandler, {
+  FileHandlerOptions,
+} from "@tiptap/extension-file-handler";
+import {
+  EmojiCategory,
+  getEmojisByCategory,
+} from "../wechat-emojis/wechatEmoji";
 import BulletList from "@tiptap/extension-bullet-list";
 import CharacterCount from "@tiptap/extension-character-count";
 import Document from "@tiptap/extension-document";
@@ -18,9 +26,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TextAlign from "@tiptap/extension-text-align";
 import Youtube from "@tiptap/extension-youtube";
 import StarterKit from "@tiptap/starter-kit";
-import FileHandler, {
-  FileHandlerOptions,
-} from "@tiptap/extension-file-handler";
+import Emoji, { EmojiItem } from "@tiptap/extension-emoji";
 
 export default function (limit: number = 3000) {
   const tableExtends: Partial<NodeConfig<any, any>> = {
@@ -48,8 +54,17 @@ export default function (limit: number = 3000) {
     },
   };
 
+  const faceEmojis: EmojiItem[] = getEmojisByCategory(EmojiCategory.FACE).map(
+    (item) => ({
+      name: item.name,
+      shortcodes: [item.name],
+      tags: [item.category],
+      group: item.category,
+      fallbackImage: `${DOMAIN}/${item.path}`,
+    })
+  );
   const handleFileChange: FileHandlerOptions["onPaste"] &
-    FileHandlerOptions["onDrop"] = (editor, files, htmlContent) => {
+    FileHandlerOptions["onDrop"] = (editor, files, htmlContent, ...props) => {
     files.forEach((file) => {
       if (htmlContent) {
         return false;
@@ -62,6 +77,7 @@ export default function (limit: number = 3000) {
           attrs: {
             src: url,
             title: file.name,
+            style: "max-width: 15rem; max-height: 15rem; object-fit: contain;",
           },
         })
         .focus()
@@ -86,13 +102,35 @@ export default function (limit: number = 3000) {
     TextAlign.configure({
       types: ["heading", "paragraph", "image"],
     }),
-    Image.configure({
-      inline: true,
-      HTMLAttributes: {
-        style: "max-width: 15rem; max-height: 15rem; object-fit: contain;",
+    Image.extend({
+      renderText() {
+        return `[图片]`;
       },
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          class: {
+            default: "image",
+            renderHTML: (data) => ({ ...data }),
+          },
+          style: {
+            default:
+              "max-width: 15rem; max-height: 15rem; object-fit: contain;",
+            renderHTML: (data) => ({ ...data }),
+          },
+        };
+      },
+    }).configure({
+      inline: true,
+      // 默认属性值
+      // HTMLAttributes: {
+      //   style: "max-width: 15rem; max-height: 15rem; object-fit: contain;",
+      // },
     }),
     Youtube.extend({
+      renderText() {
+        return `[视频]`;
+      },
       addAttributes() {
         return {
           ...this.parent?.(),
@@ -149,6 +187,24 @@ export default function (limit: number = 3000) {
       allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
       onDrop: handleFileChange,
       onPaste: handleFileChange,
+    }),
+    Emoji.extend({
+      renderText({ node }) {
+        return `[${node.attrs.name}]`;
+      },
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          style: {
+            default:
+              "display: inline-block; max-width: 25px; max-height: 25px; object-fit: contain; user-select: none",
+            renderHTML: (data) => ({ ...data }),
+          },
+        };
+      },
+    }).configure({
+      emojis: faceEmojis,
+      enableEmoticons: true,
     }),
   ];
 }

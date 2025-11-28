@@ -25,6 +25,7 @@ import TextColor from "../Components/TextColor";
 import Undo from "../Components/Undo";
 import Video from "../Components/Video";
 import Agent from "../Components/Agent";
+import Emojis from "../Components/Emojis";
 
 interface ICustomBar {
   icon?: string;
@@ -63,6 +64,11 @@ export default (props: IMenuBar) => {
       icon: "openai-line",
       title: "AI",
       component: Agent,
+    },
+    {
+      icon: "emotion-line",
+      title: "表情",
+      component: Emojis,
     },
     // {
     //   icon: "italic",
