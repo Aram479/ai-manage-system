@@ -90,18 +90,19 @@ const HeaderCmp = () => {
           <ChatListDrawer />
           <Dropdown menu={{ items: avatarItems }} placement="bottom">
             <Avatar
-              icon={<UserOutlined />}
-              size="large"
               src={userInfo?.avatar}
+              size={32}
               style={{ cursor: "pointer" }}
-            />
+            >
+              {userInfo?.username?.charAt(0)}
+            </Avatar>
           </Dropdown>
           <Dropdown menu={{ items: projectUrlItem }} placement="bottom">
             <div style={{ cursor: "pointer" }}>项目地址</div>
           </Dropdown>
         </div>
       </Flex>
-      <UserInfoModal open={userInfoOpen} onCancel={setUserInfoOpen} />
+      <UserInfoModal open={userInfoOpen} onOk={() => setUserInfoOpen(false)} onCancel={setUserInfoOpen} />
     </div>
   );
 };

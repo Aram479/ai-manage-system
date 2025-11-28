@@ -203,13 +203,13 @@ interface ImageNode {
 /**
  * 将 blob URL 转为 RcFile（模拟 RcFile）
  */
-async function blobUrlToRcFile(
+export async function blobUrlToRcFile(
   blobUrl: string,
   filename: string
 ): Promise<RcFile> {
   const response = await fetch(blobUrl);
   const blob = await response.blob();
-
+console.log("blob", blob)
   // 创建 File 对象
   const file = new File([blob], filename, {
     type: blob.type,
@@ -315,16 +315,3 @@ export const replaceImageSrcByTitle = (
     return `<img${beforeSrc} src="${file.url}"${afterSrc}>`;
   });
 };
-
-export async function blobUrlToFile(
-  blobUrl: string,
-  filename: string
-): Promise<File> {
-  const response = await fetch(blobUrl);
-  const blob = await response.blob();
-
-  return new File([blob], filename, {
-    type: blob.type,
-    lastModified: Date.now(),
-  });
-}

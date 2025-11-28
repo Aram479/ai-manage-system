@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
-  Col,
-  Flex,
   Form,
   Image,
   Input,
   message,
   Modal,
   ModalProps,
-  Row,
   Upload,
   UploadProps,
 } from "antd";
@@ -20,142 +17,170 @@ import { getFilenameSuffix } from "@/utils";
 import { uploadAvatarByUser } from "@/services/api/uploadApi";
 import styles from "./index.less";
 
+// 静态常量定义
+const FILE_ACCEPT = ".jpg,.png";
+const MODAL_WIDTH = 600;
+const MODAL_TITLE = "添加朋友";
+
+// 表单规则常量
+const FORM_RULES: Record<string, Rule[]> = {
+  username: [{ required: true, message: "请输入用户名" }],
+};
+
 interface IUserInfoModal extends ModalProps {
   data?: any;
   onOk?: (data?: any) => void;
   onCancel?: (data?: any) => void;
 }
 
-const UserInfoModal = (props: IUserInfoModal) => {
+const UserInfoModal: React.FC<IUserInfoModal> = ({
+  title = MODAL_TITLE,
+  open,
+  onOk,
+  onCancel,
+  ...modalProps
+}) => {
   const { userInfo, updateUserAction } = useModel("user");
-  const { data = {}, title, open, onOk, onCancel, ...modalProps } = props;
+  const [avatarFile, setAvatarFile] = useState<RcFile>();
   const [form] = Form.useForm<IUserInfo>();
   const formValues = Form.useWatch([], form);
-  const fileAccept = ".jpg,.png";
-  const formRules: Record<keyof IUserInfo, Rule[]> = {
-    userId: [],
-    username: [{ required: true }],
-    avatar: [],
-  };
 
+  // 上传头像请求
   const uploadAvatarReq = useRequest(uploadAvatarByUser, {
     manual: true,
     onSuccess: (res) => {
-      form.setFieldValue("avatar", res.fullUrl);
+      const formData = form.getFieldsValue();
+      URL.revokeObjectURL(formData.avatar || "");
+      updateUserAction({
+        ...formData,
+        avatar: res.fullUrl,
+      });
+      onOk?.(formData);
     },
-    onError: () => {},
+    onError: () => {
+      message.error("头像上传失败");
+    },
   });
 
-  const handleBeforeUpload: UploadProps["beforeUpload"] = (file) => {
-    const fileSuffix = getFilenameSuffix(file.name);
-    const fileTypeArr = fileAccept?.split(",");
-    const isFileType = fileTypeArr.includes(`.${fileSuffix}`);
-    if (isFileType) {
+  // 处理文件上传前的校验
+  const handleBeforeUpload = useCallback<
+    NonNullable<UploadProps["beforeUpload"]>
+  >(
+    (file) => {
+      const fileSuffix = getFilenameSuffix(file.name);
+      const fileTypeArr = FILE_ACCEPT.split(",");
+      const isFileType = fileTypeArr.includes(`.${fileSuffix}`);
+
+      if (!isFileType) {
+        const fileTypeMessage = fileTypeArr.join("、");
+        message.error(`请上传${fileTypeMessage}类型文件`);
+        return false;
+      }
+
+      const url = URL.createObjectURL(file);
+      form.setFieldValue("avatar", url);
+      setAvatarFile(file);
+      return Upload.LIST_IGNORE;
+    },
+    [form]
+  );
+
+  // 处理确认操作
+  const handleConfirm = useCallback(async () => {
+    await form.validateFields();
+
+    if (avatarFile) {
       uploadAvatarReq.run({
         userId: userInfo.userId,
-        avatar: file,
+        avatar: avatarFile,
       });
     } else {
-      const fileTypeMessage = fileTypeArr.join("、");
-      message.error(`请上传${fileTypeMessage}类型文件`);
+      // 只有用户名变更
+      const formData = form.getFieldsValue();
+      updateUserAction(formData);
+      message.success("更新成功");
+      onOk?.(formData);
     }
+  }, [
+    form,
+    avatarFile,
+    userInfo.userId,
+    uploadAvatarReq,
+    updateUserAction,
+    onOk,
+  ]);
 
-    return Upload.LIST_IGNORE;
-  };
+  // 处理取消操作
+  const handleCancel = useCallback(() => {
+    onCancel?.();
+  }, [onCancel]);
 
-  const handleConfirm = async () => {
-    const formData = await form.validateFields();
-    updateUserAction(formData);
-    onCancel?.(false);
-    // onOk?.(formData);
-  };
-  const handleCancel = () => {
-    onCancel?.(false);
-  };
-
+  // 模态框打开时初始化表单数据
   useEffect(() => {
     if (open) {
       form.setFieldsValue(userInfo);
+      setAvatarFile(undefined);
     }
-  }, [open, userInfo]);
+  }, [open, userInfo, form]);
 
   return (
     <Modal
       className={styles.userInfoModal}
-      title="添加朋友"
+      title={title}
       open={open}
       maskClosable={false}
-      width={600}
+      width={MODAL_WIDTH}
       onOk={handleConfirm}
       onCancel={handleCancel}
+      confirmLoading={uploadAvatarReq.loading}
       {...modalProps}
     >
       <Form layout="vertical" form={form} preserve={false}>
-        <Row gutter={24}>
-          <Col span={24}>
-            <Form.Item name="userId" label="用户ID" rules={formRules.userId}>
-              <Input placeholder="请输入" disabled allowClear />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              name="username"
-              label="用户名称"
-              rules={formRules.username}
-            >
-              <Input placeholder="请输入" allowClear />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              name="avatar"
-              label="头像"
-              valuePropName="avatar"
-              rules={formRules.avatar}
-            >
-              <Upload
-                name="avatar"
-                listType="picture-circle"
-                accept=".jpg,.png"
-                showUploadList={false}
-                beforeUpload={handleBeforeUpload}
-                // onChange={handleUploadChange}
-              >
-                {formValues?.avatar ? (
-                  <>
-                    <Image
-                      className={styles.uploadAvatar}
-                      src={formValues.avatar}
-                      preview={{
-                        visible: false,
-                        mask: "选择图片",
-                      }}
-                    />
-                    {uploadAvatarReq.loading && (
-                      <Flex
-                        className={styles.loadingMask}
-                        align="center"
-                        justify="center"
-                      >
-                        <LoadingOutlined />
-                        <div>加载中</div>
-                      </Flex>
-                    )}
-                  </>
-                ) : (
-                  <Flex vertical align="center" gap={5}>
-                    {uploadAvatarReq.loading ? (
-                      <LoadingOutlined />
-                    ) : (
-                      <PlusOutlined />
-                    )}
-                    <div>Upload</div>
-                  </Flex>
+        <Form.Item name="userId" label="用户ID">
+          <Input placeholder="请输入" disabled allowClear />
+        </Form.Item>
+
+        <Form.Item name="username" label="用户名称" rules={FORM_RULES.username}>
+          <Input placeholder="请输入" allowClear />
+        </Form.Item>
+
+        <Form.Item name="avatar" label="头像">
+          <Upload
+            name="avatar"
+            listType="picture-circle"
+            accept={FILE_ACCEPT}
+            showUploadList={false}
+            beforeUpload={handleBeforeUpload}
+          >
+            {formValues?.avatar ? (
+              <>
+                <Image
+                  className={styles.uploadAvatar}
+                  src={formValues.avatar}
+                  preview={{
+                    visible: false,
+                    mask: "选择图片",
+                  }}
+                />
+                {uploadAvatarReq.loading && (
+                  <div className={styles.loadingMask}>
+                    <LoadingOutlined />
+                    <div>加载中</div>
+                  </div>
                 )}
-              </Upload>
-            </Form.Item>
-          </Col>
-        </Row>
+              </>
+            ) : (
+              <div className={styles.uploadPlaceholder}>
+                {uploadAvatarReq.loading ? (
+                  <LoadingOutlined />
+                ) : (
+                  <PlusOutlined />
+                )}
+                <div>Upload</div>
+              </div>
+            )}
+          </Upload>
+        </Form.Item>
       </Form>
     </Modal>
   );
