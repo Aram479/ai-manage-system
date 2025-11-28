@@ -197,7 +197,7 @@ export default function (limit: number = 3000) {
           ...this.parent?.(),
           style: {
             default:
-              "display: inline-block; max-width: 25px; max-height: 25px; object-fit: contain; user-select: none",
+              "display: inline-block; width: 22px; height: 22px; object-fit: contain; user-select: none;",
             renderHTML: (data) => ({ ...data }),
           },
         };
