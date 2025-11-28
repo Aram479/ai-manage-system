@@ -153,22 +153,14 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
             beforeUpload={handleBeforeUpload}
           >
             {formValues?.avatar ? (
-              <>
-                <Image
-                  className={styles.uploadAvatar}
-                  src={formValues.avatar}
-                  preview={{
-                    visible: false,
-                    mask: "选择图片",
-                  }}
-                />
-                {uploadAvatarReq.loading && (
-                  <div className={styles.loadingMask}>
-                    <LoadingOutlined />
-                    <div>加载中</div>
-                  </div>
-                )}
-              </>
+              <Image
+                className={styles.uploadAvatar}
+                src={formValues.avatar}
+                preview={{
+                  visible: false,
+                  mask: "选择图片",
+                }}
+              />
             ) : (
               <div className={styles.uploadPlaceholder}>
                 {uploadAvatarReq.loading ? (
