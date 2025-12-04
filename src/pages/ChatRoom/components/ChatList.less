@@ -1,3 +1,5 @@
+@import "../../../asset/css/index.less";
+
 .container {
   height: calc(100vh - 110px);
   display: flex;
@@ -94,6 +96,20 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          user-select: none;
+
+          & .lastMarkDownMessage {
+            & p {
+              .singeLine;
+              width: 100%;
+              margin: 0 !important;
+            }
+
+            & img {
+              width: 16px !important;
+              height: 16px !important;
+            }
+          }
         }
       }
     }

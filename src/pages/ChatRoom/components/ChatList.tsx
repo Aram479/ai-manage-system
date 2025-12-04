@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Input, Avatar, Flex, Button, Tooltip, message, Dropdown } from "antd";
 import { useModel } from "@umijs/max";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { ChatItem, ChatListProps } from "../types";
+import { ChatItem, ChatListProps, Message } from "../types";
 import dayjs from "dayjs";
 import AddFriendModal from "./AddFriendModal";
 import styles from "./ChatList.less";
+import MarkDownCmp from "@/components/MarkDownCmp";
 
 const { Search } = Input;
 
@@ -47,10 +48,15 @@ const ChatList: React.FC<ChatListProps> = ({
   };
 
   // 截断消息内容
-  const truncateMessage = (content: string, maxLength = 30) => {
-    return content.length > maxLength
-      ? `${content.substring(0, maxLength)}...`
-      : content;
+  const truncateMessage = (message: Message) => {
+    const htmlMessageContent = message.htmlContent;
+    const isImg = htmlMessageContent && ~htmlMessageContent.indexOf("img");
+    const isEmoji = htmlMessageContent && ~htmlMessageContent.indexOf("emoji");
+    if (isImg && !isEmoji) {
+      return `[图片]`;
+    } else {
+      return htmlMessageContent?.replace(/(<p[^>]*>.*?)(<br\s*\/?>.*)/gi, '$1...');
+    }
   };
 
   const handleAddFriend = (formValues: ChatItem) => {
@@ -91,7 +97,7 @@ const ChatList: React.FC<ChatListProps> = ({
             ? formatTime(lastMessage.timestamp)
             : "";
           const lastMessageContent = lastMessage
-            ? truncateMessage(lastMessage.content)
+            ? truncateMessage(lastMessage)
             : "";
 
           return (
@@ -104,9 +110,7 @@ const ChatList: React.FC<ChatListProps> = ({
                 })),
               }}
               trigger={["contextMenu"]}
-              // onOpenChange={handleDropdown}
               destroyPopupOnHide
-              // destroyOnHidden
             >
               <div
                 className={`${styles.chatItem} ${
@@ -134,7 +138,12 @@ const ChatList: React.FC<ChatListProps> = ({
                       {lastMessageTime}
                     </span>
                   </div>
-                  <div className={styles.lastMessage}>{lastMessageContent}</div>
+                  <div className={`${styles.lastMessage} singeLine`}>
+                    <MarkDownCmp
+                      className={styles.lastMarkDownMessage}
+                      content={lastMessageContent || ""}
+                    />
+                  </div>
                 </div>
               </div>
             </Dropdown>

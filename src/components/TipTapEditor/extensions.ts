@@ -189,9 +189,14 @@ export default function (limit: number = 3000) {
       onPaste: handleFileChange,
     }),
     Emoji.extend({
+      // 改进renderText方法，确保只有有效emoji才显示
       renderText({ node }) {
-        return `[${node.attrs.name}]`;
+        if (node.attrs.name && node.attrs.name.trim()) {
+          return `[${node.attrs.name}]`;
+        }
+        return "";
       },
+      // 改进addAttributes，只定义必要的属性
       addAttributes() {
         return {
           ...this.parent?.(),
@@ -202,9 +207,25 @@ export default function (limit: number = 3000) {
           },
         };
       },
+      // 改进createNodeSpec，确保只有在真正需要时才创建emoji节点
+      createNodeSpec() {
+        const nodeSpec = this.parent?.();
+        if (nodeSpec && nodeSpec.toDOM) {
+          const originalToDOM = nodeSpec.toDOM;
+          nodeSpec.toDOM = (node: any) => {
+            // 只有当name存在时才渲染为emoji节点
+            if (!node.attrs.name || !node.attrs.name.trim()) {
+              return ["span", {}];
+            }
+            return originalToDOM(node);
+          };
+        }
+        return nodeSpec;
+      },
     }).configure({
       emojis: faceEmojis,
-      enableEmoticons: true,
+      // 关闭enableEmoticons可能避免空格触发的解析问题
+      enableEmoticons: false,
     }),
   ];
 }

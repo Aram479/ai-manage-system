@@ -356,11 +356,11 @@ export function splitHtmlByImagesPreserveBlocks(
         if (src) {
           if (isEmoji) {
             // 移除contentEditable，否则浏览器警告
-            node.parentElement?.removeAttribute('contentEditable')
+            node.parentElement?.removeAttribute("contentEditable");
             currentTextBlock += node.parentElement?.outerHTML;
           } else {
             if (currentTextBlock.trim()) {
-              result.push(currentTextBlock); // 保留原始格式，包括中间的 <br>
+              result.push(currentTextBlock);
               currentTextBlock = "";
             }
             result.push((node.cloneNode(true) as HTMLElement).outerHTML);
@@ -369,8 +369,14 @@ export function splitHtmlByImagesPreserveBlocks(
       } else {
         node.childNodes.forEach(walk);
       }
-    } else if (node.nodeType === Node.TEXT_NODE) {
-      currentTextBlock += node.textContent || "";
+    } else {
+      const parent = node.parentElement;
+      const imgs = parent?.querySelectorAll("img");
+      imgs?.forEach((img) => {
+        const isChildEmoji = img.alt ? ~img.alt.indexOf("emoji") : false;
+        !isChildEmoji && img.remove();
+      }); // 推荐现代写法
+      currentTextBlock = parent?.outerHTML || "";
     }
   }
 
@@ -384,7 +390,10 @@ export function splitHtmlByImagesPreserveBlocks(
 
   const newResult = result.map((content) => {
     // ✅ 第一步：仅移除整个字符串开头的 <br>（包括带属性、自闭合、大小写、前后空白）
-    const cleanedHtml = content?.replace(/^(\s*<br\s*\/?>\s*)+/gi, "");
+    const cleanedHtml = content?.replace(
+      /(<p\b[^>]*>)(\s*<br\s*\/?>\s*)+/gi,
+      "$1"
+    );
     return cleanedHtml;
   });
   return newResult;

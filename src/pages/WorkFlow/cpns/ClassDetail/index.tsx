@@ -90,13 +90,11 @@ const ClassDetail = (props: IStartDetailProps) => {
       // 针对单个手动点击 执行命令
       if (execute) {
         if (execute && execute.isStart) {
-          console.log("执行单个命令", execute);
           chatRef.current?.sendChat(execute.value as string);
         }
       } else if (list?.length) {
         list.forEach((item) => {
           if (item.isStart) {
-            console.log("执行多个命令");
             chatRef.current?.sendChat(item.value as string);
           }
         });

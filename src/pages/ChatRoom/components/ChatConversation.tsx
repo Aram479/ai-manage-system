@@ -11,7 +11,6 @@ import {
 } from "@/context/AgentRoleContext";
 import { JSONContent } from "@tiptap/core";
 import {
-  extractAllContent,
   splitHtmlByImagesPreserveBlocks,
   extractUniqueImageNodes,
   replaceImageSrcByTitle,
@@ -150,6 +149,10 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         // 发送后自动聚焦回输入框
         editorRef.current?.editor?.commands.focus();
         editorRef.current?.editor?.commands.clearContent();
+        // 延迟滚动到底部
+        setTimeout(() => {
+          scrollToBottom();
+        }, 0);
       }
     } else {
       AntdMessage.warning({
@@ -268,8 +271,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         return otherMessages;
       });
     }
-    scrollToBottom();
-  }, [chat.messages, scrollToBottom]);
+  }, [chat.messages]);
 
   // 监听对方发送消息
   useEffect(() => {
@@ -285,6 +287,10 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
   useEffect(() => {
     handleResetAgent?.();
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
   }, []);
 
   return (

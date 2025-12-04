@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { CSSProperties, useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Image, message } from "antd";
 import { CheckOutlined, CopyOutlined } from "@ant-design/icons";
@@ -44,6 +44,8 @@ const remarkPlugins = [remarkGfm, remarkMath, remarkGemoji];
 const rehypePlugins = [rehypeKatex, rehypeRaw] as const;
 
 interface Props {
+  className?: string;
+  style?: CSSProperties;
   content: string;
   theme?: TThemeType;
   copyCode?: boolean;
@@ -179,7 +181,14 @@ const MarkdownImage: React.FC<ImgProps> = React.memo(
 );
 
 const MarkDownCmp: React.FC<Props> = React.memo(
-  ({ content, theme = "default", copyCode = true, loading = false }) => {
+  ({
+    className,
+    style,
+    content,
+    theme = "default",
+    copyCode = true,
+    loading = false,
+  }) => {
     // 生成稳定的id
     const generateId = useCallback(
       (prefix: string, index: number) => {
@@ -252,12 +261,12 @@ const MarkDownCmp: React.FC<Props> = React.memo(
     }, [theme, copyCode, loading, generateId]);
 
     return (
-      <div className="markDownCmp">
+      <div className={`markDownCmp ${className}`} style={style}>
         <ReactMarkdown
           children={content}
           remarkPlugins={remarkPlugins}
-          rehypePlugins={rehypePlugins}
-          components={components}
+          rehypePlugins={[...rehypePlugins]}
+          components={components as any}
         />
       </div>
     );
