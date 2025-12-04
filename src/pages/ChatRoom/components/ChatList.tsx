@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Input, Avatar, Flex, Button, Tooltip, Modal, Form, message } from "antd";
+import { Input, Avatar, Flex, Button, Tooltip, message, Dropdown } from "antd";
+import { useModel } from "@umijs/max";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
 import { ChatItem, ChatListProps } from "../types";
-import styles from "./ChatList.less";
+import dayjs from "dayjs";
 import AddFriendModal from "./AddFriendModal";
+import styles from "./ChatList.less";
 
 const { Search } = Input;
 
@@ -14,9 +15,21 @@ const ChatList: React.FC<ChatListProps> = ({
   onSelectChat,
   onSearch,
   onAddConfirm,
+  onRemove,
   searchKeyword,
 }) => {
+  const { userInfo } = useModel("user");
   const [addFriendOpen, setAddFriendOpen] = useState(false);
+  const chatActionItems = [
+    {
+      key: "delete",
+      label: "删除",
+      danger: true,
+      onClick: (info: any, chat: ChatItem) => {
+        onRemove?.(chat);
+      },
+    },
+  ];
   // 格式化时间显示
   const formatTime = (timestamp: string) => {
     const messageTime = dayjs(timestamp);
@@ -41,8 +54,11 @@ const ChatList: React.FC<ChatListProps> = ({
   };
 
   const handleAddFriend = (formValues: ChatItem) => {
-    const isInclude = chatList?.find(item => formValues.id === item.id)
-    if(isInclude) return message.error('已添加朋友')
+    if (formValues.id === userInfo.userId) {
+      return message.error("不允许添加自己为好友");
+    }
+    const isInclude = chatList?.find((item) => formValues.id === item.id);
+    if (isInclude) return message.error("已添加朋友");
     onAddConfirm?.(formValues);
     setAddFriendOpen(false);
   };
@@ -79,29 +95,49 @@ const ChatList: React.FC<ChatListProps> = ({
             : "";
 
           return (
-            <div
+            <Dropdown
               key={chat.id}
-              className={`${styles.chatItem} ${
-                selectedChatId === chat.id ? styles.selected : ""
-              }`}
-              onClick={() => onSelectChat(chat.id)}
+              menu={{
+                items: chatActionItems.map((item) => ({
+                  ...item,
+                  onClick: (info) => item.onClick(info, chat),
+                })),
+              }}
+              trigger={["contextMenu"]}
+              // onOpenChange={handleDropdown}
+              destroyPopupOnHide
+              // destroyOnHidden
             >
-              <div className={styles.avatarContainer}>
-                <Avatar src={chat.avatar} alt={chat.name}>
-                  {chat.name.charAt(0)}
-                </Avatar>
-                {chat.unreadCount > 0 && (
-                  <div className={styles.unreadBadge}>{chat.unreadCount}</div>
-                )}
-              </div>
-              <div className={styles.chatInfo}>
-                <div className={styles.chatHeader}>
-                  <span className={styles.chatName}>{chat.name}</span>
-                  <span className={styles.messageTime}>{lastMessageTime}</span>
+              <div
+                className={`${styles.chatItem} ${
+                  selectedChatId === chat.id ? styles.selected : ""
+                }`}
+                onClick={() => onSelectChat(chat.id)}
+              >
+                <div className={styles.avatarContainer}>
+                  <Avatar
+                    shape="square"
+                    size={40}
+                    src={chat.avatar}
+                    alt={chat.name}
+                  >
+                    {chat.name.charAt(0)}
+                  </Avatar>
+                  {chat.unreadCount > 0 && (
+                    <div className={styles.unreadBadge}>{chat.unreadCount}</div>
+                  )}
                 </div>
-                <div className={styles.lastMessage}>{lastMessageContent}</div>
+                <div className={styles.chatInfo}>
+                  <div className={styles.chatHeader}>
+                    <span className={styles.chatName}>{chat.name}</span>
+                    <span className={styles.messageTime}>
+                      {lastMessageTime}
+                    </span>
+                  </div>
+                  <div className={styles.lastMessage}>{lastMessageContent}</div>
+                </div>
               </div>
-            </div>
+            </Dropdown>
           );
         })}
         {chatList.length === 0 && (

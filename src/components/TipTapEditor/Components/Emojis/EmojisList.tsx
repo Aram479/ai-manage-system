@@ -18,7 +18,7 @@ const EmojisList = (props: IEmojisList) => {
   const allEmojis = getEmojisByCategory(EmojiCategory.ALL);
 
   const handleEmoji = (emoji: (typeof allEmojis)[number]) => {
-    editor?.chain().focus().setEmoji(emoji.name).run();
+    editor?.chain().setEmoji(emoji.name).focus().run();
   };
 
   return (
@@ -28,6 +28,7 @@ const EmojisList = (props: IEmojisList) => {
           key={emoji.name}
           src={getEmojiPath(emoji.name as EmojiName) || ""}
           alt={emoji.name}
+          title={emoji.name}
           className={styles.emojiItem}
           onClick={() => handleEmoji(emoji)}
         />

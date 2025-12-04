@@ -10,7 +10,12 @@ import {
   useAgentRoleContext,
 } from "@/context/AgentRoleContext";
 import { JSONContent } from "@tiptap/core";
-import { extractUniqueImageNodes, replaceImageSrcByTitle } from "@/utils";
+import {
+  extractAllContent,
+  splitHtmlByImagesPreserveBlocks,
+  extractUniqueImageNodes,
+  replaceImageSrcByTitle,
+} from "@/utils";
 import { uploadChatImageById } from "@/services/api/uploadApi";
 import MarkDownCmp from "@/components/MarkDownCmp";
 import TipTapEditor from "@/components/TipTapEditor";
@@ -109,6 +114,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   const handleSend = async (msg?: string) => {
     const sendMessage = (msg || message).trim();
     let sendHtmlMseeage = htmlMessage.trim();
+
     if (sendHtmlMseeage) {
       if (isConnected && chat?.id) {
         const imgFileList = await extractUniqueImageNodes(jsonMessage);
@@ -129,11 +135,15 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               URL.revokeObjectURL(item.src);
             });
         }
-        onSendMessage?.({
-          htmlContent: sendHtmlMseeage,
-          content: sendMessage,
-          chatId: chat.id,
+        const splitMessage = splitHtmlByImagesPreserveBlocks(sendHtmlMseeage);
+        splitMessage.forEach((message) => {
+          onSendMessage?.({
+            htmlContent: message as string,
+            content: sendMessage,
+            chatId: chat.id,
+          });
         });
+
         setMessage("");
         setHtmlMessage("");
         setJSONMessage({});
@@ -145,6 +155,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
       AntdMessage.warning({
         key: "noContent",
         content: "消息不能为空",
+        duration: 3,
       });
       setMessage("");
       setHtmlMessage(" ");
@@ -169,7 +180,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   // 渲染单个消息行
   const renderMessageRow = (msg: Message, index: number) => {
     return (
-      <React.Fragment key={msg?.id || `msg-${index}`}>
+      <React.Fragment key={`${msg?.id}-${index}` || `msg-${index}`}>
         {renderDateSeparator(msg, index)}
         <div
           className={`${styles.messageRow} ${
@@ -207,13 +218,21 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
                 </Tag>
               </div>
             )}
-            <div className={styles.messageText}>
-              <MarkDownCmp
-                theme="onDark"
-                content={String(msg.htmlContent)}
-                copyCode={true}
-              />
-            </div>
+            {~msg.htmlContent!.indexOf("img") &&
+            !~msg.htmlContent!.indexOf("emoji") ? (
+              <div className={styles.messageImg}>
+                <MarkDownCmp theme="onDark" content={String(msg.htmlContent)} />
+              </div>
+            ) : (
+              <div className={styles.messageText}>
+                <MarkDownCmp
+                  theme="onDark"
+                  content={String(msg.htmlContent)}
+                  copyCode={true}
+                />
+              </div>
+            )}
+
             <div
               className={
                 msg.sender === "me"

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Button, Flex, Layout } from "antd";
+import { Button, Flex, Layout, message } from "antd";
 import { useModel } from "@umijs/max";
 import { useKeepAlive } from "@/hooks/useKeepAlive";
 import { ChatConversationProps, ChatItem, Message } from "./types";
@@ -11,6 +11,7 @@ import ChatConversation from "./components/ChatConversation";
 
 import _ from "lodash";
 import styles from "./index.less";
+import localCache from "@/utils/cache";
 
 const { Sider, Content } = Layout;
 
@@ -19,7 +20,9 @@ const ChatRoom = () => {
 
   const { userInfo } = useModel("user");
   // 当前用户ID (实际应用中应从认证系统获取)
-  const [chatList, setChatList] = useState<ChatItem[]>(mockChatData);
+  const [chatList, setChatList] = useState<ChatItem[]>(
+    localCache.getItem("chatList") || []
+  );
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isCollapse, setIsCollapse] = useState(false);
@@ -159,9 +162,16 @@ const ChatRoom = () => {
   // 添加朋友
   const handleAddFriend = (formValues: ChatItem) => {
     const newChatList = _.uniqBy([...chatList, formValues], "id");
+
     setChatList(newChatList);
   };
 
+  // 删除朋友
+  const handleRemoveFriend = (chat: ChatItem) => {
+    // 删除对应item项
+    const newChatList = _.reject(chatList, { id: chat.id });
+    setChatList(newChatList);
+  };
   // 处理搜索
   const filteredChatList = chatList?.filter(
     (chat) =>
@@ -170,6 +180,10 @@ const ChatRoom = () => {
         msg.content.toLowerCase().includes(searchKeyword.toLowerCase())
       )
   );
+
+  useEffect(() => {
+    localCache.setItem("chatList", chatList);
+  }, [chatList]);
 
   return (
     <Layout className={styles.container}>
@@ -190,6 +204,7 @@ const ChatRoom = () => {
               onSelectChat={handleSelectChat}
               onSearch={setSearchKeyword}
               onAddConfirm={handleAddFriend}
+              onRemove={handleRemoveFriend}
             />
           </div>
           {!isCollapse && (

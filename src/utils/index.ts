@@ -194,9 +194,9 @@ interface ImageNode {
 interface ImageNode {
   type: "image";
   attrs: {
-    src: string;
-    title?: string; // 假设 title 是文件名字符串（如 "photo.png"）
     [key: string]: any;
+    title: string; // 假设 title 是文件名字符串（如 "photo.png"）
+    src: string;
   };
 }
 
@@ -221,6 +221,26 @@ export async function blobUrlToRcFile(
   }) as RcFile;
 
   return rcFile;
+}
+
+// 定义类型（可选但推荐）
+interface Node {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: Node[];
+}
+
+// 递归提取聊天室的对话数据中所有 content 数组中的元素（扁平化）
+export function extractAllContent(node: JSONContent = {}): JSONContent[] {
+  if (!node.content || !Array.isArray(node.content)) {
+    return [];
+  }
+
+  // 对当前 content 中的每个子节点，递归提取其 content，并合并
+  return _.flatMap(node.content, (child) => [
+    child, // 保留当前子节点本身
+    ...extractAllContent(child), // 递归提取它的 content
+  ]);
 }
 
 /**
@@ -294,8 +314,8 @@ export const extractUniqueImageNodes = async (
 export const replaceImageSrcByTitle = (
   html: string,
   file: {
-    name: string,
-    url: string
+    name: string;
+    url: string;
   }
 ): string => {
   // 正则说明：
@@ -314,3 +334,58 @@ export const replaceImageSrcByTitle = (
     return `<img${beforeSrc} src="${file.url}"${afterSrc}>`;
   });
 };
+
+type HtmlPart = string;
+
+// 发送消息时 将图片(非表情)与其他元素区分开
+export function splitHtmlByImagesPreserveBlocks(
+  htmlString: string
+): HtmlPart[] {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = `<div>${htmlString}</div>`; // 包裹防止解析错乱
+
+  const result: HtmlPart[] = [];
+  let currentTextBlock = "";
+
+  function walk(node: ChildNode) {
+    if (node.nodeType === Node.ELEMENT_NODE && node instanceof HTMLElement) {
+      const src = node.getAttribute("src")?.trim();
+      const alt = node.getAttribute("alt");
+      const isEmoji = alt ? ~alt.indexOf("emoji") : false;
+      if (node.tagName.toLowerCase() === "img") {
+        if (src) {
+          if (isEmoji) {
+            // 移除contentEditable，否则浏览器警告
+            node.parentElement?.removeAttribute('contentEditable')
+            currentTextBlock += node.parentElement?.outerHTML;
+          } else {
+            if (currentTextBlock.trim()) {
+              result.push(currentTextBlock); // 保留原始格式，包括中间的 <br>
+              currentTextBlock = "";
+            }
+            result.push((node.cloneNode(true) as HTMLElement).outerHTML);
+          }
+        }
+      } else {
+        node.childNodes.forEach(walk);
+      }
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      currentTextBlock += node.textContent || "";
+    }
+  }
+
+  const container = tempDiv.firstElementChild;
+  if (container) {
+    container.childNodes.forEach(walk);
+    if (currentTextBlock.trim()) {
+      result.push(currentTextBlock);
+    }
+  }
+
+  const newResult = result.map((content) => {
+    // ✅ 第一步：仅移除整个字符串开头的 <br>（包括带属性、自闭合、大小写、前后空白）
+    const cleanedHtml = content?.replace(/^(\s*<br\s*\/?>\s*)+/gi, "");
+    return cleanedHtml;
+  });
+  return newResult;
+}

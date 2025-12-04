@@ -30,6 +30,7 @@ export interface ChatListProps {
   onSelectChat: (chatId: string) => void;
   onSearch: (keyword: string) => void;
   onAddConfirm: (friend: ChatItem) => void;
+  onRemove: (chat: ChatItem) => void
   searchKeyword: string;
 }
 
