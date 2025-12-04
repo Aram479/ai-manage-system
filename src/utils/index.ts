@@ -347,54 +347,83 @@ export function splitHtmlByImagesPreserveBlocks(
   const result: HtmlPart[] = [];
   let currentTextBlock = "";
 
+  /**
+   * 递归遍历DOM树，按照原始顺序处理节点
+   */
   function walk(node: ChildNode) {
     if (node.nodeType === Node.ELEMENT_NODE && node instanceof HTMLElement) {
-      const src = node.getAttribute("src")?.trim();
-      const alt = node.getAttribute("alt");
-      const isEmoji = alt ? ~alt.indexOf("emoji") : false;
       if (node.tagName.toLowerCase() === "img") {
-        if (src) {
-          if (isEmoji) {
-            // 移除contentEditable，否则浏览器警告
-            node.parentElement?.removeAttribute("contentEditable");
-            currentTextBlock += node.parentElement?.outerHTML;
-          } else {
-            if (currentTextBlock.trim()) {
-              result.push(currentTextBlock);
-              currentTextBlock = "";
-            }
-            result.push((node.cloneNode(true) as HTMLElement).outerHTML);
-          }
-        }
+        // 处理图片元素
+        processImageElement(node);
       } else {
-        node.childNodes.forEach(walk);
+        // 处理非图片元素
+        processNonImageElement(node);
       }
-    } else {
-      const parent = node.parentElement;
-      const imgs = parent?.querySelectorAll("img");
-      imgs?.forEach((img) => {
-        const isChildEmoji = img.alt ? ~img.alt.indexOf("emoji") : false;
-        !isChildEmoji && img.remove();
-      }); // 推荐现代写法
-      currentTextBlock = parent?.outerHTML || "";
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      // 处理文本节点
+      currentTextBlock += node.textContent || "";
     }
   }
 
+  /**
+   * 处理图片元素
+   */
+  function processImageElement(img: HTMLElement) {
+    const src = img.getAttribute("src")?.trim();
+    const alt = img.getAttribute("alt") || "";
+    const isEmoji = alt.includes("emoji");
+
+    if (src) {
+      // 如果当前有文本块，先将其添加到结果中
+      if (currentTextBlock.trim()) {
+        result.push(currentTextBlock);
+        currentTextBlock = "";
+      }
+
+      if (isEmoji) {
+        // 处理表情符号，保留父元素结构
+        const parentElement = img.parentElement;
+        if (parentElement) {
+          // 移除contentEditable属性以避免浏览器警告
+          parentElement.removeAttribute("contentEditable");
+          result.push(parentElement.outerHTML);
+        } else {
+          result.push(img.outerHTML);
+        }
+      } else {
+        // 处理普通图片
+        result.push(img.outerHTML);
+      }
+    }
+  }
+
+  /**
+   * 处理非图片元素
+   */
+  function processNonImageElement(element: HTMLElement) {
+    // 对于<br>标签，转换为换行符以保留换行效果
+    if (element.tagName.toLowerCase() === "br") {
+      currentTextBlock += "\n";
+      return;
+    }
+
+    // 对于其他非图片元素，递归处理其子节点
+    element.childNodes.forEach(walk);
+  }
+
+  // 开始遍历DOM树
   const container = tempDiv.firstElementChild;
   if (container) {
     container.childNodes.forEach(walk);
+    
+    // 将最后剩余的文本块添加到结果中
     if (currentTextBlock.trim()) {
       result.push(currentTextBlock);
     }
   }
 
-  const newResult = result.map((content) => {
-    // ✅ 第一步：仅移除整个字符串开头的 <br>（包括带属性、自闭合、大小写、前后空白）
-    const cleanedHtml = content?.replace(
-      /(<p\b[^>]*>)(\s*<br\s*\/?>\s*)+/gi,
-      "$1"
-    );
-    return cleanedHtml;
-  });
-  return newResult;
+  // 清理结果：移除每个内容块开头的多余<br>标签
+  return result.map((content) => 
+    content.replace(/(<p\b[^>]*>)(\s*<br\s*\/?>\s*)+/gi, "$1")
+  );
 }

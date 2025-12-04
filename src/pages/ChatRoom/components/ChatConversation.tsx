@@ -221,19 +221,26 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
                 </Tag>
               </div>
             )}
-            {~msg.htmlContent!.indexOf("img") &&
-            !~msg.htmlContent!.indexOf("emoji") ? (
-              <div className={styles.messageImg}>
-                <MarkDownCmp theme="onDark" content={String(msg.htmlContent)} />
-              </div>
-            ) : (
-              <div className={styles.messageText}>
-                <MarkDownCmp
-                  theme="onDark"
-                  content={String(msg.htmlContent)}
-                  copyCode={true}
-                />
-              </div>
+            {msg.content?.trim() && (
+              <>
+                {~msg.htmlContent!.indexOf("img") &&
+                !~msg.htmlContent!.indexOf("emoji") ? (
+                  <div className={styles.messageImg}>
+                    <MarkDownCmp
+                      theme="onDark"
+                      content={String(msg.htmlContent)}
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.messageText}>
+                    <MarkDownCmp
+                      theme="onDark"
+                      content={String(msg.htmlContent)}
+                      copyCode={true}
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             <div
@@ -271,7 +278,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         return otherMessages;
       });
     }
-  }, [chat.messages]);
+    scrollToBottom()
+  }, [chat.messages, scrollToBottom]);
 
   // 监听对方发送消息
   useEffect(() => {

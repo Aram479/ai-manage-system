@@ -160,7 +160,8 @@ const TipTapEditor = (props: ITipTapEditor, ref: Ref<IEditorRef>) => {
     // 傻逼tiptap <br>会在浏览器渲染两次, 给它干掉！
     editorHtml = editorHtml
       .replace(new RegExp('<br class="ProseMirror-trailingBreak">', "g"), " ")
-      .replace(/<p\b[^>]*>(?:\s*<br\s*\/?>\s*)*\s*<\/p>/gi, "");
+      .replace(/<p\b[^>]*>(?:\s*<br\s*\/?>\s*)*\s*<\/p>/gi, "")
+      .replace(new RegExp('<img class="ProseMirror-separator" alt="">', "g"), "");
     onChange?.({
       text: editorData.getText(),
       html: editorHtml,

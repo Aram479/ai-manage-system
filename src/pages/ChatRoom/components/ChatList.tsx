@@ -138,7 +138,7 @@ const ChatList: React.FC<ChatListProps> = ({
                       {lastMessageTime}
                     </span>
                   </div>
-                  <div className={`${styles.lastMessage} singeLine`}>
+                  <div className={styles.lastMessage}>
                     <MarkDownCmp
                       className={styles.lastMarkDownMessage}
                       content={lastMessageContent || ""}
