@@ -1,11 +1,166 @@
-.loginPage {
+// 登录页面样式
+.loginContainer {
   width: 100%;
   height: 100%;
+  // background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
 
+.loginCard {
+  width: 100%;
+  max-width: 450px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  padding: 40px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  .logo {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
+.loginCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.form {
+  width: 100%;
+}
+
+.formItem {
+  margin-bottom: 20px;
+}
+
+.formItem label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  height: 45px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: #ffffff;
+}
+
+.inputIcon {
+  color: #999;
+  font-size: 16px;
+}
+
+.forgotPassword {
+  text-align: right;
+  margin-bottom: 25px;
+}
+
+.forgotPassword a {
+  font-size: 13px;
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgotPassword a:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
+.loginButton {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4292 100%) !important;
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.registerLink {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.registerLink a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  margin-left: 5px;
+}
+
+.registerLink a:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
+// 响应式设计
+@media (max-width: 576px) {
+  .loginCard {
+    padding: 25px;
+    border-radius: 15px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .input {
+    height: 42px;
+  }
+
+  .loginButton {
+    height: 44px;
   }
 }

@@ -119,40 +119,6 @@ export const fixJSONSyntax = (str: string): string => {
   return result;
 };
 
-export const generateMockToken = (
-  payload: MockTokenPayload,
-  options: { expireInSeconds?: number } = {}
-): string => {
-  const { expireInSeconds = 3600 } = options;
-
-  // 安全的 Base64 编码（支持 Unicode）
-  const safeBtoa = (str: string): string => {
-    return btoa(unescape(encodeURIComponent(str)));
-  };
-
-  // Base64URL 编码（JWT 标准）
-  const base64UrlEncode = (obj: unknown): string => {
-    return safeBtoa(JSON.stringify(obj))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
-  };
-
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "HS256", typ: "JWT" };
-  const fullPayload = {
-    iat: now,
-    exp: now + expireInSeconds,
-    ...payload,
-  };
-
-  const encodedHeader = base64UrlEncode(header);
-  const encodedPayload = base64UrlEncode(fullPayload);
-  const fakeSignature = "fake-signature-for-demo";
-
-  return `${encodedHeader}.${encodedPayload}.${fakeSignature}`;
-};
-
 export const copy = (text: string) => {
   let textValue = document.createElement("textarea");
   textValue.setAttribute("readonly", "readonly"); //设置只读属性防止手机上弹出软键盘

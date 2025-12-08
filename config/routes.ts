@@ -16,6 +16,12 @@ const routes: IRouteTypes[] = [
     wrappers: ["@/wrappers/auth"],
     layout: false,
   },
+  {
+    path: "/register",
+    component: "@/pages/Register",
+    wrappers: ["@/wrappers/auth"],
+    layout: false,
+  },
   // 管理系统相关页面
   {
     name: "System",

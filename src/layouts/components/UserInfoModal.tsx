@@ -20,11 +20,12 @@ import styles from "./index.less";
 // 静态常量定义
 const FILE_ACCEPT = ".jpg,.png";
 const MODAL_WIDTH = 600;
-const MODAL_TITLE = "添加朋友";
+const MODAL_TITLE = "用户信息";
 
 // 表单规则常量
-const FORM_RULES: Record<string, Rule[]> = {
+const formRules: Record<string, Rule[]> = {
   username: [{ required: true, message: "请输入用户名" }],
+  email: [{ required: true, message: "请输入邮箱" }],
 };
 
 interface IUserInfoModal extends ModalProps {
@@ -98,13 +99,12 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
       // 只有用户名变更
       const formData = form.getFieldsValue();
       updateUserAction(formData);
-      message.success("更新成功");
       onOk?.(formData);
     }
   }, [
     form,
     avatarFile,
-    userInfo.userId,
+    userInfo?.userId,
     uploadAvatarReq,
     updateUserAction,
     onOk,
@@ -140,7 +140,11 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
           <Input placeholder="请输入" disabled allowClear />
         </Form.Item>
 
-        <Form.Item name="username" label="用户名称" rules={FORM_RULES.username}>
+        <Form.Item name="username" label="用户名称" rules={formRules.username}>
+          <Input placeholder="请输入" allowClear />
+        </Form.Item>
+
+        <Form.Item name="email" label="邮箱" rules={formRules.email}>
           <Input placeholder="请输入" allowClear />
         </Form.Item>
 

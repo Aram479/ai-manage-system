@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "@umijs/max";
 import localCache from "@/utils/cache";
 
-const AuthWrapper: React.FC = (AAA) => {
+const AuthWrapper: React.FC = () => {
   const location = useLocation();
   const token = localCache.getItem("token");
 
@@ -15,8 +15,8 @@ const AuthWrapper: React.FC = (AAA) => {
     return <Outlet />;
   }
 
-  // 如果未登录且不在登录页，重定向到登录页
-  if (location.pathname !== "/Login") {
+  // 如果未登录且不在登录页或注册页，重定向到登录页
+  if (location.pathname !== "/Login" && location.pathname !== "/register") {
     return <Navigate to="/Login" replace />;
   }
 
