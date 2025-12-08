@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Input, Avatar, Flex, Button, Tooltip, message, Dropdown } from "antd";
-import { useModel } from "@umijs/max";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { HomeOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { history, useModel } from "@umijs/max";
 import { ChatItem, ChatListProps, Message } from "../types";
 import dayjs from "dayjs";
 import AddFriendModal from "./AddFriendModal";
-import styles from "./ChatList.less";
 import MarkDownCmp from "@/components/MarkDownCmp";
+import styles from "./ChatList.less";
 
 const { Search } = Input;
 
@@ -55,7 +55,10 @@ const ChatList: React.FC<ChatListProps> = ({
     if (isImg && !isEmoji) {
       return `[图片]`;
     } else {
-      return htmlMessageContent?.replace(/(<p[^>]*>.*?)(<br\s*\/?>.*)/gi, '$1...');
+      return htmlMessageContent?.replace(
+        /(<p[^>]*>.*?)(<br\s*\/?>.*)/gi,
+        "$1..."
+      );
     }
   };
 
@@ -73,6 +76,15 @@ const ChatList: React.FC<ChatListProps> = ({
     <div className={styles.container}>
       <div className={styles.searchContainer}>
         <Flex gap={5}>
+          <Tooltip title="返回首页">
+            <Button
+              type="text"
+              icon={<HomeOutlined />}
+              onClick={() => {
+                history.push("/");
+              }}
+            />
+          </Tooltip>
           <Search
             placeholder="搜索聊天"
             allowClear

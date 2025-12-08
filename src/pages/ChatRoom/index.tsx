@@ -1,9 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
-import { Button, Flex, Layout, message } from "antd";
+import { Button, Flex, Layout } from "antd";
 import { useModel } from "@umijs/max";
-import { useKeepAlive } from "@/hooks/useKeepAlive";
 import { ChatConversationProps, ChatItem, Message } from "./types";
-import { mockChatData } from "./mockData";
 import { useSocket } from "@/hooks/useSocket";
 import { useNotification } from "@/hooks/useNotification";
 import ChatList from "./components/ChatList";
@@ -186,63 +184,65 @@ const ChatRoom = () => {
   }, [chatList]);
 
   return (
-    <Layout className={styles.container}>
-      <Sider
-        width="18vw"
-        theme="light"
-        className={styles.sider}
-        breakpoint="lg"
-        collapsedWidth={0}
-        onCollapse={(collapse) => setIsCollapse(collapse)}
-      >
-        <Flex vertical>
-          <div style={{ overflowY: "auto" }}>
-            <ChatList
-              chatList={filteredChatList}
-              searchKeyword={searchKeyword}
-              selectedChatId={selectedChatId}
-              onSelectChat={handleSelectChat}
-              onSearch={setSearchKeyword}
-              onAddConfirm={handleAddFriend}
-              onRemove={handleRemoveFriend}
-            />
-          </div>
-          {!isCollapse && (
-            <div className={styles.connectionStatus}>
-              <Flex
-                align="center"
-                justify="space-between"
-                style={{ width: "100%" }}
-              >
-                <div>WebSocket状态:</div>
-                <Flex vertical gap={2}>
-                  <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
-                  {!isConnected && (
-                    <Button type="primary" size="small" onClick={reconnect}>
-                      重新连接
-                    </Button>
-                  )}
+    <div className={styles.container}>
+      <Layout className={styles.layout}>
+        <Sider
+          width={250}
+          theme="light"
+          className={styles.sider}
+          breakpoint="lg"
+          collapsedWidth={0}
+          onCollapse={(collapse) => setIsCollapse(collapse)}
+        >
+          <Flex vertical>
+            <div style={{ overflowY: "auto" }}>
+              <ChatList
+                chatList={filteredChatList}
+                searchKeyword={searchKeyword}
+                selectedChatId={selectedChatId}
+                onSelectChat={handleSelectChat}
+                onSearch={setSearchKeyword}
+                onAddConfirm={handleAddFriend}
+                onRemove={handleRemoveFriend}
+              />
+            </div>
+            {!isCollapse && (
+              <div className={styles.connectionStatus}>
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  style={{ width: "100%" }}
+                >
+                  <div>WebSocket状态:</div>
+                  <Flex vertical gap={2}>
+                    <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
+                    {!isConnected && (
+                      <Button type="primary" size="small" onClick={reconnect}>
+                        重新连接
+                      </Button>
+                    )}
+                  </Flex>
                 </Flex>
-              </Flex>
+              </div>
+            )}
+          </Flex>
+        </Sider>
+        <Content className={styles.content}>
+          {selectedChat ? (
+            <ChatConversation
+              chat={selectedChat}
+              onSendMessage={handleSendMessage}
+              isConnected={isConnected}
+            />
+          ) : (
+            <div className={styles.emptyContainer}>
+              <h2>选择一个聊天开始对话</h2>
             </div>
           )}
-        </Flex>
-      </Sider>
-      <Content className={styles.content}>
-        {selectedChat ? (
-          <ChatConversation
-            chat={selectedChat}
-            onSendMessage={handleSendMessage}
-            isConnected={isConnected}
-          />
-        ) : (
-          <div className={styles.emptyContainer}>
-            <h2>选择一个聊天开始对话</h2>
-          </div>
-        )}
-      </Content>
-    </Layout>
+        </Content>
+      </Layout>
+    </div>
   );
 };
 
-export default useKeepAlive(ChatRoom, ChatRoom.name);
+export default ChatRoom;

@@ -1,5 +1,5 @@
 import { Menu, MenuProps } from "antd";
-import { history, useRouteProps, useSelectedRoutes } from "@umijs/max";
+import { history, useRouteProps } from "@umijs/max";
 import styles from "./index.less";
 import React, { useMemo } from "react";
 import _ from "lodash";
@@ -19,7 +19,7 @@ const MenuCmp = (props: IMenuCmp) => {
         const icon = item.meta?.icon;
         const iconNode = icon
           ? React.createElement(Icon, {
-              component: icon,
+              component: icon as any,
               style: { fontSize: "1.4em" },
             })
           : undefined;
@@ -33,6 +33,10 @@ const MenuCmp = (props: IMenuCmp) => {
   }, [systemRoutes]);
 
   const handleMenuItemChange: MenuProps["onSelect"] = (menuItem) => {
+    if (menuItem.key === "/GoToChatRoom") {
+      history.push("/ChatRoom");
+      return;
+    }
     history.push(menuItem.key);
   };
 

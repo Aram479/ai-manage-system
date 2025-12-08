@@ -374,24 +374,22 @@ export function splitHtmlByImagesPreserveBlocks(
     const isEmoji = alt.includes("emoji");
 
     if (src) {
-      // 如果当前有文本块，先将其添加到结果中
-      if (currentTextBlock.trim()) {
-        result.push(currentTextBlock);
-        currentTextBlock = "";
-      }
-
       if (isEmoji) {
-        // 处理表情符号，保留父元素结构
+        // 处理表情符号，将其添加到当前文本块中（与文字连接）
         const parentElement = img.parentElement;
         if (parentElement) {
           // 移除contentEditable属性以避免浏览器警告
           parentElement.removeAttribute("contentEditable");
-          result.push(parentElement.outerHTML);
+          currentTextBlock += parentElement.outerHTML;
         } else {
-          result.push(img.outerHTML);
+          currentTextBlock += img.outerHTML;
         }
       } else {
-        // 处理普通图片
+        // 处理普通图片，先完成当前文本块
+        if (currentTextBlock.trim()) {
+          result.push(currentTextBlock);
+          currentTextBlock = "";
+        }
         result.push(img.outerHTML);
       }
     }
@@ -403,7 +401,7 @@ export function splitHtmlByImagesPreserveBlocks(
   function processNonImageElement(element: HTMLElement) {
     // 对于<br>标签，转换为换行符以保留换行效果
     if (element.tagName.toLowerCase() === "br") {
-      currentTextBlock += "\n";
+      currentTextBlock += "<br>";
       return;
     }
 

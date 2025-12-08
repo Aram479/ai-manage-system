@@ -236,7 +236,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
                     <MarkDownCmp
                       theme="onDark"
                       content={String(msg.htmlContent)}
-                      copyCode={true}
+                      copyCode={false}
                     />
                   </div>
                 )}
@@ -278,8 +278,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         return otherMessages;
       });
     }
-    scrollToBottom()
-  }, [chat.messages, scrollToBottom]);
+  }, [chat.messages]);
 
   // 监听对方发送消息
   useEffect(() => {
@@ -295,9 +294,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
   useEffect(() => {
     handleResetAgent?.();
-  }, []);
-
-  useEffect(() => {
     scrollToBottom();
   }, []);
 

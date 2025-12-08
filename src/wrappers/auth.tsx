@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "@umijs/max";
 import localCache from "@/utils/cache";
 
-const AuthWrapper: React.FC = () => {
+const AuthWrapper: React.FC = (AAA) => {
   const location = useLocation();
   const token = localCache.getItem("token");
 
