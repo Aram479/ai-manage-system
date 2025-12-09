@@ -6,6 +6,7 @@ import {
   registerApi,
   getUserInfoApi,
   updateUserInfoApi,
+  updateUserPasswordApi,
 } from "@/services/api/loginApi";
 import localCache from "@/utils/cache";
 import routes from "../../config/routes";
@@ -53,22 +54,7 @@ const user = () => {
     },
   });
 
-  const updateUserAction = (userData: typeof userInfo) => {
-    updateUserInfoReq.run(userData);
-  };
-
-  // 注册功能
-  const registerAction = async (registerData: IRegisterData) => {
-    registerReq.run(registerData);
-  };
-
-  // 登录功能
-  const loginAction = async (loginData: ILoginData) => {
-    loginReq.run(loginData);
-  };
-
   const logoutAction = () => {
-    localCache.removeItem("userInfo");
     localCache.removeItem("token");
     history.push("/Login");
   };
@@ -86,10 +72,10 @@ const user = () => {
     userList,
     setUserList,
     setUserInfo,
-    loginAction,
-    registerAction,
+    loginReq,
+    registerReq,
     logoutAction,
-    updateUserAction,
+    updateUserInfoReq,
   };
 };
 export default user;

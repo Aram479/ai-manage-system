@@ -13,3 +13,6 @@ interface ILoginData {
 interface IRegisterData extends ILoginData {
   confirmPassword: string;
 }
+type TFormEditPsd = ApiTypes.TEditPsd & {
+  confirmPassword: string;
+};

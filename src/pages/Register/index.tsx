@@ -6,7 +6,7 @@ import Logo from "@/asset/png/logo.png";
 import styles from "./index.less";
 
 const RegisterPage = () => {
-  const { registerAction } = useModel("user");
+  const { registerReq } = useModel("user");
   const [form] = Form.useForm<IRegisterData>();
 
   // 注册表单规则
@@ -37,7 +37,7 @@ const RegisterPage = () => {
     const values = await form.validateFields();
     const { confirmPassword, ...registerData } = values;
     try {
-      registerAction(registerData as any);
+      registerReq.run(registerData as any);
     } catch (error) {
       message.error("注册失败，请重试");
     }

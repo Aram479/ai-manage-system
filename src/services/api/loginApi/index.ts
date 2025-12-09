@@ -40,11 +40,11 @@ export const updateUserInfoApi = (
 
 // 更新用户密码
 export const updateUserPasswordApi = (
-  body: any,
+  body: ApiTypes.TEditPsd,
   options?: { [key: string]: any }
 ) => {
   return request("/api/user/changePassword", {
-    method: "PUT",
+    method: "POST",
     data: body,
     ...(options || {}),
   });

@@ -41,7 +41,7 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
   onCancel,
   ...modalProps
 }) => {
-  const { userInfo, updateUserAction } = useModel("user");
+  const { userInfo, updateUserInfoReq } = useModel("user");
   const [avatarFile, setAvatarFile] = useState<RcFile>();
   const [form] = Form.useForm<IUserInfo>();
   const formValues = Form.useWatch([], form);
@@ -52,7 +52,7 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
     onSuccess: (res) => {
       const formData = form.getFieldsValue();
       URL.revokeObjectURL(formData.avatar || "");
-      updateUserAction({
+      updateUserInfoReq.run({
         ...formData,
         avatar: res.fullUrl,
       });
@@ -64,30 +64,27 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
   });
 
   // 处理文件上传前的校验
-  const handleBeforeUpload = useCallback<
-    NonNullable<UploadProps["beforeUpload"]>
-  >(
-    (file) => {
-      const fileSuffix = getFilenameSuffix(file.name);
-      const fileTypeArr = FILE_ACCEPT.split(",");
-      const isFileType = fileTypeArr.includes(`.${fileSuffix}`);
+  const handleBeforeUpload: NonNullable<UploadProps["beforeUpload"]> = (
+    file
+  ) => {
+    const fileSuffix = getFilenameSuffix(file.name);
+    const fileTypeArr = FILE_ACCEPT.split(",");
+    const isFileType = fileTypeArr.includes(`.${fileSuffix}`);
 
-      if (!isFileType) {
-        const fileTypeMessage = fileTypeArr.join("、");
-        message.error(`请上传${fileTypeMessage}类型文件`);
-        return false;
-      }
+    if (!isFileType) {
+      const fileTypeMessage = fileTypeArr.join("、");
+      message.error(`请上传${fileTypeMessage}类型文件`);
+      return false;
+    }
 
-      const url = URL.createObjectURL(file);
-      form.setFieldValue("avatar", url);
-      setAvatarFile(file);
-      return Upload.LIST_IGNORE;
-    },
-    [form]
-  );
+    const url = URL.createObjectURL(file);
+    form.setFieldValue("avatar", url);
+    setAvatarFile(file);
+    return Upload.LIST_IGNORE;
+  };
 
   // 处理确认操作
-  const handleConfirm = useCallback(async () => {
+  const handleConfirm = async () => {
     await form.validateFields();
 
     if (avatarFile) {
@@ -98,22 +95,15 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
     } else {
       // 只有用户名变更
       const formData = form.getFieldsValue();
-      updateUserAction(formData);
+      updateUserInfoReq.run(formData);
       onOk?.(formData);
     }
-  }, [
-    form,
-    avatarFile,
-    userInfo?.userId,
-    uploadAvatarReq,
-    updateUserAction,
-    onOk,
-  ]);
+  };
 
   // 处理取消操作
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     onCancel?.();
-  }, [onCancel]);
+  };
 
   // 模态框打开时初始化表单数据
   useEffect(() => {

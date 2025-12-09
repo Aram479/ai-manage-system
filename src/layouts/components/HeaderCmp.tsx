@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { history, useModel } from "@umijs/max";
+import { history, useModel, useRequest } from "@umijs/max";
 import { Avatar, Dropdown, Flex, MenuProps, message } from "antd";
 import { GithubOutlined, UserOutlined } from "@ant-design/icons";
 import { useChatEvent } from "@/hooks/useChatEvent";
 import { BaseToolsEvents, TBaseTools } from "@/tools/baseTools";
 import { copy } from "@/utils";
+import { updateUserPasswordApi } from "@/services/api/loginApi";
 import UserInfoModal from "./UserInfoModal";
+import EditPasswordModal from "./EditPasswordModal";
 import ChatListDrawer from "@/components/ChatListDrawer";
 import Gitee from "@/asset/png/giteeIcon.png";
 import Logo from "@/asset/png/logo.png";
@@ -15,6 +17,7 @@ const HeaderCmp = () => {
   const { userInfo, logoutAction } = useModel("user");
   const [title, setTile] = useState("Veloce智能管理系统");
   const [userInfoOpen, setUserInfoOpen] = useState(false);
+  const [editPasswordOpen, setEditPasswordOpen] = useState(false);
 
   const avatarItems: MenuProps["items"] = [
     {
@@ -36,8 +39,16 @@ const HeaderCmp = () => {
       },
     },
     {
+      key: "editPassword",
+      label: "修改密码",
+      onClick: () => {
+        setEditPasswordOpen(true);
+      },
+    },
+    {
       key: "logout",
       label: "退出登录",
+      danger: true,
       onClick: () => {
         logoutAction();
       },
@@ -68,6 +79,14 @@ const HeaderCmp = () => {
       },
     },
   ];
+
+  const updateUserPasswordReq = useRequest(updateUserPasswordApi, {
+    manual: true,
+    onSuccess: () => {
+      message.success("密码修改成功");
+      setEditPasswordOpen(false);
+    },
+  });
 
   const handleTitle = () => {
     history.push("/");
@@ -102,7 +121,19 @@ const HeaderCmp = () => {
           </Dropdown>
         </div>
       </Flex>
-      <UserInfoModal open={userInfoOpen} onOk={() => setUserInfoOpen(false)} onCancel={setUserInfoOpen} />
+      <UserInfoModal
+        open={userInfoOpen}
+        onOk={() => setUserInfoOpen(false)}
+        onCancel={setUserInfoOpen}
+      />
+      <EditPasswordModal
+        open={editPasswordOpen}
+        confirmLoading={updateUserPasswordReq.loading}
+        onOk={(passwordData) => {
+          updateUserPasswordReq.run(passwordData);
+        }}
+        onCancel={setEditPasswordOpen}
+      />
     </div>
   );
 };

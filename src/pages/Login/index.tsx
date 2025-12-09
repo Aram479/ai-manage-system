@@ -6,7 +6,7 @@ import Logo from "@/asset/png/logo.png";
 import styles from "./index.less";
 
 const LoginPage = () => {
-  const { loginAction } = useModel("user");
+  const { loginReq } = useModel("user");
   const [form] = Form.useForm<ILoginData>();
 
   // 登录表单规则
@@ -18,7 +18,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     const values = await form.validateFields();
-    loginAction(values);
+    loginReq.run(values);
   };
 
   return (

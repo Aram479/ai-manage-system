@@ -7,4 +7,8 @@ declare namespace ApiTypes {
     url: string;
     fullUrl: string;
   };
+  type TEditPsd = {
+    oldPassword: string;
+    newPassword: string;
+  };
 }
