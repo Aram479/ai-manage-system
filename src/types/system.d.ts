@@ -16,3 +16,9 @@ interface IRegisterData extends ILoginData {
 type TFormEditPsd = ApiTypes.TEditPsd & {
   confirmPassword: string;
 };
+
+type TAddFriendData = {
+  userId: string;
+  friendMessage: string;
+  remarkName: string;
+};

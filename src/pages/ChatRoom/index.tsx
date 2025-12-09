@@ -41,62 +41,59 @@ const ChatRoom = () => {
   const selectedChat = chatList?.find((chat) => chat.id === selectedChatId);
 
   // 处理接收到的新消息
-  const handleReceiveMessage = useCallback(
-    (message: Message) => {
-      if (message.receiverId !== userInfo.userId) return;
-      // 找到对应的聊天项
-      const targetChatId = message.senderId || "unknown";
+  const handleReceiveMessage = (message: Message) => {
+    if (message.receiverId !== userInfo.userId) return;
+    // 找到对应的聊天项
+    const targetChatId = message.senderId || "unknown";
 
-      // 创建接收到的消息
-      const receivedMessage: Message = {
-        ...message,
-        sender: "other", // 标记为对方发送的
-      };
-      // 浏览器通知
-      notify(message);
-      setChatList((prev = []) => {
-        // 检查是否已存在该聊天
-        const existingChatIndex = prev.findIndex(
-          (chat) => chat.id === targetChatId
-        );
+    // 创建接收到的消息
+    const receivedMessage: Message = {
+      ...message,
+      sender: "other", // 标记为对方发送的
+    };
+    // 浏览器通知
+    notify(message);
+    setChatList((prev = []) => {
+      // 检查是否已存在该聊天
+      const existingChatIndex = prev.findIndex(
+        (chat) => chat.id === targetChatId
+      );
 
-        if (existingChatIndex >= 0) {
-          // 更新现有聊天
-          const updatedChats = [...prev];
-          updatedChats[existingChatIndex] = {
-            ...updatedChats[existingChatIndex],
-            messages: [
-              ...updatedChats[existingChatIndex].messages,
-              receivedMessage,
-            ],
-            lastMessage: receivedMessage.content,
-            lastMessageTime: new Date().toISOString(),
-            // 如果不是当前选中的聊天，则增加未读数
-            unreadCount:
-              updatedChats[existingChatIndex].id === selectedChatId
-                ? updatedChats[existingChatIndex].unreadCount
-                : updatedChats[existingChatIndex].unreadCount + 1,
-            name: message.name,
-            avatar: message.avatar,
-          };
-          return updatedChats;
-        } else {
-          // 创建新聊天 (实际应用中应该从服务器获取用户信息)
-          const newChat: ChatItem = {
-            id: targetChatId,
-            name: message.name,
-            avatar: message.avatar,
-            lastMessage: receivedMessage.content,
-            lastMessageTime: new Date().toISOString(),
-            unreadCount: 1,
-            messages: [receivedMessage],
-          };
-          return [newChat, ...prev];
-        }
-      });
-    },
-    [userInfo.userId, selectedChatId]
-  );
+      if (existingChatIndex >= 0) {
+        // 更新现有聊天
+        const updatedChats = [...prev];
+        updatedChats[existingChatIndex] = {
+          ...updatedChats[existingChatIndex],
+          messages: [
+            ...updatedChats[existingChatIndex].messages,
+            receivedMessage,
+          ],
+          lastMessage: receivedMessage.content,
+          lastMessageTime: new Date().toISOString(),
+          // 如果不是当前选中的聊天，则增加未读数
+          unreadCount:
+            updatedChats[existingChatIndex].id === selectedChatId
+              ? updatedChats[existingChatIndex].unreadCount
+              : updatedChats[existingChatIndex].unreadCount + 1,
+          name: message.name,
+          avatar: message.avatar,
+        };
+        return updatedChats;
+      } else {
+        // 创建新聊天 (实际应用中应该从服务器获取用户信息)
+        const newChat: ChatItem = {
+          id: targetChatId,
+          name: message.name,
+          avatar: message.avatar,
+          lastMessage: receivedMessage.content,
+          lastMessageTime: new Date().toISOString(),
+          unreadCount: 1,
+          messages: [receivedMessage],
+        };
+        return [newChat, ...prev];
+      }
+    });
+  };
 
   // useTitleFlash(hasNotification, "你有未读消息");
   // 监听来自其他用户的消息

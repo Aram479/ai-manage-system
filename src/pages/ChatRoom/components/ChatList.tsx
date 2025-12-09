@@ -4,7 +4,7 @@ import { HomeOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { history, useModel } from "@umijs/max";
 import { ChatItem, ChatListProps, Message } from "../types";
 import dayjs from "dayjs";
-import AddFriendModal from "./AddFriendModal";
+import SearchFriendModal from "./SearchFriendModal";
 import MarkDownCmp from "@/components/MarkDownCmp";
 import styles from "./ChatList.less";
 
@@ -20,13 +20,13 @@ const ChatList: React.FC<ChatListProps> = ({
   searchKeyword,
 }) => {
   const { userInfo } = useModel("user");
-  const [addFriendOpen, setAddFriendOpen] = useState(false);
+  const [searchFriendOpen, setSearchFriendOpen] = useState(false);
   const chatActionItems = [
     {
       key: "delete",
       label: "删除",
       danger: true,
-      onClick: (info: any, chat: ChatItem) => {
+      onClick: (_info: any, chat: ChatItem) => {
         onRemove?.(chat);
       },
     },
@@ -69,7 +69,7 @@ const ChatList: React.FC<ChatListProps> = ({
     const isInclude = chatList?.find((item) => formValues.id === item.id);
     if (isInclude) return message.error("已添加朋友");
     onAddConfirm?.(formValues);
-    setAddFriendOpen(false);
+    setSearchFriendOpen(false);
   };
 
   return (
@@ -96,7 +96,7 @@ const ChatList: React.FC<ChatListProps> = ({
           <Tooltip title="添加朋友">
             <Button
               icon={<PlusOutlined />}
-              onClick={() => setAddFriendOpen(true)}
+              onClick={() => setSearchFriendOpen(true)}
             />
           </Tooltip>
         </Flex>
@@ -165,10 +165,10 @@ const ChatList: React.FC<ChatListProps> = ({
           <div className={styles.emptyList}>没有找到匹配的聊天</div>
         )}
       </div>
-      <AddFriendModal
-        open={addFriendOpen}
+      <SearchFriendModal
+        open={searchFriendOpen}
         onOk={handleAddFriend}
-        onCancel={setAddFriendOpen}
+        onCancel={setSearchFriendOpen}
       />
     </div>
   );

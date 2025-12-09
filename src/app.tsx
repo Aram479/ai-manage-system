@@ -19,7 +19,7 @@ export const request: RequestConfig = {
       if (data && typeof data.message === "string") {
         message.error({
           content: data.message,
-          duration: 1,
+          duration: 3,
         });
       }
     },

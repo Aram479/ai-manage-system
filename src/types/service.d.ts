@@ -11,4 +11,12 @@ declare namespace ApiTypes {
     oldPassword: string;
     newPassword: string;
   };
+
+  type TChatRoomUserList = {
+    id: string;
+    userId: string;
+    username: string;
+    avatar: string;
+  };
 }
+
