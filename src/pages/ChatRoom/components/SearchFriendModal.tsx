@@ -25,10 +25,10 @@ interface ISearchFriendModal extends ModalProps {
 }
 
 const FriendReqStatusMap = new Map([
-  [1, '自己'],
-  [2, '申请中'],
-  [3, '已添加'],
-]) 
+  [1, "自己"],
+  [2, "申请中"],
+  [3, "已添加"],
+]);
 const SearchFriendModal = (props: ISearchFriendModal) => {
   const { data = {}, title, open, onOk, onCancel, ...modalProps } = props;
   const { userInfo } = useModel("user");
@@ -115,9 +115,13 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
                     <Image
                       className={styles.userAvatarBox}
                       width={60}
-                      preview={{
-                        mask: false,
-                      }}
+                      preview={
+                        item.avatar
+                          ? {
+                              mask: false,
+                            }
+                          : false
+                      }
                       src={item.avatar}
                     >
                       {item.username}
@@ -131,7 +135,6 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
                         >
                           添加
                         </Button>
-                        
                       ) : (
                         <div>{FriendReqStatusMap.get(item.status)}</div>
                       )}
@@ -140,7 +143,10 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
                 </Card>
               ))
             ) : (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                style={{ height: "100%" }}
+              />
             )}
           </Flex>
         </Flex>

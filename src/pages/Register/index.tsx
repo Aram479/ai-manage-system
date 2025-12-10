@@ -1,4 +1,4 @@
-import { useModel } from "@umijs/max";
+import { Link, useModel } from "@umijs/max";
 import { Button, Col, Flex, Form, Input, Row, message } from "antd";
 import { Rule } from "antd/es/form";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
@@ -36,11 +36,7 @@ const RegisterPage = () => {
   const handleRegister = async () => {
     const values = await form.validateFields();
     const { confirmPassword, ...registerData } = values;
-    try {
-      registerReq.run(registerData as any);
-    } catch (error) {
-      message.error("注册失败，请重试");
-    }
+    registerReq.run(registerData as any);
   };
 
   return (
@@ -129,7 +125,7 @@ const RegisterPage = () => {
 
           <div className={styles.loginLink}>
             <span>已有账号？</span>
-            <a href="/login">立即登录</a>
+            <Link to="/Login">立即登录</Link>
           </div>
         </Form>
       </div>

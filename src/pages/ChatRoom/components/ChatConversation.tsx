@@ -193,6 +193,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           {/* 对方回答的 */}
           {msg.sender === "other" && (
             <Avatar
+              shape="square"
               src={chat.avatar}
               alt={chat.name}
               className={styles.messageAvatar}
@@ -255,7 +256,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
           </div>
           {/* 我的头像 */}
           {msg.sender === "me" && (
-            <Avatar className={styles.messageAvatar} src={userInfo?.avatar}>
+            <Avatar
+              className={styles.messageAvatar}
+              shape="square"
+              src={userInfo?.avatar}
+            >
               我
             </Avatar>
           )}
@@ -302,7 +307,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
       {/* 聊天头部 */}
       <div className={styles.header}>
         <div className={styles.headerInfo}>
-          <Avatar src={chat.avatar} alt={chat.name}>
+          <Avatar shape="square" src={chat.avatar} alt={chat.name}>
             {chat.name.charAt(0)}
           </Avatar>
           <span className={styles.headerTitle}>{chat.name}</span>

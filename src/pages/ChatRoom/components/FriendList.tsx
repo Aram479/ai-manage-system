@@ -103,7 +103,9 @@ const FriendList: React.FC<FriendListProps> = ({
       onClick={() => onSelectContact?.(friend)}
     >
       <List.Item.Meta
-        avatar={<Avatar src={friend.avatar} icon={<UserOutlined />} />}
+        avatar={
+          <Avatar shape="square" size={40} src={friend.avatar} icon={<UserOutlined />} />
+        }
         title={<span>{friend.username}</span>}
       />
     </List.Item>

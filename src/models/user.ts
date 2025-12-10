@@ -23,8 +23,9 @@ const user = () => {
 
   const registerReq = useRequest(registerApi, {
     manual: true,
-    onSuccess: (res) => {
-      history.push("/login");
+    onSuccess: () => {
+      message.success("注册成功");
+      history.push("/Login");
     },
   });
 
@@ -55,6 +56,7 @@ const user = () => {
   });
 
   const logoutAction = () => {
+    localCache.removeItem("chatList")
     localCache.removeItem("token");
     history.push("/Login");
   };

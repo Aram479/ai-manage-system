@@ -20,6 +20,7 @@ import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
 import Sidebar from "./components/Sidebar";
 import FriendList from "./components/FriendList";
+import UserAvatarDetail from "./components/UserAvatarDetail";
 import _ from "lodash";
 import styles from "./index.less";
 
@@ -34,7 +35,6 @@ const ChatRoom = () => {
   );
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [isCollapse, setIsCollapse] = useState(false);
   // 侧边栏激活标签
   const [activeTab, setActiveTab] = useState<"chat" | "friend">("chat");
   // 好友列表数据
@@ -295,9 +295,7 @@ const ChatRoom = () => {
           width={80}
           theme="light"
           className={styles.leftSider}
-          breakpoint="lg"
-          collapsedWidth={0}
-          onCollapse={(collapse) => setIsCollapse(collapse)}
+          collapsible={false}
         >
           <Flex
             vertical
@@ -306,13 +304,7 @@ const ChatRoom = () => {
             style={{ height: "100%" }}
           >
             <Flex flex={1}>
-              <Avatar
-                shape="square"
-                src={userInfo.avatar}
-                style={{ cursor: "pointer", width: 50, height: 50 }}
-              >
-                {userInfo.username.charAt(0)}
-              </Avatar>
+              <UserAvatarDetail />
             </Flex>
             {/* 聊天、好友 */}
             <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -334,9 +326,7 @@ const ChatRoom = () => {
           width={250}
           theme="light"
           className={styles.middleSider}
-          breakpoint="lg"
-          collapsedWidth={0}
-          onCollapse={(collapse) => setIsCollapse(collapse)}
+          collapsible={false}
         >
           <Flex vertical>
             <div style={{ overflowY: "auto", flex: 1 }}>
@@ -360,7 +350,7 @@ const ChatRoom = () => {
                 />
               )}
             </div>
-            {!isCollapse && activeTab === "chat" && (
+            {activeTab === "chat" && (
               <div className={styles.connectionStatus}>
                 <Flex
                   align="center"
