@@ -295,6 +295,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         Ai_Qwen.onRequest(otherLastMessage);
       }
     }
+    scrollToBottom();
   }, [otherMessages]);
 
   useEffect(() => {

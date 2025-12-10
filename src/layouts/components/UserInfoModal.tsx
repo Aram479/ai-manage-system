@@ -19,8 +19,6 @@ import styles from "./index.less";
 
 // 静态常量定义
 const FILE_ACCEPT = ".jpg,.png";
-const MODAL_WIDTH = 600;
-const MODAL_TITLE = "用户信息";
 
 // 表单规则常量
 const formRules: Record<string, Rule[]> = {
@@ -35,13 +33,14 @@ interface IUserInfoModal extends ModalProps {
 }
 
 const UserInfoModal: React.FC<IUserInfoModal> = ({
-  title = MODAL_TITLE,
+  title = "用户信息",
   open,
   onOk,
   onCancel,
   ...modalProps
 }) => {
   const { userInfo, updateUserInfoReq } = useModel("user");
+  const isAdmin = userInfo.username === "admin";
   const [avatarFile, setAvatarFile] = useState<RcFile>();
   const [form] = Form.useForm<IUserInfo>();
   const formValues = Form.useWatch([], form);
@@ -119,13 +118,14 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
       title={title}
       open={open}
       maskClosable={false}
-      width={MODAL_WIDTH}
+      width={600}
       onOk={handleConfirm}
       onCancel={handleCancel}
       confirmLoading={uploadAvatarReq.loading}
+      footer={isAdmin ? false : undefined}
       {...modalProps}
     >
-      <Form layout="vertical" form={form} preserve={false}>
+      <Form layout="vertical" form={form} preserve={false} disabled={isAdmin}>
         <Form.Item name="userId" label="用户ID">
           <Input placeholder="请输入" disabled allowClear />
         </Form.Item>

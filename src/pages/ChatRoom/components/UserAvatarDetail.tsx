@@ -3,6 +3,7 @@ import {
   AvatarProps,
   Button,
   Flex,
+  Image,
   message,
   Popover,
   Tooltip,
@@ -13,14 +14,19 @@ import { copy } from "@/utils";
 const AvatarCmp = (props: AvatarProps) => {
   const { userInfo } = useModel("user");
   return (
-    <Avatar
-      shape="square"
+    <Image
+      preview={userInfo.avatar ? { mask: false } : false}
       src={userInfo.avatar}
-      style={{ cursor: "pointer", width: 45, height: 45 }}
-      {...props}
+      style={{
+        width: 43,
+        height: 43,
+        borderRadius: 5,
+        objectFit: "cover",
+        cursor: "pointer",
+      }}
     >
-      {userInfo.username.charAt(0)}
-    </Avatar>
+      {userInfo.username}
+    </Image>
   );
 };
 
@@ -34,8 +40,8 @@ const UserAvatarDetail = () => {
           <Flex gap={8} align="center">
             <AvatarCmp />
             <Flex vertical style={{ fontSize: 14 }}>
-              <div>{userInfo.username}</div>
-              <div>
+              <div style={{ fontWeight: "bold" }}>{userInfo.username}</div>
+              <div style={{ fontSize: 12 }}>
                 用户ID：
                 <Tooltip title="点击复制" arrow={false}>
                   <Button
@@ -57,9 +63,13 @@ const UserAvatarDetail = () => {
         trigger={["click"]}
         arrow={false}
       >
-        <Flex>
-          <AvatarCmp />
-        </Flex>
+        <Avatar
+          shape="square"
+          src={userInfo.avatar}
+          style={{ cursor: "pointer", width: 45, height: 45 }}
+        >
+          {userInfo.username.charAt(0)}
+        </Avatar>
       </Popover>
     </div>
   );

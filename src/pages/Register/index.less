@@ -26,9 +26,16 @@
 .logo {
   width: 80px;
   height: 80px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   border-radius: 50%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .title {
@@ -53,7 +60,7 @@
 .formItem {
   margin-bottom: 20px;
 
-  .ant-form-item-label > label {
+  .ant-form-item-label>label {
     font-weight: 600;
     color: #555;
     font-size: 14px;

@@ -44,7 +44,9 @@ const RegisterPage = () => {
       <div className={styles.registerCard}>
         <Flex vertical align="center" justify="center">
           {/* Logo */}
-          <img className={styles.logo} src={Logo} alt="Logo" />
+          <Flex className={styles.logo} align="center" justify="center">
+            <img src={Logo} alt="Logo" />
+          </Flex>
           <h2 className={styles.title}>创建新账号</h2>
           <p className={styles.subtitle}>加入我们，开启智能之旅</p>
         </Flex>

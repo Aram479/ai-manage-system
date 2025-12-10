@@ -26,8 +26,10 @@ const LoginPage = () => {
       <div className={styles.loginCard}>
         <Flex vertical align="center" justify="center">
           {/* Logo */}
-          <img className={styles.logo} src={Logo} alt="Logo" />
-          <h2 className={styles.title}>智能管理系统</h2>
+          <Flex className={styles.logo} align="center" justify="center">
+            <img src={Logo} alt="Logo" />
+          </Flex>
+          <h2 className={styles.title}>Veloce智能未来</h2>
           <p className={styles.subtitle}>欢迎回来，请登录您的账号</p>
         </Flex>
 

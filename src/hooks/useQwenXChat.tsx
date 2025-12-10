@@ -174,13 +174,32 @@ const useQwenXChat = (props: IUseQwenXChat) => {
       // content: messagesData.message?.chatContent,
     };
 
+    // 聊天室：上一个使用的AI辅助聊天
+    const preAgentRole = [...newChatList]
+      .reverse()
+      .find((item) => item.key === "prompt");
+    // 聊天室：当前选择的AI
     const currentAgentRole = messagesData.message?.agentRole;
     // !newChatList.length &&
-    if (currentAgentRole?.prompt) {
-      const agentMessage = {
+    if (
+      preAgentRole?.content !== currentAgentRole?.prompt &&
+      currentAgentRole?.prompt
+    ) {
+      const newAgentRoleItem = {
+        key: "prompt",
         role: currentAgentRole.key ? userRole : aiRole,
         content: currentAgentRole?.prompt,
       };
+      // 聊天室：如果之前选择过AI，则替换为新的AI
+      // if (preAgentRoleIndex > -1) {
+      //   newChatList[preAgentRoleIndex] = { ...newAgentRoleItem };
+      // } else {
+      //   // 否则新增一个AI
+      //   const agentMessage = { ...newAgentRoleItem };
+      //   newChatList.push(agentMessage);
+      // }
+      // 否则新增一个AI
+      const agentMessage = { ...newAgentRoleItem };
       newChatList.push(agentMessage);
     }
     newChatList.push(userMessage);

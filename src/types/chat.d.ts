@@ -46,6 +46,7 @@ interface ChatCompletionChunk {
 
 type TChatList = {
   id?: string;
+  key?: string
   role: string;
   content: string;
 }[];
