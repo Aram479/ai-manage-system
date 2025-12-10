@@ -1,15 +1,27 @@
 import { useState, useCallback, useEffect } from "react";
-import { Button, Flex, Layout } from "antd";
-import { useModel } from "@umijs/max";
-import { ChatConversationProps, ChatItem, Message } from "./types";
+import { Avatar, Button, Flex, Layout, message, Tooltip } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+import { history, useModel, useRequest } from "@umijs/max";
+import {
+  ChatConversationProps,
+  ChatItem,
+  Message,
+  FriendRequest,
+} from "./types";
 import { useSocket } from "@/hooks/useSocket";
 import { useNotification } from "@/hooks/useNotification";
+import {
+  friendAgreeOrRefuseApi,
+  getFriendListApi,
+  getFriendReuestListApi,
+} from "@/services/api/chatRoomApi";
+import localCache from "@/utils/cache";
 import ChatList from "./components/ChatList";
 import ChatConversation from "./components/ChatConversation";
-
+import Sidebar from "./components/Sidebar";
+import FriendList from "./components/FriendList";
 import _ from "lodash";
 import styles from "./index.less";
-import localCache from "@/utils/cache";
 
 const { Sider, Content } = Layout;
 
@@ -17,17 +29,86 @@ const ChatRoom = () => {
   const { notify } = useNotification();
 
   const { userInfo } = useModel("user");
-  // 当前用户ID (实际应用中应从认证系统获取)
   const [chatList, setChatList] = useState<ChatItem[]>(
     localCache.getItem("chatList") || []
   );
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isCollapse, setIsCollapse] = useState(false);
+  // 侧边栏激活标签
+  const [activeTab, setActiveTab] = useState<"chat" | "friend">("chat");
+  // 好友列表数据
+  const [friendRequests, setFriendRequests] = useState<
+    ApiTypes.TFriendRequestList[]
+  >([]);
+  const [friends, setFriends] = useState<ApiTypes.TFriendList[]>([]);
+
+  const getFriendReuestListReq = useRequest(getFriendReuestListApi, {
+    manual: true,
+    onSuccess: (res) => {
+      setFriendRequests(res);
+    },
+  });
+
+  const getFriendLisReq = useRequest(getFriendListApi, {
+    manual: true,
+    onSuccess: (res) => {
+      setFriends(res);
+    },
+  });
+
+  const friendAgreeOrRefuseReq = useRequest(
+    (request: { id: string; action: "accept" | "reject" }) => {
+      const reqData = {
+        requestId: request.id,
+        action: request.action,
+      };
+      return friendAgreeOrRefuseApi(reqData);
+    },
+    {
+      manual: true,
+      onSuccess: () => {
+        message.success(`已处理申请`);
+        getFriendReuestListReq.run();
+        getFriendLisReq.run();
+      },
+    }
+  );
+
+  const handleAcceptRequest = (request: FriendRequest) => {
+    friendAgreeOrRefuseReq.run({ id: request.id, action: "accept" });
+  };
+
+  const handleRejectRequest = (request: FriendRequest) => {
+    friendAgreeOrRefuseReq.run({ id: request.id, action: "reject" });
+  };
+
+  // 处理选择好友
+  const handleSelectContact = (friend: (typeof friends)[number]) => {
+    // 查找是否已有聊天记录
+    const existingChat = chatList.find((chat) => chat.id === friend.id);
+    if (existingChat) {
+      setSelectedChatId(friend.id);
+    } else {
+      // 创建新的聊天
+      const newChat: ChatItem = {
+        id: friend.id,
+        name: friend.username,
+        avatar: friend.avatar,
+        unreadCount: 0,
+        messages: [],
+      };
+      setChatList((prev) => [newChat, ...prev]);
+      setSelectedChatId(friend.id);
+    }
+    // 切换到聊天标签
+    setActiveTab("chat");
+  };
   // WebSocket连接管理
   const { isConnected, on, emit, reconnect } = useSocket(
     process.env.SOCKET_BASE_URL || "/",
     {
+      user: userInfo,
       autoConnect: true,
       connectionOptions: {
         // 可选：添加认证、路径等
@@ -36,13 +117,12 @@ const ChatRoom = () => {
       },
     }
   );
-
   // 获取当前选中的聊天
   const selectedChat = chatList?.find((chat) => chat.id === selectedChatId);
 
   // 处理接收到的新消息
   const handleReceiveMessage = (message: Message) => {
-    if (message.receiverId !== userInfo.userId) return;
+    if (message.receiverId !== userInfo.id) return;
     // 找到对应的聊天项
     const targetChatId = message.senderId || "unknown";
 
@@ -83,6 +163,7 @@ const ChatRoom = () => {
         // 创建新聊天 (实际应用中应该从服务器获取用户信息)
         const newChat: ChatItem = {
           id: targetChatId,
+          userId: message.userId,
           name: message.name,
           avatar: message.avatar,
           lastMessage: receivedMessage.content,
@@ -94,13 +175,6 @@ const ChatRoom = () => {
       }
     });
   };
-
-  // useTitleFlash(hasNotification, "你有未读消息");
-  // 监听来自其他用户的消息
-  useEffect(() => {
-    const unsubscribe = on("receive_message", handleReceiveMessage);
-    return unsubscribe;
-  }, [on, handleReceiveMessage]);
 
   // 处理选择聊天
   const handleSelectChat = (chatId: string) => {
@@ -122,13 +196,14 @@ const ChatRoom = () => {
       const now = new Date();
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
+        userId: userInfo.userId,
         name: userInfo.username,
         avatar: userInfo.avatar ?? userInfo.username.charAt(0),
         content: content,
         htmlContent: htmlContent,
         sender: "me",
         timestamp: now.toISOString(),
-        senderId: userInfo.userId,
+        senderId: userInfo.id,
         receiverId: chatId,
         agent,
       };
@@ -176,6 +251,38 @@ const ChatRoom = () => {
       )
   );
 
+  // 模拟数据，实际应用中应从接口获取
+  useEffect(() => {
+    getFriendReuestListReq.run();
+    getFriendLisReq.run();
+  }, []);
+
+  // 监听来自其他用户的消息
+  useEffect(() => {
+    const unsubscribe = on("receive_message", handleReceiveMessage);
+    return unsubscribe;
+  }, [on, handleReceiveMessage]);
+
+  // 好友请求socket
+  useEffect(() => {
+    const unsubscribe = on("friend_request_notification", (notification) => {
+      const { fromUser } = notification;
+      getFriendReuestListReq.run();
+      // 显示通知
+      message.info(`您收到了来自${fromUser.username}的好友请求`);
+    });
+
+    return unsubscribe;
+  }, [on]);
+
+  useEffect(() => {
+    // 好友接受socket
+    const unsubscribe = on("friend_request_accepted_notification", () => {
+      getFriendLisReq.run();
+    });
+    return unsubscribe;
+  }, [on]);
+
   useEffect(() => {
     localCache.setItem("chatList", chatList);
   }, [chatList]);
@@ -183,27 +290,77 @@ const ChatRoom = () => {
   return (
     <div className={styles.container}>
       <Layout className={styles.layout}>
+        {/* 左侧导航侧边栏 */}
+        <Sider
+          width={80}
+          theme="light"
+          className={styles.leftSider}
+          breakpoint="lg"
+          collapsedWidth={0}
+          onCollapse={(collapse) => setIsCollapse(collapse)}
+        >
+          <Flex
+            vertical
+            align="center"
+            justify="center"
+            style={{ height: "100%" }}
+          >
+            <Flex flex={1}>
+              <Avatar
+                shape="square"
+                src={userInfo.avatar}
+                style={{ cursor: "pointer", width: 50, height: 50 }}
+              >
+                {userInfo.username.charAt(0)}
+              </Avatar>
+            </Flex>
+            {/* 聊天、好友 */}
+            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            <Flex vertical align="center" justify="end" style={{ flexGrow: 1 }}>
+              <Tooltip title="返回首页">
+                <Button
+                  type="text"
+                  icon={<HomeOutlined />}
+                  onClick={() => {
+                    history.push("/");
+                  }}
+                />
+              </Tooltip>
+            </Flex>
+          </Flex>
+        </Sider>
+        {/* 中间聊天/好友列表 */}
         <Sider
           width={250}
           theme="light"
-          className={styles.sider}
+          className={styles.middleSider}
           breakpoint="lg"
           collapsedWidth={0}
           onCollapse={(collapse) => setIsCollapse(collapse)}
         >
           <Flex vertical>
-            <div style={{ overflowY: "auto" }}>
-              <ChatList
-                chatList={filteredChatList}
-                searchKeyword={searchKeyword}
-                selectedChatId={selectedChatId}
-                onSelectChat={handleSelectChat}
-                onSearch={setSearchKeyword}
-                onAddConfirm={handleAddFriend}
-                onRemove={handleRemoveFriend}
-              />
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {activeTab === "chat" ? (
+                <ChatList
+                  chatList={filteredChatList}
+                  searchKeyword={searchKeyword}
+                  selectedChatId={selectedChatId}
+                  onSelectChat={handleSelectChat}
+                  onSearch={setSearchKeyword}
+                  onAddConfirm={handleAddFriend}
+                  onRemove={handleRemoveFriend}
+                />
+              ) : (
+                <FriendList
+                  friendRequests={friendRequests}
+                  contacts={friends}
+                  onAcceptRequest={handleAcceptRequest}
+                  onRejectRequest={handleRejectRequest}
+                  onSelectContact={handleSelectContact}
+                />
+              )}
             </div>
-            {!isCollapse && (
+            {!isCollapse && activeTab === "chat" && (
               <div className={styles.connectionStatus}>
                 <Flex
                   align="center"
@@ -224,6 +381,8 @@ const ChatRoom = () => {
             )}
           </Flex>
         </Sider>
+
+        {/* 右侧聊天内容 */}
         <Content className={styles.content}>
           {selectedChat ? (
             <ChatConversation
@@ -233,7 +392,11 @@ const ChatRoom = () => {
             />
           ) : (
             <div className={styles.emptyContainer}>
-              <h2>选择一个聊天开始对话</h2>
+              {activeTab === "chat" ? (
+                <h2>选择一个聊天开始对话</h2>
+              ) : (
+                <h2>选择一个好友开始聊天</h2>
+              )}
             </div>
           )}
         </Content>

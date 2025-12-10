@@ -9,13 +9,15 @@ interface UseSocketOptions {
   autoConnect?: boolean;
   /** 连接选项，透传给 socket.io-client */
   connectionOptions?: object;
+  /* 用户信息，用于socket房间功能 */
+  user?: IUserInfo
 }
 
 /**
  * 封装 socket.io-client 的自定义 Hook
  */
 export const useSocket = (url: string, options: UseSocketOptions = {}) => {
-  const { autoConnect = true, connectionOptions = {} } = options;
+  const { autoConnect = true, connectionOptions = {}, user } = options;
 
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState<string>("");
@@ -40,6 +42,7 @@ export const useSocket = (url: string, options: UseSocketOptions = {}) => {
       setIsConnected(true);
       setTransport(socket.io.engine.transport.name);
       console.log("Socket已连接:", socket.id);
+      socket.emit('authenticate', user?.userId);
     });
 
     socket.on("disconnect", () => {

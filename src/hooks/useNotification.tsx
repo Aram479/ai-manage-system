@@ -2,7 +2,7 @@ import { Message } from "@/pages/ChatRoom/types";
 import Logo from "@/../public/favicon.ico";
 import _ from "lodash";
 
-// 没10分钟可提示一次
+// 每10分钟可提示一次
 export const useNotification = (delay: number = 1000 * 10 * 60) => {
   const notify = _.throttle(async (message: Message) => {
     // 检查是否在浏览器环境中且支持 Notification API
@@ -41,10 +41,6 @@ export const useNotification = (delay: number = 1000 * 10 * 60) => {
       console.error("[useNotification] 显示通知时发生错误:", error);
     }
   }, delay);
-
-  // 可选：在组件卸载时清理定时器（更严谨）
-  // 注意：React 本身不会自动清理 setTimeout，但此处由用户调用控制，通常影响不大。
-  // 若需严格清理，可返回 cleanup 函数，但会破坏简洁性。此处权衡后暂不暴露。
 
   return { notify };
 };

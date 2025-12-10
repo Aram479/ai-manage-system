@@ -26,3 +26,34 @@ export const sendAddFriendApi = (
     }
   );
 };
+
+// 获取好友申请列表
+export const getFriendReuestListApi = (options?: { [key: string]: any }) => {
+  return request<ApiTypes.TFriendRequestList[]>(
+    "/api/chatroom/getFriendRequestList",
+    {
+      method: "GET",
+      ...(options || {}),
+    }
+  );
+};
+
+// 获取好友(联系人)列表
+export const getFriendListApi = (options?: { [key: string]: any }) => {
+  return request<ApiTypes.TFriendList[]>("/api/chatroom/getFriendList", {
+    method: "GET",
+    ...(options || {}),
+  });
+};
+
+// 接收/拒绝好友请求
+export const friendAgreeOrRefuseApi = (
+  body: any,
+  options?: { [key: string]: any }
+) => {
+  return request("/api/chatroom/handleFriendRequest", {
+    method: "POST",
+    data: body,
+    ...(options || {}),
+  });
+};

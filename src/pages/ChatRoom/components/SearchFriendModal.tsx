@@ -24,6 +24,11 @@ interface ISearchFriendModal extends ModalProps {
   onCancel?: (data?: any) => void;
 }
 
+const FriendReqStatusMap = new Map([
+  [1, '自己'],
+  [2, '申请中'],
+  [3, '已添加'],
+]) 
 const SearchFriendModal = (props: ISearchFriendModal) => {
   const { data = {}, title, open, onOk, onCancel, ...modalProps } = props;
   const { userInfo } = useModel("user");
@@ -119,15 +124,16 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
                     </Image>
                     <div style={{ fontSize: 14 }}>{item.username}</div>
                     <Flex align="center" justify="end" style={{ flexGrow: 1 }}>
-                      {userInfo.userId === item.userId ? (
-                        <div>自己</div>
-                      ) : (
+                      {!item.status ? (
                         <Button
                           type="link"
                           onClick={() => handleAddFriend(item)}
                         >
                           添加
                         </Button>
+                        
+                      ) : (
+                        <div>{FriendReqStatusMap.get(item.status)}</div>
                       )}
                     </Flex>
                   </Flex>
