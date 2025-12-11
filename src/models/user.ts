@@ -56,7 +56,6 @@ const user = () => {
   });
 
   const logoutAction = () => {
-    localCache.removeItem("chatList")
     localCache.removeItem("token");
     history.push("/Login");
   };

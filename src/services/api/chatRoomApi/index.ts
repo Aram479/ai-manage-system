@@ -57,3 +57,25 @@ export const friendAgreeOrRefuseApi = (
     ...(options || {}),
   });
 };
+
+// 获取用户聊天列表
+export const getUserChatListApi = (options?: { [key: string]: any }) => {
+  return request<ApiTypes.TUserChatList[]>("/api/chatroom/userChatList", {
+    method: "GET",
+    ...(options || {}),
+  });
+};
+
+// 获取聊天内容列表
+export const getConversationListApi = (
+  body: { userId: string },
+  options?: { [key: string]: any }
+) => {
+  return request<ApiTypes.TConversationList[]>(
+    `/api/chatroom/conversationList/${body.userId}`,
+    {
+      method: "GET",
+      ...(options || {}),
+    }
+  );
+};

@@ -15,8 +15,8 @@ const AvatarCmp = (props: AvatarProps) => {
   const { userInfo } = useModel("user");
   return (
     <Image
-      preview={userInfo.avatar ? { mask: false } : false}
-      src={userInfo.avatar}
+      preview={userInfo?.avatar ? { mask: false } : false}
+      src={userInfo?.avatar}
       style={{
         width: 43,
         height: 43,
@@ -25,7 +25,7 @@ const AvatarCmp = (props: AvatarProps) => {
         cursor: "pointer",
       }}
     >
-      {userInfo.username}
+      {userInfo?.username}
     </Image>
   );
 };
@@ -40,7 +40,7 @@ const UserAvatarDetail = () => {
           <Flex gap={8} align="center">
             <AvatarCmp />
             <Flex vertical style={{ fontSize: 14 }}>
-              <div style={{ fontWeight: "bold" }}>{userInfo.username}</div>
+              <div style={{ fontWeight: "bold" }}>{userInfo?.username}</div>
               <div style={{ fontSize: 12 }}>
                 用户ID：
                 <Tooltip title="点击复制" arrow={false}>
@@ -48,11 +48,11 @@ const UserAvatarDetail = () => {
                     type="link"
                     style={{ padding: 0, height: "auto" }}
                     onClick={() => {
-                      copy(userInfo.userId ?? "");
+                      copy(userInfo?.userId ?? "");
                       message.success("复制成功");
                     }}
                   >
-                    {userInfo.userId}
+                    {userInfo?.userId}
                   </Button>
                 </Tooltip>
               </div>
@@ -65,10 +65,10 @@ const UserAvatarDetail = () => {
       >
         <Avatar
           shape="square"
-          src={userInfo.avatar}
+          src={userInfo?.avatar}
           style={{ cursor: "pointer", width: 45, height: 45 }}
         >
-          {userInfo.username.charAt(0)}
+          {userInfo?.username.charAt(0)}
         </Avatar>
       </Popover>
     </div>

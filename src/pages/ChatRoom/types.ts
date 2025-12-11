@@ -1,14 +1,14 @@
 // 消息类型定义
 export interface Message {
   id: string;
-  userId?: string;
+  userId: string;
   name: string;
   avatar?: string;
   content: string;
   htmlContent?: string;
   sender: "me" | "other";
-  senderId?: string; // 发送者ID
-  receiverId?: string; // 接收者ID
+  senderUserId?: string; // 发送者ID
+  receiverUserId?: string; // 接收者ID
   timestamp: string;
   agent?: IAgentCategoryRole;
 }
@@ -16,7 +16,7 @@ export interface Message {
 // 聊天项类型定义
 export interface ChatItem {
   id: string;
-  userId?: string;
+  userId: string;
   name: string;
   avatar?: string;
   lastMessage?: string;
@@ -40,7 +40,7 @@ export interface FriendRequest {
 export interface ChatListProps {
   chatList?: ChatItem[];
   selectedChatId: string | null;
-  onSelectChat: (chatId: string) => void;
+  onSelectChat: (chatId: ChatItem) => void;
   onSearch: (keyword: string) => void;
   onAddConfirm: (friend: ChatItem) => void;
   onRemove: (chat: ChatItem) => void;
@@ -54,6 +54,7 @@ export interface ChatConversationProps {
     content: string;
     htmlContent?: string;
     chatId: string;
+    userId?: string;
     agent?: Message["agent"];
   }) => void;
   isConnected: boolean;

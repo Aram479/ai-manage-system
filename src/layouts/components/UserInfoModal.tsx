@@ -40,7 +40,7 @@ const UserInfoModal: React.FC<IUserInfoModal> = ({
   ...modalProps
 }) => {
   const { userInfo, updateUserInfoReq } = useModel("user");
-  const isAdmin = userInfo.username === "admin";
+  const isAdmin = userInfo?.username === "admin";
   const [avatarFile, setAvatarFile] = useState<RcFile>();
   const [form] = Form.useForm<IUserInfo>();
   const formValues = Form.useWatch([], form);

@@ -15,7 +15,7 @@ import styles from "./index.less";
 
 const HeaderCmp = () => {
   const { userInfo, logoutAction } = useModel("user");
-  const isAdmin = userInfo.username === "admin";
+  const isAdmin = userInfo?.username === "admin";
   const [title, setTile] = useState("Veloce智能管理系统");
   const [userInfoOpen, setUserInfoOpen] = useState(false);
   const [editPasswordOpen, setEditPasswordOpen] = useState(false);

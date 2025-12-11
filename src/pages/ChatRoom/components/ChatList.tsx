@@ -117,9 +117,9 @@ const ChatList: React.FC<ChatListProps> = ({
             >
               <div
                 className={`${styles.chatItem} ${
-                  selectedChatId === chat.id ? styles.selected : ""
+                  selectedChatId === chat.userId ? styles.selected : ""
                 }`}
-                onClick={() => onSelectChat(chat.id)}
+                onClick={() => onSelectChat(chat)}
               >
                 <div className={styles.avatarContainer}>
                   <Avatar
@@ -128,7 +128,7 @@ const ChatList: React.FC<ChatListProps> = ({
                     src={chat.avatar}
                     alt={chat.name}
                   >
-                    {chat.name.charAt(0)}
+                    {chat.name?.charAt(0)}
                   </Avatar>
                   {chat.unreadCount > 0 && (
                     <div className={styles.unreadBadge}>{chat.unreadCount}</div>

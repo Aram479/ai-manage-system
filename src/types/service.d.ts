@@ -36,4 +36,29 @@ declare namespace ApiTypes {
     username: string;
     avatar: string;
   };
+
+  type TUserChatList = {
+    id: string;
+    userId: string;
+    name: string;
+    avatar?: string;
+    lastMessage?: string;
+    lastMessageTime?: string;
+    unreadCount: number;
+    messages: TConversationList[];
+  };
+
+  type TConversationList = {
+    id: string;
+    userId: string;
+    name: string;
+    avatar?: string;
+    content: string;
+    htmlContent?: string;
+    sender: "me" | "other";
+    senderUserId?: string; // 发送者ID
+    receiverUserId?: string; // 接收者ID
+    timestamp: string;
+    agent?: IAgentCategoryRole;
+  };
 }

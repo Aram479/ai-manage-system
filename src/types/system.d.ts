@@ -1,6 +1,6 @@
 interface IUserInfo extends Omit<ILoginData, "password"> {
   id: string,
-  userId?: string;
+  userId: string;
   avatar?: string;
   email?: string;
 }

@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { Avatar, Button, Flex, Layout, message, Tooltip } from "antd";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Button, Flex, Layout, message, Tooltip } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { history, useModel, useRequest } from "@umijs/max";
 import {
@@ -12,12 +12,16 @@ import { useSocket } from "@/hooks/useSocket";
 import { useNotification } from "@/hooks/useNotification";
 import {
   friendAgreeOrRefuseApi,
+  getConversationListApi,
   getFriendListApi,
   getFriendReuestListApi,
+  getUserChatListApi,
 } from "@/services/api/chatRoomApi";
 import localCache from "@/utils/cache";
 import ChatList from "./components/ChatList";
-import ChatConversation from "./components/ChatConversation";
+import ChatConversation, {
+  IChatConversationRef,
+} from "./components/ChatConversation";
 import Sidebar from "./components/Sidebar";
 import FriendList from "./components/FriendList";
 import UserAvatarDetail from "./components/UserAvatarDetail";
@@ -28,12 +32,12 @@ const { Sider, Content } = Layout;
 
 const ChatRoom = () => {
   const { notify } = useNotification();
-
   const { userInfo } = useModel("user");
+  const conversationRef = useRef<IChatConversationRef>(null);
   const [chatList, setChatList] = useState<ChatItem[]>(
     localCache.getItem("chatList") || []
   );
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<ChatItem>();
   const [searchKeyword, setSearchKeyword] = useState("");
   // 侧边栏激活标签
   const [activeTab, setActiveTab] = useState<"chat" | "friend">("chat");
@@ -42,6 +46,13 @@ const ChatRoom = () => {
     ApiTypes.TFriendRequestList[]
   >([]);
   const [friends, setFriends] = useState<ApiTypes.TFriendList[]>([]);
+
+  const getUserChatListReq = useRequest(getUserChatListApi, {
+    manual: true,
+    onSuccess: (res) => {
+      setChatList(res);
+    },
+  });
 
   const getFriendReuestListReq = useRequest(getFriendReuestListApi, {
     manual: true,
@@ -85,21 +96,25 @@ const ChatRoom = () => {
 
   // 处理选择好友
   const handleSelectContact = (friend: (typeof friends)[number]) => {
-    // 查找是否已有聊天记录
-    const existingChat = chatList.find((chat) => chat.id === friend.id);
-    if (existingChat) {
-      setSelectedChatId(friend.id);
-    } else {
-      // 创建新的聊天
-      const newChat: ChatItem = {
+    const friendItem = chatList.find((item) => item.userId === friend.userId);
+    if (!friendItem) {
+      const newFriendChatItem = {
         id: friend.id,
-        name: friend.username,
         avatar: friend.avatar,
-        unreadCount: 0,
+        lastMessage: "",
+        lastMessageTime: "",
+        name: friend.username,
+        userId: friend.userId,
         messages: [],
+        unreadCount: 0,
       };
-      setChatList((prev) => [newChat, ...prev]);
-      setSelectedChatId(friend.id);
+      chatList.unshift(newFriendChatItem);
+      setSelectedChat(newFriendChatItem);
+    } else {
+      setSelectedChat({
+        ...friendItem,
+        unreadCount: 0,
+      });
     }
     // 切换到聊天标签
     setActiveTab("chat");
@@ -117,15 +132,28 @@ const ChatRoom = () => {
       },
     }
   );
-  // 获取当前选中的聊天
-  const selectedChat = chatList?.find((chat) => chat.id === selectedChatId);
+
+  // 处理选择聊天
+  const handleSelectChat = (chatItem: ChatItem) => {
+    const chatIndex = chatList.findIndex(
+      (item) => item.userId === chatItem.userId
+    );
+    const updateItem = {
+      ...chatItem,
+      unreadCount: 0,
+    };
+    chatList[chatIndex] = updateItem;
+    setChatList([...chatList]);
+    setSelectedChat({
+      ...chatItem,
+      unreadCount: 0,
+    });
+  };
 
   // 处理接收到的新消息
   const handleReceiveMessage = (message: Message) => {
-    if (message.receiverId !== userInfo.id) return;
-    // 找到对应的聊天项
-    const targetChatId = message.senderId || "unknown";
-
+    if (message.receiverUserId !== userInfo.userId) return;
+    const { senderUserId } = message;
     // 创建接收到的消息
     const receivedMessage: Message = {
       ...message,
@@ -133,114 +161,94 @@ const ChatRoom = () => {
     };
     // 浏览器通知
     notify(message);
-    setChatList((prev = []) => {
-      // 检查是否已存在该聊天
-      const existingChatIndex = prev.findIndex(
-        (chat) => chat.id === targetChatId
-      );
-
-      if (existingChatIndex >= 0) {
-        // 更新现有聊天
-        const updatedChats = [...prev];
-        updatedChats[existingChatIndex] = {
-          ...updatedChats[existingChatIndex],
-          messages: [
-            ...updatedChats[existingChatIndex].messages,
-            receivedMessage,
-          ],
-          lastMessage: receivedMessage.content,
-          lastMessageTime: new Date().toISOString(),
-          // 如果不是当前选中的聊天，则增加未读数
-          unreadCount:
-            updatedChats[existingChatIndex].id === selectedChatId
-              ? updatedChats[existingChatIndex].unreadCount
-              : updatedChats[existingChatIndex].unreadCount + 1,
-          name: message.name,
-          avatar: message.avatar,
-        };
-        return updatedChats;
-      } else {
-        // 创建新聊天 (实际应用中应该从服务器获取用户信息)
-        const newChat: ChatItem = {
-          id: targetChatId,
-          userId: message.userId,
-          name: message.name,
-          avatar: message.avatar,
-          lastMessage: receivedMessage.content,
-          lastMessageTime: new Date().toISOString(),
-          unreadCount: 1,
-          messages: [receivedMessage],
-        };
-        return [newChat, ...prev];
-      }
-    });
-  };
-
-  // 处理选择聊天
-  const handleSelectChat = (chatId: string) => {
-    setSelectedChatId(chatId);
-    // 更新聊天的未读状态
-    setChatList((prev = []) =>
-      prev.map((chat) =>
-        chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
-      )
+    const currentChatIndex = chatList.findIndex(
+      (item) => item.userId === senderUserId
     );
+    const currentChatItem = chatList[currentChatIndex];
+    if (currentChatIndex >= 0) {
+      const updateChat = {
+        ...currentChatItem,
+        messages: [receivedMessage],
+        lastMessage: receivedMessage.content,
+        lastMessageTime: new Date().toISOString(),
+        unreadCount:
+          currentChatItem.userId === selectedChat?.userId
+            ? currentChatItem.unreadCount
+            : currentChatItem.unreadCount + 1,
+        name: message.name,
+        avatar: message.avatar,
+      };
+      chatList[currentChatIndex] = updateChat;
+      setChatList([...chatList]);
+    } else {
+      // 创建新聊天 (实际应用中应该从服务器获取用户信息)
+      const newChat: ChatItem = {
+        id: senderUserId || "",
+        userId: message.userId,
+        name: message.name,
+        avatar: message.avatar,
+        lastMessage: receivedMessage.content,
+        lastMessageTime: new Date().toISOString(),
+        unreadCount: 1,
+        messages: [receivedMessage],
+      };
+      setChatList([newChat, ...chatList]);
+    }
+    if (selectedChat?.userId === senderUserId) {
+      conversationRef.current?.updateConversation(receivedMessage);
+    }
   };
 
   // 处理发送消息
-  const handleSendMessage = useCallback<ChatConversationProps["onSendMessage"]>(
-    (data) => {
-      const { content, htmlContent, chatId, agent } = data;
-      if (!htmlContent || !chatId || !isConnected) return;
+  const handleSendMessage: ChatConversationProps["onSendMessage"] = (data) => {
+    const { content, htmlContent, userId, agent } = data;
+    if (!htmlContent || !userId || !isConnected) return;
 
-      const now = new Date();
-      const newMessage: Message = {
-        id: `msg-${Date.now()}`,
-        userId: userInfo.userId,
-        name: userInfo.username,
-        avatar: userInfo.avatar ?? userInfo.username.charAt(0),
-        content: content,
-        htmlContent: htmlContent,
-        sender: "me",
-        timestamp: now.toISOString(),
-        senderId: userInfo.id,
-        receiverId: chatId,
-        agent,
-      };
-
-      // 通过WebSocket发送消息
-      emit("send_message", newMessage);
-
-      // 更新本地状态
-      setChatList((prev = []) =>
-        prev.map((chat) => {
-          if (chat.id === chatId) {
-            return {
-              ...chat,
-              messages: [...chat.messages, newMessage],
-              lastMessage: newMessage.content,
-              lastMessageTime: now.toISOString(),
-            };
-          }
-          return chat;
-        })
-      );
-    },
-    [isConnected, userInfo, emit]
-  );
+    const now = new Date();
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      userId: userInfo.userId,
+      name: userInfo.username,
+      avatar: userInfo.avatar ?? userInfo.username.charAt(0),
+      content: content,
+      htmlContent: htmlContent,
+      sender: "me",
+      timestamp: now.toISOString(),
+      senderUserId: userInfo.userId,
+      receiverUserId: userId,
+      agent,
+    };
+    // 通过WebSocket发送消息
+    emit("send_message", newMessage);
+    const currentChatIndex = chatList.findIndex(
+      (item) => item.userId === selectedChat?.userId
+    );
+    const newSelectedChat = {
+      ...selectedChat!,
+      messages: [newMessage],
+      lastMessage: newMessage.content,
+      lastMessageTime: now.toISOString(),
+    };
+    if (currentChatIndex >= 0) {
+      chatList[currentChatIndex] = { ...newSelectedChat };
+    }
+    setChatList(chatList);
+    setSelectedChat({ ...newSelectedChat });
+    conversationRef.current?.updateConversation(newMessage);
+  };
 
   // 添加朋友
   const handleAddFriend = (formValues: ChatItem) => {
     const newChatList = _.uniqBy([...chatList, formValues], "id");
 
-    setChatList(newChatList);
+    setChatList({ ...newChatList });
   };
 
   // 删除朋友
   const handleRemoveFriend = (chat: ChatItem) => {
     // 删除对应item项
     const newChatList = _.reject(chatList, { id: chat.id });
-    setChatList(newChatList);
+    setChatList([...newChatList]);
   };
   // 处理搜索
   const filteredChatList = chatList?.filter(
@@ -253,6 +261,7 @@ const ChatRoom = () => {
 
   // 模拟数据，实际应用中应从接口获取
   useEffect(() => {
+    getUserChatListReq.run();
     getFriendReuestListReq.run();
     getFriendLisReq.run();
   }, []);
@@ -282,10 +291,6 @@ const ChatRoom = () => {
     });
     return unsubscribe;
   }, [on]);
-
-  useEffect(() => {
-    localCache.setItem("chatList", chatList);
-  }, [chatList]);
 
   return (
     <div className={styles.container}>
@@ -334,7 +339,7 @@ const ChatRoom = () => {
                 <ChatList
                   chatList={filteredChatList}
                   searchKeyword={searchKeyword}
-                  selectedChatId={selectedChatId}
+                  selectedChatId={selectedChat?.userId || ""}
                   onSelectChat={handleSelectChat}
                   onSearch={setSearchKeyword}
                   onAddConfirm={handleAddFriend}
@@ -376,6 +381,7 @@ const ChatRoom = () => {
         <Content className={styles.content}>
           {selectedChat ? (
             <ChatConversation
+              ref={conversationRef}
               chat={selectedChat}
               onSendMessage={handleSendMessage}
               isConnected={isConnected}
