@@ -11,11 +11,13 @@ import {
 import { useSocket } from "@/hooks/useSocket";
 import { useNotification } from "@/hooks/useNotification";
 import {
+  addUserChatByChatListApi,
   friendAgreeOrRefuseApi,
   getConversationListApi,
   getFriendListApi,
   getFriendReuestListApi,
   getUserChatListApi,
+  removeUserChatByChatListApi,
 } from "@/services/api/chatRoomApi";
 import localCache from "@/utils/cache";
 import ChatList from "./components/ChatList";
@@ -46,6 +48,20 @@ const ChatRoom = () => {
     ApiTypes.TFriendRequestList[]
   >([]);
   const [friends, setFriends] = useState<ApiTypes.TFriendList[]>([]);
+
+  const addUserChatByChatListReq = useRequest(addUserChatByChatListApi, {
+    manual: true,
+    onSuccess: () => {
+      getUserChatListReq.run();
+    },
+  });
+
+  const removeUserChatByChatListReq = useRequest(removeUserChatByChatListApi, {
+    manual: true,
+    onSuccess: () => {
+      getUserChatListReq.run();
+    },
+  });
 
   const getUserChatListReq = useRequest(getUserChatListApi, {
     manual: true,
@@ -96,26 +112,17 @@ const ChatRoom = () => {
 
   // 处理选择好友
   const handleSelectContact = (friend: (typeof friends)[number]) => {
-    const friendItem = chatList.find((item) => item.userId === friend.userId);
-    if (!friendItem) {
-      const newFriendChatItem = {
-        id: friend.id,
-        avatar: friend.avatar,
-        lastMessage: "",
-        lastMessageTime: "",
-        name: friend.username,
-        userId: friend.userId,
-        messages: [],
-        unreadCount: 0,
-      };
-      chatList.unshift(newFriendChatItem);
-      setSelectedChat(newFriendChatItem);
-    } else {
-      setSelectedChat({
-        ...friendItem,
-        unreadCount: 0,
-      });
-    }
+    addUserChatByChatListReq.run({ friendUserId: friend.userId });
+    setSelectedChat({
+      id: friend.id,
+      avatar: friend.avatar,
+      lastMessage: "",
+      lastMessageTime: "",
+      name: friend.username,
+      userId: friend.userId,
+      messages: [],
+      unreadCount: 0,
+    });
     // 切换到聊天标签
     setActiveTab("chat");
   };
@@ -160,7 +167,7 @@ const ChatRoom = () => {
       sender: "other", // 标记为对方发送的
     };
     // 浏览器通知
-    notify(message);
+    // notify(message);
     const currentChatIndex = chatList.findIndex(
       (item) => item.userId === senderUserId
     );
@@ -246,9 +253,10 @@ const ChatRoom = () => {
 
   // 删除朋友
   const handleRemoveFriend = (chat: ChatItem) => {
-    // 删除对应item项
-    const newChatList = _.reject(chatList, { id: chat.id });
-    setChatList([...newChatList]);
+    removeUserChatByChatListReq.run({ sessionId: chat.id });
+    // // 删除对应item项
+    // const newChatList = _.reject(chatList, { id: chat.id });
+    // setChatList([...newChatList]);
   };
   // 处理搜索
   const filteredChatList = chatList?.filter(

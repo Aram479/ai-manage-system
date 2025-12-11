@@ -66,6 +66,30 @@ export const getUserChatListApi = (options?: { [key: string]: any }) => {
   });
 };
 
+// 聊天列表新增聊天
+export const addUserChatByChatListApi = (
+  body: { friendUserId: string },
+  options?: { [key: string]: any }
+) => {
+  return request<any>("/api/chatroom/addUserChatByChatList", {
+    method: "POST",
+    data: body,
+    ...(options || {}),
+  });
+};
+
+// 聊天列表删除聊天
+export const removeUserChatByChatListApi = (
+  body: { sessionId: string },
+  options?: { [key: string]: any }
+) => {
+  return request<any>("/api/chatroom/removeUserChatByChatList", {
+    method: "POST",
+    data: body,
+    ...(options || {}),
+  });
+};
+
 // 获取聊天内容列表
 export const getConversationListApi = (
   body: { userId: string },

@@ -81,6 +81,7 @@ const ChatConversation = forwardRef(
       manual: true,
       onSuccess: (res) => {
         setConversationList(res);
+        scrollToBottom();
       },
     });
 
@@ -89,7 +90,9 @@ const ChatConversation = forwardRef(
     });
     // 自动滚动到最新消息
     const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView();
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView();
+      }, 1);
     };
 
     // 格式化消息时间
@@ -172,10 +175,7 @@ const ChatConversation = forwardRef(
           // 发送后自动聚焦回输入框
           editorRef.current?.editor?.commands.focus();
           editorRef.current?.editor?.commands.clearContent();
-          // 延迟滚动到底部
-          setTimeout(() => {
-            scrollToBottom();
-          }, 0);
+          scrollToBottom();
         }
       } else {
         AntdMessage.warning({
@@ -245,7 +245,7 @@ const ChatConversation = forwardRef(
                   </Tag>
                 </div>
               )}
-              {msg.htmlContent?.trim() && (
+              {msg.content?.trim() && (
                 <>
                   {~msg.htmlContent!.indexOf("img") &&
                   !~msg.htmlContent!.indexOf("emoji") ? (
@@ -292,7 +292,6 @@ const ChatConversation = forwardRef(
       );
     };
 
-    // 当消息列表变化时，滚动到底部
     useEffect(() => {
       const newOtherMessages = conversationList.filter(
         (item) => item.sender === "other"
@@ -306,7 +305,7 @@ const ChatConversation = forwardRef(
           return otherMessages;
         });
       }
-    }, [chat.messages]);
+    }, [conversationList]);
 
     // 监听对方发送消息
     useEffect(() => {
