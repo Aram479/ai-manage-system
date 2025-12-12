@@ -4,6 +4,7 @@ export interface Message {
   userId: string;
   name: string;
   avatar?: string;
+  status?: "notFriend" | null,
   content: string;
   htmlContent?: string;
   sender: "me" | "other";
@@ -22,6 +23,7 @@ export interface ChatItem {
   lastMessage?: string;
   lastMessageTime?: string;
   unreadCount: number;
+  isFriend?: boolean;
   messages: Message[];
 }
 
@@ -73,4 +75,5 @@ export interface FriendListProps {
   onAcceptRequest?: (request: FriendRequest) => void;
   onRejectRequest?: (request: FriendRequest) => void;
   onSelectContact?: (friend: ApiTypes.TFriendList) => void;
+  onRemoveContact?: (friend: ApiTypes.TFriendList) => void;
 }

@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Input, Avatar, Flex, Button, Tooltip, message, Dropdown } from "antd";
+import {
+  Input,
+  Avatar,
+  Flex,
+  Button,
+  Tooltip,
+  message,
+  Dropdown,
+  Modal,
+} from "antd";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useModel } from "@umijs/max";
 import { ChatItem, ChatListProps, Message } from "../types";
@@ -27,7 +36,13 @@ const ChatList: React.FC<ChatListProps> = ({
       label: "删除",
       danger: true,
       onClick: (_info: any, chat: ChatItem) => {
-        onRemove?.(chat);
+        Modal.confirm({
+          title: `删除与“${chat.name}”的聊天？`,
+          content: "删除聊天后，聊天记录也将被清空。",
+          onOk: () => {
+            onRemove?.(chat);
+          },
+        });
       },
     },
   ];
@@ -84,7 +99,7 @@ const ChatList: React.FC<ChatListProps> = ({
             onChange={(e) => onSearch(e.target.value)}
             className={styles.searchInput}
           />
-          <Tooltip title="添加朋友">
+          <Tooltip title="添加好友">
             <Button
               icon={<PlusOutlined />}
               onClick={() => setSearchFriendOpen(true)}

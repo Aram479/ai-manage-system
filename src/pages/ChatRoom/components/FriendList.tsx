@@ -7,6 +7,8 @@ import {
   Empty,
   Popover,
   CollapseProps,
+  Dropdown,
+  Modal,
 } from "antd";
 import {
   CheckOutlined,
@@ -24,6 +26,7 @@ const FriendList: React.FC<FriendListProps> = ({
   onAcceptRequest,
   onRejectRequest,
   onSelectContact,
+  onRemoveContact,
 }) => {
   const [activeKey, setActiveKey] = useState<string[]>([]);
   // 渲染好友申请项
@@ -96,20 +99,54 @@ const FriendList: React.FC<FriendListProps> = ({
   };
 
   // 渲染好友项
-  const renderContactItem = (friend: ApiTypes.TFriendList) => (
-    <List.Item
-      key={friend.id}
-      className={`${styles.contactItem}`}
-      onClick={() => onSelectContact?.(friend)}
-    >
-      <List.Item.Meta
-        avatar={
-          <Avatar shape="square" size={40} src={friend.avatar} icon={<UserOutlined />} />
-        }
-        title={<span>{friend.username}</span>}
-      />
-    </List.Item>
-  );
+  const renderContactItem = (friend: ApiTypes.TFriendList) => {
+    const friendActionItems = [
+      {
+        key: "delete",
+        label: "删除",
+        danger: true,
+        onClick: (info: any, friend: ApiTypes.TFriendList) => {
+          Modal.confirm({
+            title: `删除“${friend.username}”？`,
+            content: "删除好友后，聊天中对应好友和聊天记录也将被清空。",
+            onOk: () => {
+              onRemoveContact?.(friend);
+            },
+          });
+        },
+      },
+    ];
+    return (
+      <Dropdown
+        key={friend.id}
+        menu={{
+          items: friendActionItems.map((item) => ({
+            ...item,
+            onClick: (info) => item.onClick(info, friend),
+          })),
+        }}
+        trigger={["contextMenu"]}
+        destroyPopupOnHide
+      >
+        <List.Item
+          className={`${styles.contactItem}`}
+          onClick={() => onSelectContact?.(friend)}
+        >
+          <List.Item.Meta
+            avatar={
+              <Avatar
+                shape="square"
+                size={40}
+                src={friend.avatar}
+                icon={<UserOutlined />}
+              />
+            }
+            title={<span>{friend.username}</span>}
+          />
+        </List.Item>
+      </Dropdown>
+    );
+  };
 
   const friendPanelItems: CollapseProps["items"] = [
     {

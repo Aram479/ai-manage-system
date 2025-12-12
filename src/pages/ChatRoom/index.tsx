@@ -12,6 +12,7 @@ import { useSocket } from "@/hooks/useSocket";
 import { useNotification } from "@/hooks/useNotification";
 import {
   addUserChatByChatListApi,
+  deleteFriendApi,
   friendAgreeOrRefuseApi,
   getConversationListApi,
   getFriendListApi,
@@ -36,9 +37,7 @@ const ChatRoom = () => {
   const { notify } = useNotification();
   const { userInfo } = useModel("user");
   const conversationRef = useRef<IChatConversationRef>(null);
-  const [chatList, setChatList] = useState<ChatItem[]>(
-    localCache.getItem("chatList") || []
-  );
+  const [chatList, setChatList] = useState<ChatItem[]>([]);
   const [selectedChat, setSelectedChat] = useState<ChatItem>();
   const [searchKeyword, setSearchKeyword] = useState("");
   // 侧边栏激活标签
@@ -49,17 +48,41 @@ const ChatRoom = () => {
   >([]);
   const [friends, setFriends] = useState<ApiTypes.TFriendList[]>([]);
 
-  const addUserChatByChatListReq = useRequest(addUserChatByChatListApi, {
-    manual: true,
-    onSuccess: () => {
-      getUserChatListReq.run();
-    },
-  });
+  const addUserChatByChatListReq = useRequest(
+    (friend: (typeof friends)[number]) =>
+      addUserChatByChatListApi({ friendUserId: friend.userId }),
+    {
+      manual: true,
+      onSuccess: (_res, [friend]) => {
+        getUserChatListReq.run().then((res) => {
+          const findByUserIdItem = res.find(
+            (item) => item.userId === friend.userId
+          );
+          if (findByUserIdItem) {
+            setSelectedChat({
+              ...findByUserIdItem,
+            });
+          }
+        });
+      },
+    }
+  );
 
   const removeUserChatByChatListReq = useRequest(removeUserChatByChatListApi, {
     manual: true,
+    onSuccess: (_res, [req]) => {
+      getUserChatListReq.run();
+      if (selectedChat?.id === req.sessionId) {
+        setSelectedChat(undefined);
+      }
+    },
+  });
+
+  const deleteFriendReq = useRequest(deleteFriendApi, {
+    manual: true,
     onSuccess: () => {
       getUserChatListReq.run();
+      getFriendListReq.run();
     },
   });
 
@@ -77,7 +100,7 @@ const ChatRoom = () => {
     },
   });
 
-  const getFriendLisReq = useRequest(getFriendListApi, {
+  const getFriendListReq = useRequest(getFriendListApi, {
     manual: true,
     onSuccess: (res) => {
       setFriends(res);
@@ -97,7 +120,7 @@ const ChatRoom = () => {
       onSuccess: () => {
         message.success(`已处理申请`);
         getFriendReuestListReq.run();
-        getFriendLisReq.run();
+        getFriendListReq.run();
       },
     }
   );
@@ -112,20 +135,21 @@ const ChatRoom = () => {
 
   // 处理选择好友
   const handleSelectContact = (friend: (typeof friends)[number]) => {
-    addUserChatByChatListReq.run({ friendUserId: friend.userId });
-    setSelectedChat({
-      id: friend.id,
-      avatar: friend.avatar,
-      lastMessage: "",
-      lastMessageTime: "",
-      name: friend.username,
-      userId: friend.userId,
-      messages: [],
-      unreadCount: 0,
-    });
+    const isAAA = chatList.find((item) => item.userId === friend.userId);
+    if (!isAAA) {
+      addUserChatByChatListReq.run(friend);
+    } else {
+      setSelectedChat({ ...isAAA });
+    }
     // 切换到聊天标签
     setActiveTab("chat");
   };
+
+  // 删除好友
+  const handleRemoveContact = (friend: (typeof friends)[number]) => {
+    deleteFriendReq.run({ userId: friend.userId });
+  };
+
   // WebSocket连接管理
   const { isConnected, on, emit, reconnect } = useSocket(
     process.env.SOCKET_BASE_URL || "/",
@@ -145,9 +169,13 @@ const ChatRoom = () => {
     const chatIndex = chatList.findIndex(
       (item) => item.userId === chatItem.userId
     );
+    const isFriendByFriends = friends.find(
+      (item) => item.userId === chatItem.userId
+    )?.isFriend;
     const updateItem = {
       ...chatItem,
       unreadCount: 0,
+      isFriend: isFriendByFriends,
     };
     chatList[chatIndex] = updateItem;
     setChatList([...chatList]);
@@ -171,11 +199,15 @@ const ChatRoom = () => {
     const currentChatIndex = chatList.findIndex(
       (item) => item.userId === senderUserId
     );
+    const isFriendByFriends = friends.find(
+      (item) => item.userId === senderUserId
+    )?.isFriend;
     const currentChatItem = chatList[currentChatIndex];
     if (currentChatIndex >= 0) {
       const updateChat = {
         ...currentChatItem,
         messages: [receivedMessage],
+        isFriend: isFriendByFriends,
         lastMessage: receivedMessage.content,
         lastMessageTime: new Date().toISOString(),
         unreadCount:
@@ -188,20 +220,10 @@ const ChatRoom = () => {
       chatList[currentChatIndex] = updateChat;
       setChatList([...chatList]);
     } else {
-      // 创建新聊天 (实际应用中应该从服务器获取用户信息)
-      const newChat: ChatItem = {
-        id: senderUserId || "",
-        userId: message.userId,
-        name: message.name,
-        avatar: message.avatar,
-        lastMessage: receivedMessage.content,
-        lastMessageTime: new Date().toISOString(),
-        unreadCount: 1,
-        messages: [receivedMessage],
-      };
-      setChatList([newChat, ...chatList]);
+      getUserChatListReq.run();
     }
-    if (selectedChat?.userId === senderUserId) {
+    if (selectedChat && selectedChat?.userId === senderUserId) {
+      setSelectedChat({ ...selectedChat, isFriend: true });
       conversationRef.current?.updateConversation(receivedMessage);
     }
   };
@@ -224,12 +246,14 @@ const ChatRoom = () => {
       senderUserId: userInfo.userId,
       receiverUserId: userId,
       agent,
+      status: !selectedChat?.isFriend ? "notFriend" : null,
     };
     // 通过WebSocket发送消息
     emit("send_message", newMessage);
     const currentChatIndex = chatList.findIndex(
       (item) => item.userId === selectedChat?.userId
     );
+
     const newSelectedChat = {
       ...selectedChat!,
       messages: [newMessage],
@@ -244,20 +268,17 @@ const ChatRoom = () => {
     conversationRef.current?.updateConversation(newMessage);
   };
 
-  // 添加朋友
+  // 添加好友
   const handleAddFriend = (formValues: ChatItem) => {
     const newChatList = _.uniqBy([...chatList, formValues], "id");
-
     setChatList({ ...newChatList });
   };
 
   // 删除朋友
   const handleRemoveFriend = (chat: ChatItem) => {
     removeUserChatByChatListReq.run({ sessionId: chat.id });
-    // // 删除对应item项
-    // const newChatList = _.reject(chatList, { id: chat.id });
-    // setChatList([...newChatList]);
   };
+
   // 处理搜索
   const filteredChatList = chatList?.filter(
     (chat) =>
@@ -271,7 +292,7 @@ const ChatRoom = () => {
   useEffect(() => {
     getUserChatListReq.run();
     getFriendReuestListReq.run();
-    getFriendLisReq.run();
+    getFriendListReq.run();
   }, []);
 
   // 监听来自其他用户的消息
@@ -292,10 +313,23 @@ const ChatRoom = () => {
     return unsubscribe;
   }, [on]);
 
+  // 好友接受socket
   useEffect(() => {
-    // 好友接受socket
     const unsubscribe = on("friend_request_accepted_notification", () => {
-      getFriendLisReq.run();
+      getFriendListReq.run();
+    });
+    return unsubscribe;
+  }, [on]);
+
+  // 好友删除自己
+  useEffect(() => {
+    const unsubscribe = on("friend_deleted", (notification) => {
+      const { fromUser } = notification;
+      if (selectedChat && selectedChat?.userId === fromUser.userId) {
+        setSelectedChat({ ...selectedChat, isFriend: false });
+      }
+      getFriendListReq.run();
+      getUserChatListReq.run();
     });
     return unsubscribe;
   }, [on]);
@@ -360,6 +394,7 @@ const ChatRoom = () => {
                   onAcceptRequest={handleAcceptRequest}
                   onRejectRequest={handleRejectRequest}
                   onSelectContact={handleSelectContact}
+                  onRemoveContact={handleRemoveContact}
                 />
               )}
             </div>
@@ -370,9 +405,9 @@ const ChatRoom = () => {
                   justify="space-between"
                   style={{ width: "100%" }}
                 >
-                  <div>WebSocket状态:</div>
+                  <div>连接状态:</div>
                   <Flex vertical gap={2}>
-                    <div>{isConnected ? "🟢 已连接" : "🔴 未连接"}</div>
+                    <div>{isConnected ? "🟢 正常" : "🔴 未连接"}</div>
                     {!isConnected && (
                       <Button type="primary" size="small" onClick={reconnect}>
                         重新连接
@@ -387,7 +422,7 @@ const ChatRoom = () => {
 
         {/* 右侧聊天内容 */}
         <Content className={styles.content}>
-          {selectedChat ? (
+          {selectedChat?.userId ? (
             <ChatConversation
               ref={conversationRef}
               chat={selectedChat}

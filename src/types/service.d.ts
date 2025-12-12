@@ -35,6 +35,7 @@ declare namespace ApiTypes {
     userId: string;
     username: string;
     avatar: string;
+    isFriend?: boolean
   };
 
   type TUserChatList = {
@@ -45,6 +46,7 @@ declare namespace ApiTypes {
     lastMessage?: string;
     lastMessageTime?: string;
     unreadCount: number;
+    isFriend?: boolean;
     messages: TConversationList[];
   };
 

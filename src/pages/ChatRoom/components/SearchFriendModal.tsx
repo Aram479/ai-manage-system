@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { KeyboardEventHandler, useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -9,6 +9,7 @@ import {
   message,
   Modal,
   ModalProps,
+  Spin,
 } from "antd";
 import { useModel, useRequest } from "@umijs/max";
 import { SearchOutlined } from "@ant-design/icons";
@@ -55,8 +56,21 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
     },
   });
 
+  const handleEnterKeyDown: KeyboardEventHandler<any> = (e) => {
+    if (e.key === "Enter") {
+      handleSearchFriend();
+    }
+  };
+
   const handleSearchFriend = () => {
-    getUserInfoReq.run({ search: searchValue });
+    if (searchValue.trim()) {
+      getUserInfoReq.run({ search: searchValue });
+    } else {
+      message.error({
+        key: "noSearch",
+        content: "请提供朋友id或邮箱",
+      });
+    }
   };
 
   const handleAddFriend = (userData: typeof currentAddUserData) => {
@@ -65,6 +79,7 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
   };
 
   const handleCancel = () => {
+    setSearchValue("");
     onCancel?.(false);
   };
 
@@ -77,9 +92,9 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
   }, [open]);
 
   return (
-    <div className={styles.addFriendModal}>
+    <div className={styles.addFriendModal} onKeyDown={handleEnterKeyDown}>
       <Modal
-        title="添加朋友"
+        title="添加好友"
         open={open}
         maskClosable={false}
         cancelButtonProps={{ loading: false }}
@@ -102,53 +117,59 @@ const SearchFriendModal = (props: ISearchFriendModal) => {
               搜索
             </Button>
           </Flex>
-          <Flex className={styles.addUserList} vertical gap={8}>
-            {!!friendList.length ? (
-              friendList.map((item) => (
-                <Card
-                  key={item.id}
-                  classNames={{
-                    body: styles.addUserCard,
-                  }}
-                >
-                  <Flex gap={8}>
-                    <Image
-                      className={styles.userAvatarBox}
-                      width={60}
-                      preview={
-                        item.avatar
-                          ? {
-                              mask: false,
-                            }
-                          : false
-                      }
-                      src={item.avatar}
-                    >
-                      {item.username}
-                    </Image>
-                    <div style={{ fontSize: 14 }}>{item.username}</div>
-                    <Flex align="center" justify="end" style={{ flexGrow: 1 }}>
-                      {!item.status ? (
-                        <Button
-                          type="link"
-                          onClick={() => handleAddFriend(item)}
-                        >
-                          添加
-                        </Button>
-                      ) : (
-                        <div>{FriendReqStatusMap.get(item.status)}</div>
-                      )}
+          <Spin spinning={getUserInfoReq.loading}>
+            <Flex className={styles.addUserList} vertical gap={8}>
+              {!!friendList.length ? (
+                friendList.map((item) => (
+                  <Card
+                    key={item.id}
+                    classNames={{
+                      body: styles.addUserCard,
+                    }}
+                  >
+                    <Flex gap={8}>
+                      <Image
+                        className={styles.userAvatarBox}
+                        width={60}
+                        preview={
+                          item.avatar
+                            ? {
+                                mask: false,
+                              }
+                            : false
+                        }
+                        src={item.avatar}
+                      >
+                        {item.username}
+                      </Image>
+                      <div style={{ fontSize: 14 }}>{item.username}</div>
+                      <Flex
+                        align="center"
+                        justify="end"
+                        style={{ flexGrow: 1 }}
+                      >
+                        {!item.status ? (
+                          <Button
+                            type="link"
+                            onClick={() => handleAddFriend(item)}
+                          >
+                            添加
+                          </Button>
+                        ) : (
+                          <div>{FriendReqStatusMap.get(item.status)}</div>
+                        )}
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </Card>
-              ))
-            ) : (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                style={{ height: "100%" }}
-              />
-            )}
-          </Flex>
+                  </Card>
+                ))
+              ) : (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  style={{ height: "100%" }}
+                />
+              )}
+            </Flex>
+          </Spin>
         </Flex>
       </Modal>
       <AddFriendModal

@@ -1,6 +1,6 @@
 import { request } from "@umijs/max";
 
-// 搜索添加朋友列表
+// 搜索添加好友列表
 export const getAddFriendList = (
   body: { search: string },
   options?: { [key: string]: any }
@@ -10,6 +10,20 @@ export const getAddFriendList = (
     params: body,
     ...(options || {}),
   });
+};
+
+// 删除好友
+export const deleteFriendApi = (
+  body: { userId: string },
+  options?: { [key: string]: any }
+) => {
+  return request<ApiTypes.TChatRoomUserList[]>(
+    `/api/chatroom/deleteFriend/${body.userId}`,
+    {
+      method: "Delete",
+      ...(options || {}),
+    }
+  );
 };
 
 // 发送好友请求

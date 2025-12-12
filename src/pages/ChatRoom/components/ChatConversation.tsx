@@ -8,7 +8,14 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { useModel, useRequest } from "@umijs/max";
-import { Avatar, Button, Flex, Tag, message as AntdMessage } from "antd";
+import {
+  Avatar,
+  Button,
+  Flex,
+  Tag,
+  message as AntdMessage,
+  Tooltip,
+} from "antd";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { ChatConversationProps, Message } from "../types";
@@ -28,6 +35,7 @@ import MarkDownCmp from "@/components/MarkDownCmp";
 import TipTapEditor from "@/components/TipTapEditor";
 import styles from "./ChatConversation.less";
 import { getConversationListApi } from "@/services/api/chatRoomApi";
+import { ExclamationCircleFilled, InfoCircleOutlined } from "@ant-design/icons";
 
 export interface IChatConversationRef {
   updateConversation: (newMessage: ApiTypes.TConversationList) => void;
@@ -246,25 +254,34 @@ const ChatConversation = forwardRef(
                 </div>
               )}
               {msg.content?.trim() && (
-                <>
-                  {~msg.htmlContent!.indexOf("img") &&
-                  !~msg.htmlContent!.indexOf("emoji") ? (
-                    <div className={styles.messageImg}>
-                      <MarkDownCmp
-                        theme="onDark"
-                        content={String(msg.htmlContent)}
+                <Flex align="center" gap={5}>
+                  {msg.status === "notFriend" && (
+                    <Tooltip title="消息已拒收">
+                      <ExclamationCircleFilled
+                        style={{ color: "red", cursor: "pointer" }}
                       />
-                    </div>
-                  ) : (
-                    <div className={styles.messageText}>
-                      <MarkDownCmp
-                        theme="onDark"
-                        content={String(msg.htmlContent)}
-                        copyCode={false}
-                      />
-                    </div>
+                    </Tooltip>
                   )}
-                </>
+                  <div>
+                    {~msg.htmlContent!.indexOf("img") &&
+                    !~msg.htmlContent!.indexOf("emoji") ? (
+                      <div className={styles.messageImg}>
+                        <MarkDownCmp
+                          theme="onDark"
+                          content={String(msg.htmlContent)}
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.messageText}>
+                        <MarkDownCmp
+                          theme="onDark"
+                          content={String(msg.htmlContent)}
+                          copyCode={false}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </Flex>
               )}
 
               <div

@@ -60,7 +60,7 @@ const AddFriendModal = (props: IAddFriendModal) => {
           <Col span={24}>
             <Form.Item
               name="friendMessage"
-              label="添加朋友申请"
+              label="添加好友申请"
               rules={formRules.friendMessage}
             >
               <Input.TextArea placeholder="请输入" rows={3} allowClear />
