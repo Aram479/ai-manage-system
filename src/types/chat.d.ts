@@ -72,4 +72,5 @@ type TToolsProps = {
   userMenus?: Extract<typeof import("../../config/routes")["default"], any[]>;
   userList?: IUserList[];
   orderList?: IOrderList[];
+  chartConfig?: any
 };

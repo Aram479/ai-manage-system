@@ -1,17 +1,19 @@
+import AgentChart from "@/components/AgentChart";
 import { useChatEvent } from "@/hooks/useChatEvent";
+import { stockDatas } from "@/services/api/charts/StockMockData";
 import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import { Stock, StockConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
 const StockCharts = () => {
-  const [datas, setDatas] = useState<any[]>([]);
+  const [datas, setDatas] = useState<any[]>(stockDatas);
   const [config, setConfig] = useState<StockConfig | unknown>({});
 
   const stockConfig = useMemo<StockConfig>(() => {
     return {
       data: [],
-      xField: "",
-      yField: ["", "", "", ""] as const,
+      xField: "trade_date",
+      yField: ["open", "close", "high", "low"],
       ...(config || {}),
     };
   }, [datas, config]);
@@ -22,7 +24,25 @@ const StockCharts = () => {
       setConfig(event.config);
     }
   });
-  return <div>{!!datas.length && <Stock {...stockConfig} data={datas} />}</div>;
+  return (
+    <div>
+      {!!datas.length && (
+        <AgentChart
+          chartConfig={stockConfig}
+          tools={[
+            ChartToolsEvents.Create_StockCharts,
+            ChartToolsEvents.Update_StockCharts,
+          ]}
+          onAgentChat={(chartInfo) => {
+            setDatas(chartInfo.datas);
+            setConfig(chartInfo.config);
+          }}
+        >
+          <Stock {...stockConfig} data={datas} />
+        </AgentChart>
+      )}
+    </div>
+  );
 };
 
 export default StockCharts;

@@ -4,6 +4,7 @@ import BarCharts from "./cpns/BarCharts";
 import LineCharts from "./cpns/LineCharts";
 import WaterfallCharts from "./cpns/WaterfallCharts";
 import StockCharts from "./cpns/StockCharts";
+import { Card, Flex } from "antd";
 
 const ChartsPage = () => {
   return (
@@ -11,11 +12,23 @@ const ChartsPage = () => {
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: 8 }}>
         请输入：随机生成 饼图/柱状图/折线图/瀑布图/股票图
       </div>
-      <PieCharts />
-      <BarCharts />
-      <LineCharts />
-      <WaterfallCharts />
-      <StockCharts />
+      <Flex vertical gap={8}>
+        <Card>
+          <PieCharts />
+        </Card>
+        <Card>
+          <BarCharts />
+        </Card>
+        <Card>
+          <LineCharts />
+        </Card>
+        <Card>
+          <WaterfallCharts />
+        </Card>
+        <Card>
+          <StockCharts />
+        </Card>
+      </Flex>
     </div>
   );
 };

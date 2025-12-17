@@ -5,6 +5,11 @@ export enum ChartToolsEvents {
   Create_LineCharts = "Create_LineCharts",
   Create_WaterfallCharts = "Create_WaterfallCharts",
   Create_StockCharts = "Create_StockCharts",
+  Update_BarCharts = "Update_BarCharts",
+  Update_PieCharts = "Update_PieCharts",
+  Update_LineCharts = "Update_LineCharts",
+  Update_WaterfallCharts = "Update_WaterfallCharts",
+  Update_StockCharts = "Update_StockCharts",
 }
 
 /* 整合 结果类型 */
@@ -178,10 +183,200 @@ const Create_StockCharts = (props: TToolsProps) => {
   } as const;
 };
 
+const Update_BarCharts = (props: TToolsProps) => {
+  const { chartConfig } = props;
+
+  return {
+    type: "function",
+    function: {
+      name: ChartToolsEvents.Update_LineCharts,
+      description:
+        "根据用户需求，修改柱状图数据，数据的返回格式要严格按照JSON数据格式规范完整提供，不得有缺漏字符",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称",
+            enum: [ChartToolsEvents.Update_LineCharts],
+          },
+          datas: {
+            type: "array",
+            description:
+              "图表数据，必填项，如果用户需要修改datas数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.data,
+          },
+          config: {
+            type: "object",
+            description:
+              "必填项，根据ant design charts版本为1.4.2为标准的瀑布图的配置项，文档链接：https://ant-design-charts-v1.antgroup.com/api/plots/line，但配置项中不需要data字段，如果用户需要修改config数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.config,
+          },
+        },
+        required: ["datas", "config"],
+      },
+    },
+  } as const;
+};
+
+const Update_PieCharts = (props: TToolsProps) => {
+  const { chartConfig } = props;
+
+  return {
+    type: "function",
+    function: {
+      name: ChartToolsEvents.Update_PieCharts,
+      description:
+        "根据用户需求，修改饼图数据，数据的返回格式要严格按照JSON数据格式规范完整提供，不得有缺漏字符",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称",
+            enum: [ChartToolsEvents.Update_PieCharts],
+          },
+          datas: {
+            type: "array",
+            description:
+              "图表数据，必填项，如果用户需要修改datas数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.data,
+          },
+          config: {
+            type: "object",
+            description:
+              "必填项，根据ant design charts版本为1.4.2为标准的图表的配置项，文档链接：https://ant-design-charts-v1.antgroup.com/api/plots/line，但配置项中不需要data字段，如果用户需要修改config数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.config,
+          },
+        },
+        required: ["datas", "config"],
+      },
+    },
+  } as const;
+};
+
+const Update_LineCharts = (props: TToolsProps) => {
+  const { chartConfig } = props;
+
+  return {
+    type: "function",
+    function: {
+      name: ChartToolsEvents.Update_LineCharts,
+      description:
+        "根据用户需求，修改折线图数据，数据的返回格式要严格按照JSON数据格式规范完整提供，不得有缺漏字符",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称",
+            enum: [ChartToolsEvents.Update_LineCharts],
+          },
+          datas: {
+            type: "array",
+            description:
+              "图表数据，必填项，如果用户需要修改datas数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.data,
+          },
+          config: {
+            type: "object",
+            description:
+              "必填项，根据ant design charts版本为1.4.2为标准的图表的配置项，文档链接：https://ant-design-charts-v1.antgroup.com/api/plots/line，但配置项中不需要data字段，如果用户需要修改config数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.config,
+          },
+        },
+        required: ["datas", "config"],
+      },
+    },
+  } as const;
+};
+
+const Update_WaterfallCharts = (props: TToolsProps) => {
+  const { chartConfig } = props;
+
+  return {
+    type: "function",
+    function: {
+      name: ChartToolsEvents.Update_WaterfallCharts,
+      description:
+        "根据用户需求，修改瀑布图数据，数据的返回格式要严格按照JSON数据格式规范完整提供，不得有缺漏字符",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称",
+            enum: [ChartToolsEvents.Update_WaterfallCharts],
+          },
+          datas: {
+            type: "array",
+            description:
+              "图表数据，必填项，如果用户需要修改datas数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.data,
+          },
+          config: {
+            type: "object",
+            description:
+              "必填项，根据ant design charts版本为1.4.2为标准的图表的配置项，文档链接：https://ant-design-charts-v1.antgroup.com/api/plots/line，但配置项中不需要data字段，如果用户需要修改config数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.config,
+          },
+        },
+        required: ["datas", "config"],
+      },
+    },
+  } as const;
+};
+
+const Update_StockCharts = (props: TToolsProps) => {
+  const { chartConfig } = props;
+
+  return {
+    type: "function",
+    function: {
+      name: ChartToolsEvents.Update_StockCharts,
+      description:
+        "根据用户需求，修改股票图数据，数据的返回格式要严格按照JSON数据格式规范完整提供，不得有缺漏字符",
+      parameters: {
+        type: "object",
+        properties: {
+          ...eventProperties(props),
+          name: {
+            type: "string",
+            description: "事件名称",
+            enum: [ChartToolsEvents.Update_StockCharts],
+          },
+          datas: {
+            type: "array",
+            description:
+              "图表数据，必填项，如果用户需要修改datas数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.data,
+          },
+          config: {
+            type: "object",
+            description:
+              "必填项，根据ant design charts版本为1.4.2为标准的图表的配置项，文档链接：https://ant-design-charts-v1.antgroup.com/api/plots/line，但配置项中不需要data字段，如果用户需要修改config数据但没有明确提供该数据，则默认基于默认值数据进行修改",
+            default: chartConfig?.config,
+          },
+        },
+        required: ["datas", "config"],
+      },
+    },
+  } as const;
+};
+
 export const ChartToolsFunctions = {
   Create_BarCharts,
   Create_PieCharts,
   Create_LineCharts,
   Create_WaterfallCharts,
   Create_StockCharts,
+  Update_BarCharts,
+  Update_PieCharts,
+  Update_LineCharts,
+  Update_WaterfallCharts,
+  Update_StockCharts,
 } as const;

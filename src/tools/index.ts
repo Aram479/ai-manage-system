@@ -32,3 +32,5 @@ const allToolsFunctions = {
 export const allTools = (props: TToolsProps) => {
   return Object.values(allToolsFunctions).map((func) => func(props));
 };
+
+export default allToolsFunctions;
