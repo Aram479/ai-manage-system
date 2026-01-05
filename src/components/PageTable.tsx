@@ -233,7 +233,7 @@ const PageTable = forwardRef<Partial<TableRef>, Partial<IPageTable>>(
         </div>
 
         <Table
-          ref={tableRef}
+          ref={tableRef as any}
           rowKey={rowKey}
           dataSource={dataSource}
           columns={columns}

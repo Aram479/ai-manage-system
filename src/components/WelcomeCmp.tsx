@@ -1,7 +1,7 @@
 import { Welcome, WelcomeProps } from "@ant-design/x";
 import { Card } from "antd";
-import styles from "./index.less";
 import { SlackSquareOutlined } from "@ant-design/icons";
+import styles from "./index.less";
 
 interface IWelcomeCmp extends WelcomeProps {}
 
