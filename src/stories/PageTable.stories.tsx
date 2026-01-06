@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { UserList } from "@/services/api/userApi/mockData";
-import { TableProps } from "antd";
+import { Button, Dropdown, TableProps } from "antd";
 import PageTable from "@/components/PageTable";
 import { SettingOutlined } from "@ant-design/icons";
 
@@ -52,8 +52,52 @@ const meta = {
   },
 } satisfies Meta<TableProps>;
 
+export const Select: Story = {
+  name: "可选中行",
+  argTypes: {
+    isShowSelect: {
+      description: "是否展示多选",
+    },
+    selectedRowKeys: {
+      description: "选中的行Key",
+    },
+  },
+  args: {
+    isShowSelect: true,
+    pagination: {
+      total: UserList.length,
+      defaultPageSize: 5,
+      showSizeChanger: true,
+      pageSizeOptions: [5, 10, 20, 50],
+    },
+    rowSelection: {
+      defaultSelectedRowKeys: [1, 2, 3],
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "通过 **isShowSelect**和**selectedRowKeys**可以操作表格选中行，同时分页切换时，之前选中项不会清除",
+      },
+    },
+  },
+  render: (args) => <PageTable {...args} />,
+};
+
 export const OperateButton: Story = {
   name: "自定义操作按钮",
+  argTypes: {
+    operateChildren: {
+      control: false,
+      description: "表格头部操作",
+      table: {
+        type: {
+          summary: "ReactNode",
+        },
+      },
+    },
+  },
   parameters: {
     docs: {
       description: {
@@ -62,20 +106,11 @@ export const OperateButton: Story = {
     },
   },
   render: (args) => (
-    <PageTable {...args} operateChildren={<SettingOutlined />} />
+    <PageTable
+      {...args}
+      operateChildren={<Button icon={<SettingOutlined />} />}
+    />
   ),
-};
-
-export const Large: Story = {
-  args: {
-    size: "large",
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: "small",
-  },
 };
 
 export default meta;

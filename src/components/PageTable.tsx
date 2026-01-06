@@ -16,7 +16,6 @@ import _ from "lodash";
 import styles from "./index.less";
 
 interface IPageTable extends TableProps {
-  isCustomTable: boolean; // 是否采用antd表格
   ref: LegacyRef<any> | undefined;
   resizableKey: string;
   rowKey: string; // 行key，用于多选
@@ -28,8 +27,6 @@ interface IPageTable extends TableProps {
   selectedRowKeys: any[]; // 选中的行数据的keys
   customRowSelection: TableProps["rowSelection"]; // 自定义多选
   isShowSelect: boolean; // 是否显示多选
-  isDrag: boolean; // 是否拖拽排序
-  isDragWidth: boolean; // 是否拖拽列宽
   isColumnsControl: boolean; // 是否开启自定义显示/隐藏列
   allClearFilter: boolean; // 是否一键清空列筛选
   bordered: boolean;
@@ -47,7 +44,6 @@ const PageTable = forwardRef<Partial<TableRef>, Partial<IPageTable>>(
   (props, ref) => {
     const {
       rowKey = "id", // 行key，用于多选
-      isCustomTable,
       resizableKey = "basicTable", // 重置key，用于缓存列宽缓存
       columns = [],
       dataSource, // 列数据
@@ -57,8 +53,6 @@ const PageTable = forwardRef<Partial<TableRef>, Partial<IPageTable>>(
       selectedRowKeys, // 选中的行数据的keys
       customRowSelection, // 自定义多选
       isShowSelect, // 是否显示多选
-      isDrag = false, // 是否拖拽排序
-      isDragWidth = false, // 是否拖拽列宽
       isColumnsControl = false,
       allClearFilter = false,
       bordered = false,
