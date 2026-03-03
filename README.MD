@@ -61,21 +61,49 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 3、在系统中看到的接口请求全部为前端模拟的请求，并非真实的后端请求
 
 ### 目前已有功能列表
+**AI类**
+- 深度思考、联网搜索、重新生成、文件解析
+- 多个AI角色
+- 指令中心
+- 支持Iframe数据交互
+- 存储用户提出的问题
+- 命令列表、重复执行过命令
+- 自动对话（实验性）
+- 聊天室（实验性，可AI辅助聊天）
 
-- 跳转页面
+**系统类（支持AI辅助）**
+- 页面跳转
 - 修改系统名称
 - 创建组件
-- 生成饼图
+- 图表生成
+- 图表修改
 - 用户管理：增删改查、导出用户数据
 - 订单管理：增删改查、导出订单数据
 - 角色管理：查询、导出角色数据
 - 解析文件并将文件数据应用到系统中
-- 命令列表、重复执行命令
+- 表单实时赋值
 
-### 部分功能展示截图：
 
-**创建组件**
-![alt text](public/image-cpn.png)
+### 部分功能展示：
+#### AI类
+**文件解析**
+
+**多个AI角色**
+
+**指令中心**
+
+**支持Iframe数据交互**
+
+**存储用户提出的问题**
+
+**命令列表**
+
+****
+
+#### 系统类
+**修改系统名称**
+
+**页面跳转**
 
 **生成图表**
 ![alt text](public/image-charts.png)
@@ -88,12 +116,13 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 ![alt text](public/image-order-1.png)
 ![alt text](public/image-order-2.png)
 
-**执行列表：记录执行过的命令，可再次重复执行**
-![alt text](public/image-cmd-1.png)
-![alt text](public/image-cmd-2.png)
+**表单实时赋值**
+
 
 ### 扩展
 
 **本系统还支持两个 AI 之间的对话，让对话不再局限于人与 AI，而是 AI 与 AI**
 ![alt text](public/image-auto-1.png)
 ![alt text](public/image-auto-2.png)
+
+**聊天室（实验性，可AI辅助聊天）**
