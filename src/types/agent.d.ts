@@ -1,0 +1,39 @@
+interface IAgentConfig {
+  basic: IAgentBasicTabFormData;
+  iframe: IAgentIframeTabFormData;
+}
+FormInstance;
+interface IAgentTabItemRef {
+  form: import("antd").FormProps["form"];
+  updateIsApply: (bool) => void;
+}
+
+interface IAgentBasicTabRef extends IAgentTabItemRef {}
+
+interface IAgentBasicTabFormData {
+  qwenApiKey?: string;
+  defaultMessage?: string;
+}
+
+interface IAgentIframeTabRef extends IAgentTabItemRef {}
+
+interface IAgentIframeTabFormData {
+  projectDomain?: string;
+  isDataTransfer?: boolean;
+}
+
+type TPromptList = import("@ant-design/x").PromptsProps["items"];
+interface IAgentCategoryRole {
+  key?: string;
+  icon?: any;
+  title?: string;
+  desc?: string;
+  greet?: string;
+  prompt?: string;
+  collect?: number;
+  hot?: number;
+  hideFooter?: boolean;
+  categoryType?: string;
+  avatar?: string | number;
+  promptList?: TPromptList;
+}

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Badge,
   Button,
@@ -12,16 +12,15 @@ import {
 } from "antd";
 import { PaperClipOutlined, UserOutlined } from "@ant-design/icons";
 import { BubbleDataType } from "@ant-design/x/es/bubble/BubbleList";
-
 import { Bubble, Sender, SenderProps } from "@ant-design/x";
-
-import WelcomeCmp from "@/components/WelcomeCmp";
+import { chatsCrossMerge } from "@/utils/deepseek.utils";
+import { Ai_Options } from "@/constant//base";
+import { useKeepAlive } from "@/hooks/useKeepAlive";
+import { useUnactivate } from "react-activation";
+import useQwenXChat from "@/hooks/useQwenXChat";
+import SenderHeader from "@/components/Assistant/SenderHeader";
 import styles from "./index.less";
 import _ from "lodash";
-import { chatsCrossMerge } from "@/utils/deepseek.utils";
-import SenderHeader from "./cpns/SenderHeader";
-import { Ai_Options } from "@/constant//base";
-import useQwenXChat from "@/hooks/useQwenXChat";
 
 const defaultPlaceholder = "别光看着我，快敲几个字让我知道你在想啥！";
 const AutoChatPage = () => {
@@ -66,14 +65,14 @@ const AutoChatPage = () => {
     }
     // TODO 切换聊天类型时，消息不应该随时改变
     if (!Ai_Two.streamClass?.writable.locked && isAutoChat.current) {
-      Ai_Two.onRequest(messageData.chatContent || '');
+      Ai_Two.onRequest(messageData.chatContent || "");
     }
   };
 
   // AI2 对话完成事件
   const Ai_Two_SuccessAction = (messageData: TResultStream) => {
     // isAutoChat.current = true;
-    Ai_One.onRequest(messageData.chatContent || '');
+    Ai_One.onRequest(messageData.chatContent || "");
   };
 
   const requestConfig = {
@@ -97,7 +96,7 @@ const AutoChatPage = () => {
   const Ai_Two = Ai_XChatHook({
     /* "从现在开始你只需要帮助我对话就行，不需要思考太多，不需要问太多，你只需要帮助我回答我说的话就行; 这句话你不用回复我" +
         deepSeekPrompt.concise, */
-    defaultMessage: `${defaultTwoMessage}:`,
+    userDefaultMessage: `${defaultTwoMessage}:`,
     requestBody: {
       ...requestConfig,
       model,
@@ -141,19 +140,6 @@ const AutoChatPage = () => {
     },
   };
 
-  const aaa = (
-    items: BubbleDataType[],
-    aiName: string,
-    toName: string
-  ): BubbleDataType | unknown => {
-    const lastItem = _.last(items);
-    if (lastItem?.role === aiName) {
-      lastItem.role = toName;
-      return lastItem;
-    }
-    return false;
-  };
-
   const newItems = useMemo<BubbleDataType[]>(() => {
     // 自动对话模式 且 ai1输出完毕后 执行
     if (isAutoChat.current) {
@@ -161,21 +147,12 @@ const AutoChatPage = () => {
       const oneItemsByAssistant = Ai_One.items.filter(
         (item) => item.role === "assistant"
       );
-
-      const twoItemsByAssistant = [
-        ...Ai_One.items
-          .slice(0, endIndex)
-          .filter((item) => item.role === "local"),
-        ...Ai_Two.items
-          .filter((item) => item.role === "assistant")
-          .map((item) => ({ ...item, role: "local" })),
-      ];
-      return chatsCrossMerge(oneItemsByAssistant, twoItemsByAssistant);
+      return Ai_One.items
     } else {
       // 正常模式
       return Ai_One.items;
     }
-  }, [Ai_One.messages, Ai_Two.messages, endIndex]);
+  }, [Ai_One.messages, Ai_Two.messages]);
 
   const handleSendChat: SenderProps["onSubmit"] = async (message) => {
     // 开启自动对话
@@ -219,6 +196,10 @@ const AutoChatPage = () => {
     }
   };
 
+  // 离开页面时，暂停对话
+  useUnactivate(() => {
+    handleStopChat();
+  });
   // 输入框左侧图标
   const attachmentsNode = (
     <Badge dot={uploadFiles.length > 0 && !senderHeaderOpen}>
@@ -231,20 +212,24 @@ const AutoChatPage = () => {
   );
 
   return (
-    <div className={styles.autoChatPage}>
-      {isHeader && (
-        <div>
-          <WelcomeCmp title="当前页面支持自动对话功能" />
-        </div>
-      )}
+    <div className={`${styles.autoChatPage} ${styles.chatBox}`}>
       <div className={styles.chatListBox}>
-        <Bubble.List
-          ref={listRef}
-          className={styles.bubbleListBox}
-          items={newItems}
-          roles={roles}
-        />
-
+        {newItems.length ? (
+          <Bubble.List
+            ref={listRef}
+            className={styles.bubbleListBox}
+            items={newItems}
+            roles={roles}
+          />
+        ) : (
+          // 智能体介绍
+          <div className={styles.agentRoleBox}>
+            <Flex gap={8} vertical align="center" justify="center">
+              <div className={styles.title}>当前页面支持自动对话</div>
+              <div className={styles.desc}>支持自动对话（待完善...）</div>
+            </Flex>
+          </div>
+        )}
         {/* 🌟 提示词 */}
         {/* <Prompts items={senderPromptsItems} /> */}
 
@@ -297,4 +282,4 @@ const AutoChatPage = () => {
   );
 };
 
-export default AutoChatPage;
+export default useKeepAlive(AutoChatPage, AutoChatPage.name);

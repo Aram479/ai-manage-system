@@ -31,11 +31,17 @@ export class StreamDataProcessor {
   // 存储二者解析后字符串
   private resultString: Pick<
     TResultStream,
-    "ctmpContent" | "chatContent" | "toolContent"
+    | "ctmpContent"
+    | "chatContent"
+    | "toolContent"
+    | "toolContentChunk"
+    | "toolContentChunks"
   > = {
     ctmpContent: "",
     chatContent: "",
     toolContent: "",
+    toolContentChunk: "",
+    toolContentChunks: [],
   };
 
   /**
@@ -62,6 +68,8 @@ export class StreamDataProcessor {
     }
 
     if ((toolContent ?? false) && _.isString(toolContent)) {
+      this.resultString.toolContentChunks?.push(toolContent);
+      this.resultString.toolContentChunk = toolContent;
       this.resultString.toolContent += toolContent;
     }
 
@@ -118,6 +126,12 @@ export class StreamDataProcessor {
   public getToolContent(): string {
     return this.resultString.toolContent;
   }
+  public getToolContentChunk(): string {
+    return this.resultString.toolContentChunk;
+  }
+  public getToolContentChunks(): string[] {
+    return this.resultString.toolContentChunks;
+  }
   /**
    * 检查流是否完成
    */
@@ -131,12 +145,16 @@ export class StreamDataProcessor {
       ctmpContent: "",
       chatContent: "",
       toolContent: "",
+      toolContentChunk: "",
+      toolContentChunks: [],
     };
   }
 }
 
 // 聊天对话数据交叉
-export const chatsCrossMerge = (...arrs: BubbleDataType[][]): BubbleDataType[] => {
+export const chatsCrossMerge = (
+  ...arrs: BubbleDataType[][]
+): BubbleDataType[] => {
   // 翻转后.zip才是正确顺序
   arrs = arrs.reverse();
   // 使用 _.zip 将两个数组按索引配对

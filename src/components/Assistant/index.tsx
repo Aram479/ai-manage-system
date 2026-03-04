@@ -1,9 +1,8 @@
-import { ChromeOutlined } from "@ant-design/icons";
 import { Popover } from "antd";
 import _ from "lodash";
-import ChatCmp from "./ChatCmp";
+import LogoWhite from "@/asset/png/logoWhite.png";
+import AgentByRoleTabs from "../AgentByRoleTabs";
 import styles from "./index.less";
-import DifyChatCmp from "./DifyChatCmp";
 
 const Assistant = () => {
   return (
@@ -11,16 +10,15 @@ const Assistant = () => {
       <Popover
         placement="leftTop"
         trigger={["click"]}
-        content={<DifyChatCmp />}
+        content={<AgentByRoleTabs />}
+        arrow={false}
         classNames={{
           body: styles.popoverContent,
         }}
       >
-        <ChromeOutlined
-          style={{
-            fontSize: 40,
-          }}
-        />
+        <div className={styles.agentImage}>
+          <img src={LogoWhite} />
+        </div>
       </Popover>
     </div>
   );

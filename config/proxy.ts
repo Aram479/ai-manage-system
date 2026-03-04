@@ -29,19 +29,19 @@ export default {
   },
   uat: {
     "/api": {
-      target: "https://api.deepseek.com/v1",
+      target: "http://localhost:3000",
+      ws: true,
       changeOrigin: true,
-      pathRewrite: { "^/api": "" },
     },
     "/ali": {
       target: "https://dashscope.aliyuncs.com/compatible-mode/v1",
       changeOrigin: true,
       pathRewrite: { "^/ali": "" },
     },
-    "/dify": {
-      target: "https://api.dify.ai/v1", // https://api.dify.ai/v1 或 http://127.0.0.1/v1
+    "/socket.io": {
+      target: "http://localhost:3000",
+      ws: true, // 启用 WebSocket 代理
       changeOrigin: true,
-      pathRewrite: { "^/dify": "" },
     },
   },
 };

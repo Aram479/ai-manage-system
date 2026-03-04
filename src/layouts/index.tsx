@@ -1,14 +1,22 @@
+import {  useMemo } from "react";
 import { Layout } from "antd";
-import MenuCmp from "./components/MenuCmp";
-import { Outlet } from "@umijs/max";
-import HeaderCmp from "./components/HeaderCmp";
-import styles from "./index.less";
-import Assistant from "@/components/Assistant";
+import { Outlet, useLocation } from "@umijs/max";
+import { AliveScope } from "react-activation";
 import { useGlobalChatEvent } from "@/hooks/useGlobalChatEvent";
+import MenuCmp from "./components/MenuCmp";
+import HeaderCmp from "./components/HeaderCmp";
+import Assistant from "@/components/Assistant";
+import styles from "./index.less";
 const { Header, Sider, Content } = Layout;
 
+const agentBlackRoute = ["/Main", "/AutoChat", "/ScreenChat", "/ChatRoom"];
 const Layouts = () => {
   useGlobalChatEvent();
+  const location = useLocation();
+  const isAssistant = useMemo(
+    () => !agentBlackRoute.includes(location.pathname),
+    [location.pathname]
+  );
 
   return (
     <div className={styles.layouts}>
@@ -20,12 +28,16 @@ const Layouts = () => {
           <Sider theme="light">
             <MenuCmp />
           </Sider>
-          <Content>
-            <Outlet />
+          <Content className={styles.content}>
+            <AliveScope>
+              <Outlet />
+            </AliveScope>
           </Content>
         </Layout>
       </Layout>
-      <Assistant />
+      <div style={{ display: isAssistant ? "block" : "none" }}>
+        <Assistant />
+      </div>
     </div>
   );
 };

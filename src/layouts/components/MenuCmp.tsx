@@ -1,35 +1,42 @@
 import { Menu, MenuProps } from "antd";
-import {
-  history,
-  useRouteData,
-  useRouteProps,
-  useSelectedRoutes,
-} from "@umijs/max";
+import { history, useRouteProps } from "@umijs/max";
 import styles from "./index.less";
-import { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import _ from "lodash";
+import Icon from "@ant-design/icons";
+import routes from "@/../config/routes";
 
 interface IMenuCmp extends MenuProps {}
-
 const MenuCmp = (props: IMenuCmp) => {
-  const routes = useSelectedRoutes();
   const currentRoute = useRouteProps();
   // 查找routes下System的子route
-  const systemRoutes = _.find(routes, {
-    route: {
-      name: "System",
-    },
-  })?.route.children;
+  const systemRoutes = _.find(routes, { name: "System" })?.routes;
   const selectedKeys = useMemo(() => currentRoute.path, [currentRoute.path]);
   const items = useMemo(() => {
-    return systemRoutes?.map((item) => ({
-      key: item.path,
-      label: item?.meta?.title,
-      children: item.children,
-    }));
+    return systemRoutes
+      ?.filter((item) => item?.name)
+      .map((item) => {
+        const icon = item.meta?.icon;
+        const iconNode = icon
+          ? React.createElement(Icon, {
+              component: icon as any,
+              style: { fontSize: "1.4em" },
+            })
+          : undefined;
+        return {
+          key: item.path,
+          label: item?.meta?.title,
+          children: item.routes,
+          icon: iconNode,
+        };
+      });
   }, [systemRoutes]);
 
   const handleMenuItemChange: MenuProps["onSelect"] = (menuItem) => {
+    if (menuItem.key === "/GoToChatRoom") {
+      history.push("/ChatRoom");
+      return;
+    }
     history.push(menuItem.key);
   };
 

@@ -62,11 +62,9 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
   };
 
   const handleConfirm = async () => {
-    const formData = await form.validateFields();
-    const newFormData = {
-      ...formData,
-    };
-    onOk?.(newFormData);
+    await form.validateFields();
+    const formData = form.getFieldsValue(true);
+    onOk?.(formData);
   };
 
   const handleCencel = () => {
@@ -79,22 +77,6 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
       resetAction();
     }
   }, [open]);
-
-  useChatEvent<TOrderManageTools>((event) => {
-    if (event.name === OrderManageToolsEvents.Create_Order) {
-      const chatData = event.data;
-      form.setFieldsValue({
-        ...chatData,
-        deliveryTime: chatData?.deliveryTime
-          ? dayjs(chatData?.deliveryTime)
-          : undefined,
-      });
-      if(chatData?.goodsName) {
-        const currentGood = GoodsOptions.find(item=> item.value === chatData.goodsName)
-        handleGoodsChange(chatData?.goodsName, currentGood)
-      }
-    }
-  });
 
   return (
     <div>
@@ -111,7 +93,7 @@ const CreateOrderModalCmp = (props: ICreateOrderModalCmp) => {
           <Row gutter={24}>
             <Col span={6}>
               <Form.Item
-                name="username"
+                name="userName"
                 label={"用户名"}
                 rules={formRules.plant}
               >

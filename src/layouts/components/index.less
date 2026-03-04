@@ -1,14 +1,80 @@
 .headerCmp {
-  display: flex;
-  align-items: center;
   padding: 0 10px;
+
   .title {
-    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 25px;
+    font-weight: bold;
+
+    .headerLogo {
+      width: 55px;
+      height: 100%;
+      object-fit: cover;
+    }
   }
+
+  .operation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    // antd 图标
+    & span[role] {
+      cursor: pointer;
+      font-size: 25px;
+    }
+  }
+
+
 }
+
 .menuCmp {
   height: 100%;
+
   .menuItemLabel {
     font-size: 12px;
+  }
+}
+
+.userInfoModal {
+
+  :global {
+    .ant-image {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ant-upload {
+      position: relative;
+      overflow: hidden;
+    }
+  }
+
+  .uploadAvatar {
+    width: 100%;
+    height: 100%;
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+
+
+  }
+
+  .loadingMask {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    color: #fff;
+    background: #000000A0;
+  }
+}
+
+// EditPasswordModal 样式
+.editPasswordModal {
+  .form {
+    padding: 20px 0;
   }
 }

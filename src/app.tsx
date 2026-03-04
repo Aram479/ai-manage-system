@@ -1,5 +1,7 @@
+import { message } from "antd";
 import "./global.less";
-import { type RequestConfig } from "@umijs/max";
+import { AxiosResponse, type RequestConfig } from "@umijs/max";
+import localCache from "@/utils/cache";
 const { API_BASE_URL } = process.env;
 
 export const request: RequestConfig = {
@@ -7,30 +9,38 @@ export const request: RequestConfig = {
   baseURL: API_BASE_URL,
   requestInterceptors: [
     (config: RequestConfig) => {
-      config.headers!.Authorization = `Bearer ${process.env.DEEPSEEK_API_KEY}`;
+      config.headers!.Authorization = `Bearer ${localCache.getItem("token")}`;
       return { ...config };
     },
   ],
   errorConfig: {
     errorHandler: async (error: any) => {
-      // const { errcode, data } = error.response || {};
-      // if (data && typeof data.result === "string") {
-      //   message.error({
-      //     content: data.result,
-      //     duration: 1,
-      //   });
-      // }
+      const { data } = error.response || {};
+      if (data && typeof data.message === "string") {
+        message.error({
+          content: data.message,
+          duration: 3,
+        });
+      }
     },
     errorThrower: () => null,
   },
   responseInterceptors: [
-    async (response) => {
+    async (response: AxiosResponse<any>) => {
       // const { data } = response;
-      // // 检查errcode并处理错误
-      // if (data?.errcode && data?.errcode !== 0) {
-      //   handleError(data, response);
-      // }
+      // // 统一处理错误
+      // if (response.headers["content-type"]?.includes("application/json")) {
+      //   const text = await data?.text?.();
+      //   if (text) {
+      //     const newData = JSON.parse(text);
+      //     console.log("newData", newData)
+      //     if (newData?.code && newData?.code !== 200) {
 
+      //       // handleError(newData, response);
+      //     }
+      //   }
+      //   response.data = data.result;
+      // }
       // // 检查content-type是否为application/json
       // if (response.headers["content-type"]?.includes("application/json")) {
       //   // 获取responseType: 'blob'接口错误 返回数据
@@ -43,7 +53,7 @@ export const request: RequestConfig = {
       //   }
       //   response.data = data.result;
       // }
-
+      response.data = response.data.data;
       return response;
     },
     [

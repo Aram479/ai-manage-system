@@ -1,4 +1,7 @@
 import { BaseToolsFunctions, TBaseTools } from "./baseTools";
+import { ChartToolsFunctions, TChartTools } from "./chartsTools";
+import { FormAssignPageToolsFunctions } from "./formAssignPageTools";
+import { MainToolsFunctions, TMainTools } from "./mainTools";
 import {
   OrderManageToolsFunctions,
   TOrderManageTools,
@@ -10,7 +13,9 @@ export type TGlobalToolsEvent =
   | TBaseTools
   | TUserManageTools
   | TOrderManageTools
-  | TRoleManageTools;
+  | TRoleManageTools
+  | TMainTools
+  | TChartTools;
 
 // 合并所有工具函数集合
 const allToolsFunctions = {
@@ -18,6 +23,9 @@ const allToolsFunctions = {
   ...UserManageToolsFunctions,
   ...OrderManageToolsFunctions,
   ...RoleManageToolsFunctions,
+  ...MainToolsFunctions,
+  ...ChartToolsFunctions,
+  ...FormAssignPageToolsFunctions,
 };
 
 // 动态调用所有工具函数
@@ -25,3 +33,5 @@ export const allTools = (props: TToolsProps) => {
   const tools = Object.values(allToolsFunctions).map((func) => func(props));
   return tools;
 };
+
+export default allToolsFunctions;

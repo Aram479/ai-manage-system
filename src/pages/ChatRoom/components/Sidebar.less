@@ -1,0 +1,63 @@
+.container {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  :global {
+    .ant-menu-vertical {
+      border-inline-end: none !important;
+    }
+  }
+}
+
+.menu {
+  border-right: none;
+  height: 100%;
+  padding: 16px 0;
+
+  .ant-menu-item {
+    height: 64px;
+    line-height: 64px;
+    padding: 0 20px;
+    font-size: 16px;
+    margin: 0 12px 8px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &.ant-menu-item-selected {
+      background-color: #e6f7ff;
+      color: #1890ff;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+
+      .anticon {
+        color: #1890ff;
+      }
+    }
+
+    &:hover {
+      background-color: #f0f7ff;
+      color: #40a9ff;
+
+      .anticon {
+        color: #40a9ff;
+      }
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  .anticon {
+    font-size: 22px;
+    transition: all 0.3s ease;
+  }
+}
+
+.menuLabel {
+  padding: 5px;
+}
+
+.menuLabelText {
+  line-height: 16px;
+}

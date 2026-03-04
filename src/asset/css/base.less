@@ -5,14 +5,38 @@ body {
 
 html,
 body,
+#root,
 #app {
   width: 100%;
   height: 100%;
 }
+
 h1,
 h2,
 h3,
 h4 {
   margin: 0;
   padding: 0;
+}
+
+.singeLine {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doubleLine {
+  word-break: break-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.threeLine {
+  word-break: break-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }

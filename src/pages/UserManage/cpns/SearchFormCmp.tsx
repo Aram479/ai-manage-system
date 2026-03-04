@@ -14,18 +14,22 @@ import {
   Row,
   Select,
 } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 interface ISearchForm extends FormProps {
   onSearch: (data?: any) => void;
   onReset: (data?: any) => void;
 }
 
-const { RangePicker } = DatePicker;
+export type TUserFormData = {
+  userName?: string;
+  role?: string;
+  createTime?: Dayjs | string;
+};
 
 const SearchForm = (props: Partial<ISearchForm>) => {
   const { onSearch, onReset } = props;
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<TUserFormData>();
 
   const handleSearch = () => {
     const values = form.getFieldsValue();
@@ -42,8 +46,11 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       const chatData = event.data;
       form.setFieldsValue({
         ...chatData,
-        createTime: chatData?.createTime ? dayjs(chatData?.createTime) : undefined
+        createTime: chatData?.createTime
+          ? dayjs(chatData?.createTime)
+          : undefined,
       });
+      handleSearch();
     }
   });
 
@@ -52,7 +59,7 @@ const SearchForm = (props: Partial<ISearchForm>) => {
       <Form name="form_in_modal" layout="vertical" form={form} preserve={false}>
         <Row gutter={24}>
           <Col span={6}>
-            <Form.Item name="user" label="用户">
+            <Form.Item name="userName" label="用户">
               <Input placeholder="请输入" allowClear />
             </Form.Item>
           </Col>

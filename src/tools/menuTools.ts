@@ -19,7 +19,6 @@ const eventProperties = (props: TToolsProps) => {
 };
 
 const menuProperties = (props: TToolsProps) => {
-  console.log(props);
   const { userMenus } = props;
   return {
     name: {
