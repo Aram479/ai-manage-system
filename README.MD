@@ -10,7 +10,7 @@
 
 **系统如何执行 AI 对话中的命令**：代码中主要分为局部执行 AI 命令`(useChatEvent)`和全局执行 AI 命令`(useGlobalChatEvent)`，开发者可参考代码示例使用
 
-目前项目仅支持 Qwen 通义千问`(代码较为完善，系统推荐使用)`和 DeepSeek`(代码完善中,不推荐使用)`的 Api 调用
+目前项目仅支持 Qwen 千问的 Api 调用
 
 框架环境
 
@@ -38,7 +38,7 @@ yarn start
 
 ### JSON Schema
 
-如果你不太了解 Tools 中 JSON 书写规范，你可以去查阅[JSON Schema](https://json-schema.apifox.cn/)文档并结合[Tools](https://api-docs.deepseek.com/zh-cn/api/create-chat-completion)使用方式实践到项目中，这不会花费你太多的时间去了解
+如果你不太了解 Tools 中 JSON 书写规范，你可以去查阅[JSON Schema](https://json-schema.apifox.cn/)文档并结合[Tools](https://help.aliyun.com/zh/model-studio/qwen-function-calling)使用方式实践到项目中，这不会花费你太多的时间去了解
 
 ### 提示
 
@@ -53,8 +53,6 @@ export default {
 ```
 
 2、如果没有 Apikey，请搜索教程注册并申请。如已申请 ApiKey 请点击如下地址跳转
-
-DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 
 通义千问 ApiKey 查询：https://bailian.console.aliyun.com/?tab=model#/api-key
 
