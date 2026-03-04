@@ -24,6 +24,7 @@ const StockCharts = () => {
       setConfig(event.config);
     }
   });
+  
   return (
     <div>
       {!!datas.length && (

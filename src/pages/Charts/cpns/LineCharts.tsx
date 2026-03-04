@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Line, LineConfig } from "@ant-design/charts";
 import { lineDatas } from "@/services/api/charts/LineMockData";
-import { ChartToolsEvents } from "@/tools/chartsTools";
+import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import AgentChart from "@/components/AgentChart";
+import { useChatEvent } from "@/hooks/useChatEvent";
 
 const LineCharts = () => {
   const [datas, setDatas] = useState<any[]>(lineDatas);
@@ -21,6 +22,13 @@ const LineCharts = () => {
       ...(config || {}),
     };
   }, [datas, config]);
+
+  useChatEvent<TChartTools>((event) => {
+    if (event.name === ChartToolsEvents.Create_LineCharts) {
+      setDatas(event.datas ?? []);
+      setConfig(event.config);
+    }
+  });
 
   return (
     <div>

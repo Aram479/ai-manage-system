@@ -1,6 +1,7 @@
 import AgentChart from "@/components/AgentChart";
+import { useChatEvent } from "@/hooks/useChatEvent";
 import { pieDatas } from "@/services/api/charts/PieMockData";
-import { ChartToolsEvents } from "@/tools/chartsTools";
+import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import { Pie, PieConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
@@ -33,12 +34,12 @@ const PieCharts = () => {
     };
   }, [datas, config]);
 
-  // useChatEvent<TChartTools>((event) => {
-  //   if (event.name === ChartToolsEvents.Create_PieCharts) {
-  //     setDatas(event.datas ?? []);
-  //     setConfig(event.config);
-  //   }
-  // });
+  useChatEvent<TChartTools>((event) => {
+    if (event.name === ChartToolsEvents.Create_PieCharts) {
+      setDatas(event.datas ?? []);
+      setConfig(event.config);
+    }
+  });
 
   return (
     <div>

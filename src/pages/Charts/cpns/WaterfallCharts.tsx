@@ -1,6 +1,7 @@
 import AgentChart from "@/components/AgentChart";
+import { useChatEvent } from "@/hooks/useChatEvent";
 import { waterfallDatas } from "@/services/api/charts/WaterfallMockData";
-import { ChartToolsEvents } from "@/tools/chartsTools";
+import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import { Waterfall, WaterfallConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
@@ -43,6 +44,13 @@ const WaterfallCharts = () => {
       ...(config || {}),
     };
   }, [datas, config]);
+
+  useChatEvent<TChartTools>((event) => {
+    if (event.name === ChartToolsEvents.Create_WaterfallCharts) {
+      setDatas(event.datas ?? []);
+      setConfig(event.config);
+    }
+  });
 
   return (
     <div>

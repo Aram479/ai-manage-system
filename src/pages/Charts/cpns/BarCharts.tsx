@@ -1,6 +1,7 @@
 import AgentChart from "@/components/AgentChart";
+import { useChatEvent } from "@/hooks/useChatEvent";
 import { barDatas } from "@/services/api/charts/BarMockData";
-import { ChartToolsEvents } from "@/tools/chartsTools";
+import { ChartToolsEvents, TChartTools } from "@/tools/chartsTools";
 import { Column, ColumnConfig } from "@ant-design/charts";
 import { useMemo, useState } from "react";
 
@@ -40,6 +41,13 @@ const BarCharts = () => {
       ...(config || {}),
     };
   }, [datas, config]);
+
+  useChatEvent<TChartTools>((event) => {
+    if (event.name === ChartToolsEvents.Create_BarCharts) {
+      setDatas(event.datas ?? []);
+      setConfig(event.config);
+    }
+  });
 
   return (
     <div>
