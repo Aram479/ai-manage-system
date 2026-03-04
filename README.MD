@@ -84,8 +84,8 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 - 表单实时赋值
 
 
-### 部分功能展示：
-#### AI类
+### 部分功能展示
+### AI类
 **文件解析**
 ![alt text](public/AI文件解析.png)
 
@@ -104,7 +104,7 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 
 ****
 
-#### 系统类
+### 系统类
 **修改系统名称**
 ![alt text](public/更改系统名称.png)
 
