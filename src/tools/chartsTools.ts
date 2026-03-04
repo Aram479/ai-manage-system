@@ -214,7 +214,7 @@ const Update_BarCharts = (props: TToolsProps) => {
             default: chartConfig?.config,
           },
         },
-        required: ["datas", "config"],
+        required: ["name", "datas", "config"],
       },
     },
   } as const;
@@ -251,7 +251,7 @@ const Update_PieCharts = (props: TToolsProps) => {
             default: chartConfig?.config,
           },
         },
-        required: ["datas", "config"],
+        required: ["name", "datas", "config"],
       },
     },
   } as const;
@@ -288,7 +288,7 @@ const Update_LineCharts = (props: TToolsProps) => {
             default: chartConfig?.config,
           },
         },
-        required: ["datas", "config"],
+        required: ["name", "datas", "config"],
       },
     },
   } as const;
@@ -325,7 +325,7 @@ const Update_WaterfallCharts = (props: TToolsProps) => {
             default: chartConfig?.config,
           },
         },
-        required: ["datas", "config"],
+        required: ["name", "datas", "config"],
       },
     },
   } as const;
@@ -362,7 +362,7 @@ const Update_StockCharts = (props: TToolsProps) => {
             default: chartConfig?.config,
           },
         },
-        required: ["datas", "config"],
+        required: ["name", "datas", "config"],
       },
     },
   } as const;

@@ -112,7 +112,7 @@ DeepSeek ApiKey 查询：https://platform.deepseek.com/api_keys
 ![alt text](public/页面跳转.png)
 
 **生成图表**
-![alt text](public/image-charts.png)
+![alt text](public/图表生成.png)
 
 **图表修改**
 ![alt text](public/图表数据修改.png)
